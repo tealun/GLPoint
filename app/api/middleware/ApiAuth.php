@@ -10,11 +10,11 @@ class ApiAuth
 {
     public function handle($request, \Closure $next)
     {
-        // 获取当前控制器和方法
-        $controller = request()->controller();
-        $action = request()->action();
-        
         try {
+            // 获取当前控制器和方法
+            $controller = request()->controller();
+            $action = request()->action();
+            
             // 检查是否需要登录验证
             $noNeedLogin = $this->getNoNeedLogin();
             $currentPath = strtolower("{$controller}/{$action}");
@@ -48,7 +48,20 @@ class ApiAuth
             return $next($request);
             
         } catch(\Exception $e) {
-            return json(['code' => 401, 'msg' => '异常: ' . $e->getMessage()]);
+            // 🔍 在异常时也输出调试信息
+            $debugInfo = [
+                'exception' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'controller' => $controller ?? 'unknown',
+                'action' => $action ?? 'unknown',
+                'currentPath' => isset($controller, $action) ? strtolower("{$controller}/{$action}") : 'unknown',
+                'trace' => $e->getTraceAsString(),
+            ];
+            return json([
+                'code' => 401, 
+                'msg' => '🔍异常调试: ' . json_encode($debugInfo, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            ]);
         }
     }
 
