@@ -62,6 +62,12 @@
         "post-autoload-dump": [
             "@php think service:discover",
             "@php think vendor:publish"
+        ],
+        "post-install-cmd": [
+            "@php -r \"if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') { passthru('powershell -ExecutionPolicy Bypass -File scripts/fix-jwt-php8.ps1'); } else { passthru('bash scripts/fix-jwt-php8.sh'); }\""
+        ],
+        "post-update-cmd": [
+            "@php -r \"if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') { passthru('powershell -ExecutionPolicy Bypass -File scripts/fix-jwt-php8.ps1'); } else { passthru('bash scripts/fix-jwt-php8.sh'); }\""
         ]
     }
 }

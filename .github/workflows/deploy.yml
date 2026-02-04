@@ -26,6 +26,15 @@ jobs:
       - name: 安装 Composer 依赖
         run: |
           composer install --no-dev --optimize-autoloader --no-interaction
+          
+      - name: 应用JWT PHP8兼容性修复
+        run: |
+          echo "检查并修复JWT PHP8兼容性问题..."
+          if [ -f "scripts/fix-jwt-php8.sh" ]; then
+            bash scripts/fix-jwt-php8.sh
+          else
+            echo "⚠️ 修复脚本不存在，跳过"
+          fi
 
       - name: 准备部署文件
         run: |

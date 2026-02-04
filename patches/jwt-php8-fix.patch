@@ -1,0 +1,10 @@
+--- a/vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php
++++ b/vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php
+@@ -23,6 +23,7 @@ use thans\jwt\exception\TokenInvalidException;
+ 
+ class Lcobucci extends Provider
+ {
++    protected $signer;
+     protected $signers
+         = [
+             'HS256' => HS256::class,
