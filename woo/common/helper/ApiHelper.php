@@ -130,16 +130,29 @@ class ApiHelper
     public function checkLogin() :bool
     {
         $info = $this->getActionApiInfo();
+        
+        // 调试日志：记录注解信息
+        \think\facade\Log::info('ApiHelper.checkLogin() 检查:', [
+            'controller' => $this->request->controller(),
+            'action' => $this->request->action(),
+            'info' => $info,
+            'login_value' => $info['login'] ?? 'not_set',
+            'login_type' => isset($info['login']) ? gettype($info['login']) : 'not_set'
+        ]);
+        
         // 修复：empty(false) 返回 true 的问题，需要严格检查 login 属性
         // 如果没有注解信息，或者 login 明确设置为 false，则不需要登录
         if (empty($info) || (isset($info['login']) && $info['login'] === false)) {
+            \think\facade\Log::info('ApiHelper.checkLogin() 结果: 不需要登录');
             return true;
         }
         // 如果没有设置 login 属性，默认为 true（需要登录）
         // 如果设置为 true，也需要登录
         if (Auth::user()) {
+            \think\facade\Log::info('ApiHelper.checkLogin() 结果: 已登录，允许访问');
             return true;
         }
+        \think\facade\Log::info('ApiHelper.checkLogin() 结果: 未登录，拒绝访问');
         $this->forceError(['nologin' => '未登录']);
         return false;
     }
