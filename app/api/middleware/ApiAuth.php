@@ -19,11 +19,23 @@ class ApiAuth
             $noNeedLogin = $this->getNoNeedLogin();
             $currentPath = strtolower("{$controller}/{$action}");
             
+            // 🔍 调试信息
+            $debugInfo = [
+                'controller' => $controller,
+                'action' => $action,
+                'currentPath' => $currentPath,
+                'noNeedLogin' => $noNeedLogin,
+                'inWhitelist' => in_array($currentPath, $noNeedLogin),
+            ];
+            
             if(!in_array($currentPath, $noNeedLogin)) {
                 // 验证Token
                 $payload = Auth::verifyToken();
                 if(!$payload) {
-                    return json(['code' => 401, 'msg' => '请先登录']);
+                    return json([
+                        'code' => 401, 
+                        'msg' => '🔍ApiAuth调试: ' . json_encode($debugInfo, JSON_UNESCAPED_UNICODE)
+                    ]);
                 }
                 
                 // 验证用户状态  
@@ -36,7 +48,7 @@ class ApiAuth
             return $next($request);
             
         } catch(\Exception $e) {
-            return json(['code' => 401, 'msg' => $e->getMessage()]);
+            return json(['code' => 401, 'msg' => '异常: ' . $e->getMessage()]);
         }
     }
 
