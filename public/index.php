@@ -12,6 +12,9 @@
 // [ 应用入口文件 ]
 namespace think;
 
+// 屏蔽 PHP 8.2+ 动态属性警告（兼容旧版本第三方包）
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+
 require __DIR__ . '/../vendor/autoload.php';
 
 
