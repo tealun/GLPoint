@@ -8,3 +8,13 @@
      protected $signers
          = [
              'HS256' => HS256::class,
+--- a/vendor/thans/tp-jwt-auth/src/claim/Factory.php
++++ b/vendor/thans/tp-jwt-auth/src/claim/Factory.php
+@@ -7,6 +7,7 @@ use think\Request;
+ 
+ class Factory
+ {
++    protected $request;
+     protected $classMap
+         = [
+             'aud' => Audience::class,

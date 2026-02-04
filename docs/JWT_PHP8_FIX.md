@@ -2,7 +2,9 @@
 
 ## 问题根源
 
-第三方库 `thans/tp-jwt-auth` v1.3.1 存在PHP8兼容性问题：
+第三方库 `thans/tp-jwt-auth` v1.3.1 存在PHP8兼容性问题，发现**两处**动态属性创建：
+
+### 问题1: Lcobucci.php
 
 **原始代码**（GitHub: QThans/jwt-auth@ab5efcc）：
 ```php
@@ -15,10 +17,6 @@ class Lcobucci extends Provider
 
     public function __construct(Builder $builder, Parser $parser, $algo, $keys)
     {
-        $this->builder = $builder;
-        $this->parser  = $parser;
-        $this->algo    = $algo;
-        $this->keys    = $keys;
         $this->signer  = $this->getSign();  // ❌ 动态创建属性
     }
 }
@@ -29,17 +27,52 @@ class Lcobucci extends Provider
 Creation of dynamic property thans\jwt\provider\JWT\Lcobucci::$signer is deprecated
 ```
 
+### 问题2: Factory.php
+
+**原始代码**（GitHub: QThans/jwt-auth@v1.3.1）：
+```php
+class Factory
+{
+    protected $classMap = [...];  // ✅ 已声明
+    protected $ttl;               // ✅ 已声明
+    protected $claim = [];        // ✅ 已声明
+    protected $refreshTtl;        // ✅ 已声明
+    // ❌ 缺少 $request 声明
+
+    public function __construct(Request $request, $ttl, $refreshTtl)
+    {
+        $this->request    = $request;  // ❌ 动态创建属性
+        $this->ttl        = $ttl;
+        $this->refreshTtl = $refreshTtl;
+    }
+}
+```
+
+**PHP8 警告**：
+```
+Creation of dynamic property thans\jwt\claim\Factory::$request is deprecated
+```
+
 ## 修复方案
 
-在类声明中添加 `protected $signer;` 属性：
+在两个类的声明中分别添加缺失的属性：
 
+**Lcobucci.php:**
 ```php
 class Lcobucci extends Provider
 {
     protected $signer;   // ✅ 新增声明
     protected $signers = [...];
-    protected $builder;
-    protected $parser;
+}
+```
+
+**Factory.php:**
+```php
+class Factory
+{
+    protected $request;  // ✅ 新增声明
+    protected $classMap = [...];
+}
 ```
 
 ## 自动化修复
@@ -95,11 +128,13 @@ vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php
 **Linux/Mac：**
 ```bash
 grep "protected \$signer;" vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php
+grep "protected \$request;" vendor/thans/tp-jwt-auth/src/claim/Factory.php
 ```
 
 **Windows PowerShell：**
 ```powershell
 Select-String "protected \`$signer;" vendor\thans\tp-jwt-auth\src\provider\JWT\Lcobucci.php
+Select-String "protected \`$request;" vendor\thans\tp-jwt-auth\src\claim\Factory.php
 ```
 
 ## 部署环境
@@ -110,8 +145,10 @@ Select-String "protected \`$signer;" vendor\thans\tp-jwt-auth\src\provider\JWT\L
 
 - **受影响版本**: thans/tp-jwt-auth v1.3.1 及更早版本
 - **PHP版本**: PHP 8.0+
-- **修复位置**: vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php 第26行
-- **根本原因**: 构造函数中动态赋值 `$this->signer` 但类中未声明该属性
+- **修复位置**: 
+  - vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php 第26行
+  - vendor/thans/tp-jwt-auth/src/claim/Factory.php 第10行
+- **根本原因**: 构造函数中动态赋值 `$this->signer` 和 `$this->request` 但类中未声明这些属性
 - **影响**: PHP8弃用动态属性，未声明的属性赋值会触发 Deprecated 警告
 
 ## 相关文件
