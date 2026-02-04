@@ -38,9 +38,10 @@ jobs:
           echo "README.md" >> .deployignore
           echo "docs/" >> .deployignore
           echo "deploy.tar.gz" >> .deployignore
+          echo ".deployignore" >> .deployignore
           
           # 打包文件（排除不需要的）
-          tar -czf deploy.tar.gz \
+          tar --warning=no-file-changed -czf deploy.tar.gz \
             --exclude-from=.deployignore \
             --exclude='.env' \
             --exclude='runtime/*' \
