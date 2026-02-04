@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GLpoint - 企业员工积分管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.47059;
+            color: #1d1d1f;
+            background: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 导航栏 - 苹果风格 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            z-index: 9999;
+            transition: all 0.3s cubic-bezier(0.28, 0.11, 0.32, 1);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 44px;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: 600;
+            color: #1d1d1f;
+            text-decoration: none;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 36px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #1d1d1f;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 400;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+        }
+
+        .btn-admin {
+            background: #0071e3;
+            color: #fff;
+            padding: 4px 11px;
+            border-radius: 980px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 400;
+            transition: all 0.3s;
+        }
+
+        .btn-admin:hover {
+            background: #0077ed;
+        }
+
+        /* Hero区域 - 苹果风格大标题 */
+        .hero {
+            padding: 100px 20px 60px;
+            text-align: center;
+            background: #fbfbfd;
+            margin-top: 44px;
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            line-height: 1.0625;
+            font-weight: 600;
+            letter-spacing: -0.009em;
+            color: #1d1d1f;
+            margin-bottom: 6px;
+        }
+
+        .hero-subtitle {
+            font-size: 28px;
+            line-height: 1.14286;
+            font-weight: 400;
+            letter-spacing: .007em;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            font-size: 21px;
+            line-height: 1.381;
+            font-weight: 400;
+            letter-spacing: .011em;
+            color: #6e6e73;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border-radius: 980px;
+            text-decoration: none;
+            font-size: 17px;
+            line-height: 1.17648;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #0071e3;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #0077ed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #0071e3;
+            border: 1px solid #0071e3;
+        }
+
+        .btn-secondary:hover {
+            background: #0071e3;
+            color: #fff;
+        }
+
+        /* 特性区域 - 简洁网格 */
+        .features {
+            padding: 100px 20px;
+            background: #fff;
+        }
+
+        .features-container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 48px;
+            line-height: 1.08349;
+            font-weight: 600;
+            letter-spacing: -0.003em;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 21px;
+            line-height: 1.381;
+            font-weight: 400;
+            letter-spacing: .011em;
+            color: #6e6e73;
+            margin-bottom: 80px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .feature-card {
+            padding: 50px 30px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: scale(1.02);
+        }
+
+        .feature-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            line-height: 1.16667;
+            font-weight: 600;
+            letter-spacing: .009em;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            font-size: 17px;
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            color: #6e6e73;
+        }
+
+        /* 展示区域 */
+        .showcase {
+            background: #f5f5f7;
+            padding: 100px 20px;
+        }
+
+        .showcase-container {
+            max-width: 980px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            align-items: center;
+        }
+
+        .showcase-content h2 {
+            font-size: 40px;
+            line-height: 1.1;
+            font-weight: 600;
+            letter-spacing: 0;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+        }
+
+        .showcase-content p {
+            font-size: 21px;
+            line-height: 1.381;
+            font-weight: 400;
+            letter-spacing: .011em;
+            color: #6e6e73;
+            margin-bottom: 20px;
+        }
+
+        .showcase-link {
+            color: #0071e3;
+            font-size: 17px;
+            text-decoration: none;
+            font-weight: 400;
+        }
+
+        .showcase-link:hover {
+            text-decoration: underline;
+        }
+
+        .showcase-image {
+            background: #fff;
+            border-radius: 18px;
+            padding: 40px;
+            text-align: center;
+            font-size: 80px;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 4px 12px rgba(0, 0, 0, .08);
+        }
+
+        /* 统计区域 */
+        .stats {
+            padding: 80px 20px;
+            background: #fff;
+        }
+
+        .stats-container {
+            max-width: 980px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item h4 {
+            font-size: 56px;
+            line-height: 1.07143;
+            font-weight: 600;
+            letter-spacing: -0.005em;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+        }
+
+        .stat-item p {
+            font-size: 17px;
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+            color: #6e6e73;
+        }
+
+        /* 底部 */
+        .footer {
+            background: #f5f5f7;
+            padding: 40px 20px;
+            border-top: 1px solid #d2d2d7;
+        }
+
+        .footer-container {
+            max-width: 980px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 12px;
+            line-height: 1.33337;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            color: #6e6e73;
+            margin-bottom: 8px;
+        }
+
+        .footer a {
+            color: #424245;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1068px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .showcase-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 734px) {
+            .hero h1 {
+                font-size: 40px;
+            }
+
+            .hero-subtitle {
+                font-size: 21px;
+            }
+
+            .hero p {
+                font-size: 17px;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .section-subtitle {
+                font-size: 17px;
+            }
+
+            .nav-link {
+                display: none;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* 滚动动画 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 - Apple风格 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">GLpoint</a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">功能</a>
+                <a href="#showcase" class="nav-link">特色</a>
+                <a href="#about" class="nav-link">关于</a>
+                <a href="/admin" class="btn-admin">管理后台</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero区域 -->
+    <section class="hero">
+        <div class="hero-container fade-in">
+            <h1>企业员工积分管理</h1>
+            <p class="hero-subtitle">简单、高效、智能</p>
+            <p>专为现代企业打造的积分激励体系。<br>让管理更轻松，让员工更积极。</p>
+            <div class="hero-buttons">
+                <a href="/admin" class="btn btn-primary">立即体验</a>
+                <a href="#features" class="btn btn-secondary">了解更多</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 功能特性 -->
+    <section id="features" class="features">
+        <div class="features-container">
+            <h2 class="section-title fade-in">强大而简洁</h2>
+            <p class="section-subtitle fade-in">一切功能，触手可及</p>
+            
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📊</div>
+                    <h3>智能积分</h3>
+                    <p>灵活的积分规则，自动统计分析，实时查看员工表现</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">👥</div>
+                    <h3>员工管理</h3>
+                    <p>完善的组织架构，细粒度权限控制，管理井然有序</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🎁</div>
+                    <h3>礼品兑换</h3>
+                    <p>丰富的礼品库，便捷的兑换流程，提升员工满意度</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📱</div>
+                    <h3>小程序</h3>
+                    <p>随时随地查看积分，轻松兑换礼品，体验流畅</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📈</div>
+                    <h3>数据洞察</h3>
+                    <p>可视化报表，深度数据分析，助力科学决策</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🔒</div>
+                    <h3>安全可靠</h3>
+                    <p>企业级安全保障，数据加密传输，让您放心使用</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 展示区域 -->
+    <section id="showcase" class="showcase">
+        <div class="showcase-container">
+            <div class="showcase-content fade-in">
+                <h2>为每个企业<br>量身定制</h2>
+                <p>无论是中小企业还是大型集团，GLpoint都能满足您的需求</p>
+                <a href="/admin" class="showcase-link">开始使用 →</a>
+            </div>
+            <div class="showcase-image fade-in">
+                🏢
+            </div>
+        </div>
+    </section>
+
+    <!-- 统计数据 -->
+    <section class="stats">
+        <div class="stats-container">
+            <div class="stat-item fade-in">
+                <h4>100+</h4>
+                <p>服务企业</p>
+            </div>
+            <div class="stat-item fade-in">
+                <h4>10000+</h4>
+                <p>活跃用户</p>
+            </div>
+            <div class="stat-item fade-in">
+                <h4>99.9%</h4>
+                <p>系统稳定性</p>
+            </div>
+            <div class="stat-item fade-in">
+                <h4>24×7</h4>
+                <p>技术支持</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer id="about" class="footer">
+        <div class="footer-container">
+            <p>Copyright © 2024 GLpoint. All rights reserved.</p>
+            <p>
+                <a href="/admin">管理后台</a> · 
+                <a href="https://github.com/tealun/GLPoint" target="_blank">GitHub</a>
+            </p>
+            <p style="margin-top: 15px;">Powered by ThinkPHP & wooAdmin</p>
+        </div>
+    </footer>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offsetTop = target.offsetTop - 44;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.pageYOffset > 0) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
