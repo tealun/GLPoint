@@ -46,10 +46,12 @@ class ApiAuth
     protected function getNoNeedLogin(): array
     {
         return [
-            'auth/login', // 统一登录入口
-            'auth/check', // 检查登录状态
-            'rules/index', // 积分规则
-            'rules/categories' // 规则分类 
+            'index/index',      // 首页（公开访问）
+            'auth/login',       // 微信登录
+            'auth/check',       // 检查登录状态
+            'usergrade/index',  // 用户等级列表（公开）
+            'rules/index',      // 积分规则
+            'rules/categories'  // 规则分类 
         ];
     }
 }
