@@ -2,7 +2,7 @@
 
 ## 问题根源
 
-第三方库 `thans/tp-jwt-auth` v1.3.1 存在PHP8兼容性问题，发现**两处**动态属性创建：
+第三方库 `thans/tp-jwt-auth` v1.3.1 存在PHP8兼容性问题，发现**三处**动态属性创建：
 
 ### 问题1: Lcobucci.php
 
@@ -53,9 +53,38 @@ class Factory
 Creation of dynamic property thans\jwt\claim\Factory::$request is deprecated
 ```
 
+### 问题3: Manager.php
+
+**原始代码**（GitHub: QThans/jwt-auth@v1.3.1）：
+```php
+class Manager
+{
+    protected $blacklist;    // ✅ 已声明
+    protected $payload;      // ✅ 已声明
+    protected $refresh;      // ✅ 已声明
+    protected $validate = true;  // ✅ 已声明
+    // ❌ 缺少 $provider 声明
+
+    public function __construct(
+        Blacklist $blacklist,
+        Payload $payload,
+        Provider $provider
+    ) {
+        $this->blacklist = $blacklist;
+        $this->payload   = $payload;
+        $this->provider  = $provider;  // ❌ 动态创建属性
+    }
+}
+```
+
+**PHP8 警告**：
+```
+Creation of dynamic property thans\jwt\Manager::$provider is deprecated
+```
+
 ## 修复方案
 
-在两个类的声明中分别添加缺失的属性：
+在三个类的声明中分别添加缺失的属性：
 
 **Lcobucci.php:**
 ```php
@@ -72,6 +101,19 @@ class Factory
 {
     protected $request;  // ✅ 新增声明
     protected $classMap = [...];
+}
+```
+
+**Manager.php:**
+```php
+class Manager
+{
+    protected $blacklist;
+    protected $payload;
+    
+    protected $provider;  // ✅ 新增声明
+    
+    protected $refresh;
 }
 ```
 
@@ -129,12 +171,14 @@ vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php
 ```bash
 grep "protected \$signer;" vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php
 grep "protected \$request;" vendor/thans/tp-jwt-auth/src/claim/Factory.php
+grep "protected \$provider;" vendor/thans/tp-jwt-auth/src/Manager.php
 ```
 
 **Windows PowerShell：**
 ```powershell
 Select-String "protected \`$signer;" vendor\thans\tp-jwt-auth\src\provider\JWT\Lcobucci.php
 Select-String "protected \`$request;" vendor\thans\tp-jwt-auth\src\claim\Factory.php
+Select-String "protected \`$provider;" vendor\thans\tp-jwt-auth\src\Manager.php
 ```
 
 ## 部署环境
@@ -148,7 +192,8 @@ Select-String "protected \`$request;" vendor\thans\tp-jwt-auth\src\claim\Factory
 - **修复位置**: 
   - vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php 第26行
   - vendor/thans/tp-jwt-auth/src/claim/Factory.php 第10行
-- **根本原因**: 构造函数中动态赋值 `$this->signer` 和 `$this->request` 但类中未声明这些属性
+  - vendor/thans/tp-jwt-auth/src/Manager.php 第15行
+- **根本原因**: 构造函数中动态赋值 `$this->signer`、`$this->request` 和 `$this->provider` 但类中未声明这些属性
 - **影响**: PHP8弃用动态属性，未声明的属性赋值会触发 Deprecated 警告
 
 ## 相关文件

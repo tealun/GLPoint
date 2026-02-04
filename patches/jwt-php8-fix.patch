@@ -18,3 +18,13 @@
      protected $classMap
          = [
              'aud' => Audience::class,
+--- a/vendor/thans/tp-jwt-auth/src/Manager.php
++++ b/vendor/thans/tp-jwt-auth/src/Manager.php
+@@ -12,6 +12,8 @@ class Manager
+     protected $blacklist;
+ 
+     protected $payload;
++
++    protected $provider;
+ 
+     protected $refresh;

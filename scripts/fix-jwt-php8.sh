@@ -1,16 +1,18 @@
 #!/bin/bash
 # JWT PHP8 兼容性修复脚本
-# 问题根源: thans/tp-jwt-auth v1.3.1 存在两个动态属性问题
+# 问题根源: thans/tp-jwt-auth v1.3.1 存在三个动态属性问题
 # 1. provider/JWT/Lcobucci.php: 缺少 protected $signer;
 # 2. claim/Factory.php: 缺少 protected $request;
+# 3. Manager.php: 缺少 protected $provider;
 # 解决方案: 在类声明中添加对应的属性声明
 
 TARGET_FILE1="vendor/thans/tp-jwt-auth/src/provider/JWT/Lcobucci.php"
 TARGET_FILE2="vendor/thans/tp-jwt-auth/src/claim/Factory.php"
+TARGET_FILE3="vendor/thans/tp-jwt-auth/src/Manager.php"
 PATCH_FILE="patches/jwt-php8-fix.patch"
 
 # 检查目标文件是否存在
-if [ ! -f "$TARGET_FILE1" ] && [ ! -f "$TARGET_FILE2" ]; then
+if [ ! -f "$TARGET_FILE1" ] && [ ! -f "$TARGET_FILE2" ] && [ ! -f "$TARGET_FILE3" ]; then
     echo "⚠️  目标文件不存在，跳过修复"
     exit 0
 fi
@@ -18,6 +20,7 @@ fi
 # 检查是否已经修复
 FIXED1=false
 FIXED2=false
+FIXED3=false
 
 if [ -f "$TARGET_FILE1" ]; then
     if grep -q "protected \$signer;" "$TARGET_FILE1" 2>/dev/null; then
@@ -31,7 +34,13 @@ if [ -f "$TARGET_FILE2" ]; then
     fi
 fi
 
-if [ "$FIXED1" = true ] && [ "$FIXED2" = true ]; then
+if [ -f "$TARGET_FILE3" ]; then
+    if grep -q "protected \$provider;" "$TARGET_FILE3" 2>/dev/null; then
+        FIXED3=true
+    fi
+fi
+
+if [ "$FIXED1" = true ] && [ "$FIXED2" = true ] && [ "$FIXED3" = true ]; then
     echo "✅ JWT PHP8兼容性已全部修复"
     exit 0
 fi
@@ -75,5 +84,18 @@ if [ -f "$TARGET_FILE2" ] && [ "$FIXED2" = false ]; then
         echo "✅ Factory.php 修复成功"
     else
         echo "❌ Factory.php 修复失败"
+    fi
+fi
+
+# 修复Manager.php
+if [ -f "$TARGET_FILE3" ] && [ "$FIXED3" = false ]; then
+    sed -i '/protected \$payload;/a\
+\
+    protected $provider;' "$TARGET_FILE3"
+    
+    if grep -q "protected \$provider;" "$TARGET_FILE3"; then
+        echo "✅ Manager.php 修复成功"
+    else
+        echo "❌ Manager.php 修复失败"
     fi
 fi
