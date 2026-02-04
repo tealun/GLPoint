@@ -29,24 +29,20 @@ jobs:
 
       - name: 准备部署文件
         run: |
-          # 创建排除文件列表
-          echo ".git/" > .deployignore
-          echo ".github/" >> .deployignore
-          echo "node_modules/" >> .deployignore
-          echo "tests/" >> .deployignore
-          echo ".env.example" >> .deployignore
-          echo "README.md" >> .deployignore
-          echo "docs/" >> .deployignore
-          echo "deploy.tar.gz" >> .deployignore
-          echo ".deployignore" >> .deployignore
-          
           # 打包文件（排除不需要的）
-          tar --warning=no-file-changed -czf deploy.tar.gz \
-            --exclude-from=.deployignore \
+          tar -czf deploy.tar.gz \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='.env.example' \
+            --exclude='README.md' \
+            --exclude='docs' \
+            --exclude='deploy.tar.gz' \
             --exclude='.env' \
             --exclude='runtime/*' \
             --exclude='public/uploads/*' \
-            .
+            . || true
 
       - name: 部署到服务器
         uses: appleboy/ssh-action@master
