@@ -11,64 +11,29 @@ class ApiAuth
     public function handle($request, \Closure $next)
     {
         try {
+            // 🔍 只对 api 应用的请求进行验证，其他应用直接放行
+            $pathinfo = request()->pathinfo();
+            if (!preg_match('#^/?api(/|$)#i', $pathinfo)) {
+                return $next($request);
+            }
+            
             // 获取当前控制器和方法
             $controller = request()->controller();
             $action = request()->action();
-            
-            // 🔍 如果controller为空，尝试从pathinfo解析
-            if (empty($controller)) {
-                $pathinfo = request()->pathinfo();
-                // pathinfo格式可能是: api/index/index 或 index/index
-                $parts = array_filter(explode('/', $pathinfo));
-                $parts = array_values($parts);
-                
-                // 如果第一部分是'api'，跳过它
-                if (!empty($parts) && strtolower($parts[0]) === 'api') {
-                    array_shift($parts);
-                    $parts = array_values($parts);
-                }
-                
-                // 解析controller和action
-                if (isset($parts[0])) {
-                    $controller = $parts[0];
-                }
-                if (isset($parts[1])) {
-                    $action = $parts[1];
-                }
-            }
             
             // 检查是否需要登录验证
             $noNeedLogin = $this->getNoNeedLogin();
             $currentPath = strtolower("{$controller}/{$action}");
             
-            // 🔍 增强调试信息：添加路由和URL信息
-            $debugInfo = [
-                'controller' => $controller,
-                'action' => $action,
-                'currentPath' => $currentPath,
-                'request_url' => request()->url(true),
-                'request_path' => request()->pathinfo(),
-                'request_method' => request()->method(),
-                'app_name' => app('http')->getName(),
-                'route_info' => request()->rule() ? request()->rule()->getRule() : 'no_rule',
-                'noNeedLogin' => $noNeedLogin,
-                'inWhitelist' => in_array($currentPath, $noNeedLogin),
-            ];
-            
-            // 先检查白名单，在白名单中的直接放行
+            // 先检查白名单，在白名单中直接放行
             if(in_array($currentPath, $noNeedLogin)) {
-                // 🔍 白名单放行
                 return $next($request);
             }
             
-            // 不在白名单中，需要验证Token（传入force=false避免抛异常）
+            // 不在白名单，验证Token（force=false不抛异常）
             $payload = Auth::verifyToken(null, false);
             if(!$payload) {
-                return json([
-                    'code' => 401, 
-                    'msg' => '请先登录',
-                    'debug' => $debugInfo
-                ]);
+                return json(['code' => 401, 'msg' => '请先登录']);
             }
             
             // 验证用户状态  
@@ -80,20 +45,7 @@ class ApiAuth
             return $next($request);
             
         } catch(\Exception $e) {
-            // 🔍 在异常时也输出调试信息
-            $debugInfo = [
-                'exception' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'controller' => $controller ?? 'unknown',
-                'action' => $action ?? 'unknown',
-                'currentPath' => isset($controller, $action) ? strtolower("{$controller}/{$action}") : 'unknown',
-                'trace' => $e->getTraceAsString(),
-            ];
-            return json([
-                'code' => 401, 
-                'msg' => '🔍异常调试: ' . json_encode($debugInfo, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-            ]);
+            return json(['code' => 500, 'msg' => '服务器错误: ' . $e->getMessage()]);
         }
     }
 
