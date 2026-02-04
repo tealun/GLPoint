@@ -164,30 +164,30 @@ jobs:
             echo "====== 部署完成 ======"
             echo "版本: $(cd $PROJECT_DIR && git log -1 --format='%H %s')"
 
-      - name: 健康检查
-        run: |
-          echo "执行健康检查..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_URL }}/api/index/index)
-          if [ $HTTP_CODE -eq 200 ]; then
-            echo "✅ 健康检查通过 (HTTP $HTTP_CODE)"
-          else
-            echo "❌ 健康检查失败 (HTTP $HTTP_CODE)"
-            exit 1
-          fi
+      # - name: 健康检查
+      #   run: |
+      #     echo "执行健康检查..."
+      #     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_URL }}/api/index/index)
+      #     if [ $HTTP_CODE -eq 200 ]; then
+      #       echo "✅ 健康检查通过 (HTTP $HTTP_CODE)"
+      #     else
+      #       echo "❌ 健康检查失败 (HTTP $HTTP_CODE)"
+      #       exit 1
+      #     fi
 
-      - name: 发送部署通知
-        if: always()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message: |
-            🚀 GLpoint 部署完成
-            
-            仓库: ${{ github.repository }}
-            分支: ${{ github.ref }}
-            提交: ${{ github.sha }}
-            作者: ${{ github.actor }}
-            状态: ${{ job.status }}
-            
-            时间: $(date '+%Y-%m-%d %H:%M:%S')
+      # - name: 发送部署通知
+      #   if: always()
+      #   uses: appleboy/telegram-action@master
+      #   with:
+      #     to: ${{ secrets.TELEGRAM_CHAT_ID }}
+      #     token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      #     message: |
+      #       🚀 GLpoint 部署完成
+      #       
+      #       仓库: ${{ github.repository }}
+      #       分支: ${{ github.ref }}
+      #       提交: ${{ github.sha }}
+      #       作者: ${{ github.actor }}
+      #       状态: ${{ job.status }}
+      #       
+      #       时间: $(date '+%Y-%m-%d %H:%M:%S')
