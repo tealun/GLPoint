@@ -28,21 +28,26 @@ class ApiAuth
                 'inWhitelist' => in_array($currentPath, $noNeedLogin),
             ];
             
-            if(!in_array($currentPath, $noNeedLogin)) {
-                // 验证Token
-                $payload = Auth::verifyToken();
-                if(!$payload) {
-                    return json([
-                        'code' => 401, 
-                        'msg' => '🔍ApiAuth调试: ' . json_encode($debugInfo, JSON_UNESCAPED_UNICODE)
-                    ]);
-                }
-                
-                // 验证用户状态  
-                $user = Auth::getUser();
-                if(!$user || $user['status'] !== 'verified') {
-                    return json(['code' => 403, 'msg' => '账号已被禁用']);
-                }
+            // 先检查白名单，在白名单中的直接放行
+            if(in_array($currentPath, $noNeedLogin)) {
+                // 🔍 白名单放行
+                return $next($request);
+            }
+            
+            // 不在白名单中，需要验证Token（传入force=false避免抛异常）
+            $payload = Auth::verifyToken(null, false);
+            if(!$payload) {
+                return json([
+                    'code' => 401, 
+                    'msg' => '请先登录',
+                    'debug' => $debugInfo
+                ]);
+            }
+            
+            // 验证用户状态  
+            $user = Auth::getUser();
+            if(!$user || $user['status'] !== 'verified') {
+                return json(['code' => 403, 'msg' => '账号已被禁用']);
             }
             
             return $next($request);
