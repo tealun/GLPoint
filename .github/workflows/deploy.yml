@@ -37,6 +37,7 @@ jobs:
           echo ".env.example" >> .deployignore
           echo "README.md" >> .deployignore
           echo "docs/" >> .deployignore
+          echo "deploy.tar.gz" >> .deployignore
           
           # 打包文件（排除不需要的）
           tar -czf deploy.tar.gz \
