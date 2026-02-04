@@ -9,11 +9,13 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 
+<?php
 // [ 应用入口文件 ]
 namespace think;
 
-// 屏蔽 PHP 8.2+ 动态属性警告（兼容旧版本第三方包）
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+// 屏蔽 PHP 8+ 动态属性警告（必须在最前面）
+error_reporting(E_ALL & ~E_DEPRECATED);
+ini_set('display_errors', '0');
 
 require __DIR__ . '/../vendor/autoload.php';
 
