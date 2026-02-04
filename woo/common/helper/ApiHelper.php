@@ -259,6 +259,16 @@ class ApiHelper
             return $this->store['apiInfo'][$action];
         }
         $info = $this->reader->getActionApiInfo($action);
+        
+        // 🔍 调试：记录读取的注解信息
+        \think\facade\Log::info('ApiHelper.getActionApiInfo() 读取注解:', [
+            'action' => $action,
+            'controller' => $this->params['controller'] ?? 'unknown',
+            'raw_info' => $info,
+            'login_field' => $info['login'] ?? 'NOT_FOUND',
+            'login_type' => isset($info['login']) ? gettype($info['login']) : 'NOT_SET'
+        ]);
+        
         return $this->store['apiInfo'][$action] = $info ? $info : [];
     }
 
