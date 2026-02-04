@@ -130,9 +130,13 @@ class ApiHelper
     public function checkLogin() :bool
     {
         $info = $this->getActionApiInfo();
-        if (empty($info) || empty($info['login'])) {
+        // 修复：empty(false) 返回 true 的问题，需要严格检查 login 属性
+        // 如果没有注解信息，或者 login 明确设置为 false，则不需要登录
+        if (empty($info) || (isset($info['login']) && $info['login'] === false)) {
             return true;
         }
+        // 如果没有设置 login 属性，默认为 true（需要登录）
+        // 如果设置为 true，也需要登录
         if (Auth::user()) {
             return true;
         }
