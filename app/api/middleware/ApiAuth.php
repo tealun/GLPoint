@@ -15,15 +15,42 @@ class ApiAuth
             $controller = request()->controller();
             $action = request()->action();
             
+            // 🔍 如果controller为空，尝试从pathinfo解析
+            if (empty($controller)) {
+                $pathinfo = request()->pathinfo();
+                // pathinfo格式可能是: api/index/index 或 index/index
+                $parts = array_filter(explode('/', $pathinfo));
+                $parts = array_values($parts);
+                
+                // 如果第一部分是'api'，跳过它
+                if (!empty($parts) && strtolower($parts[0]) === 'api') {
+                    array_shift($parts);
+                    $parts = array_values($parts);
+                }
+                
+                // 解析controller和action
+                if (isset($parts[0])) {
+                    $controller = $parts[0];
+                }
+                if (isset($parts[1])) {
+                    $action = $parts[1];
+                }
+            }
+            
             // 检查是否需要登录验证
             $noNeedLogin = $this->getNoNeedLogin();
             $currentPath = strtolower("{$controller}/{$action}");
             
-            // 🔍 调试信息
+            // 🔍 增强调试信息：添加路由和URL信息
             $debugInfo = [
                 'controller' => $controller,
                 'action' => $action,
                 'currentPath' => $currentPath,
+                'request_url' => request()->url(true),
+                'request_path' => request()->pathinfo(),
+                'request_method' => request()->method(),
+                'app_name' => app('http')->getName(),
+                'route_info' => request()->rule() ? request()->rule()->getRule() : 'no_rule',
                 'noNeedLogin' => $noNeedLogin,
                 'inWhitelist' => in_array($currentPath, $noNeedLogin),
             ];
