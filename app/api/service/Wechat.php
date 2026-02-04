@@ -19,7 +19,7 @@ class Wechat
         $secret = $config['app_secret'] ?? '';
 
         Log::debug('微信登录配置: appid=' . $appid . 
-                  ', secret=' . substr($secret, 0, 6) . '***' .
+                  ', secret=' . substr($secret ?? '', 0, 6) . '***' .
                   ', code=' . $code);
 
         if(empty($appid) || empty($secret)) {

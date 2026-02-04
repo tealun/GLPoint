@@ -80,9 +80,9 @@ class Auth extends Api
         // 如果未找到微信用户，则创建新用户
         if(!$wechatUser) {
             Log::debug('未找到微信用户，开始创建新用户');
-            $randPassword = substr(md5(uniqid()), 0, 16);
+            $randPassword = substr(md5(uniqid() ?: ''), 0, 16);
             $salt = 'YUANyin';
-            $baseUsername = 'wx_' . substr($result['openid'], -8);
+            $baseUsername = 'wx_' . substr($result['openid'] ?? '', -8);
             $username = $baseUsername;
             $i = 1;
             while(User::where('username', $username)->find()) {

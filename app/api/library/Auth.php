@@ -42,7 +42,7 @@ class Auth
             }
             
             // 记录要验证的token
-            Log::debug("[Auth] 验证token: " . substr($token, 0, 20) . '...');
+            Log::debug("[Auth] 验证token: " . substr($token ?? '', 0, 20) . '...');
             
             // 检查是否有token
             if(!$token) {
@@ -57,7 +57,7 @@ class Auth
             try {
                 // 记录JWT配置信息
                 $jwtConfig = [
-                    'secret' => substr(Config::get('jwt.secret'), 0, 10) . '...',
+                    'secret' => substr(Config::get('jwt.secret') ?? '', 0, 10) . '...',
                     'signer' => Config::get('jwt.signer'),
                     'ttl' => Config::get('jwt.ttl')
                 ];
@@ -104,12 +104,12 @@ class Auth
         }
 
         // Bearer Token处理
-        if($token && stripos($token, 'Bearer ') === 0) {
+        if($token && is_string($token) && stripos($token, 'Bearer ') === 0) {
             $token = trim(substr($token, 7));
         }
 
         if($token) {
-            Log::debug("[Auth] 获取到Token: " . substr($token, 0, 10) . '...');
+            Log::debug("[Auth] 获取到Token: " . substr($token ?? '', 0, 10) . '...');
         } else {
             Log::debug("[Auth] 未找到Token");
         }
@@ -182,7 +182,7 @@ class Auth
             
             // 记录日志
             Log::info('[Auth] 用户退出登录成功', [
-                'token' => substr($token, 0, 10) . '...'
+                'token' => substr($token ?? '', 0, 10) . '...'
             ]);
 
             return true;

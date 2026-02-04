@@ -158,7 +158,7 @@ class DatabaseUpgrade extends AdminController
                 if (!empty(trim($statement))) {
                     try {
                         Db::execute($statement);
-                        Log::info('执行SQL: ' . substr($statement, 0, 100));
+                        Log::info('执行SQL: ' . substr($statement ?? '', 0, 100));
                     } catch (\Exception $e) {
                         // 如果是已存在的列或表，记录警告但继续执行
                         if (strpos($e->getMessage(), 'Duplicate column') !== false ||
