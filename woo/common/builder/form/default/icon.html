@@ -1,0 +1,38 @@
+<div class="woo-icon-container clearfix">
+    <input type="text"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <a class="layui-btn woo-theme-btn woo-icon-toggle">展开</a>
+    <div class="woo-icon-list">
+        {if !empty($data.options.custom)}
+        <h4>自定义图标</h4>
+        <ul class="grid">
+            {foreach $data.options.custom as $item}
+            <li data-icon="{$item.icon}" class="{if isset($data.attrs.value) && $data.attrs.value == $item.icon}woo-icon-selected{/if}">
+                <div class="woo-icon-show"><i class="{:return_icon_class($item.icon)}"></i></div>
+                <div class="woo-icon-name" title="{$item.name}">{$item.name}</div>
+            </li>
+            {/foreach}
+        </ul>
+        {/if}
+        <h4>UI框架图标</h4>
+        <ul class="grid">
+            {foreach $data.options.layui as $item}
+            <li data-icon="{$item.icon}" class="{if isset($data.attrs.value) && $data.attrs.value == $item.icon}woo-icon-selected{/if}">
+                <div class="woo-icon-show"><i class="{:return_icon_class($item.icon)}"></i></div>
+                <div class="woo-icon-name" title="{$item.name}">{$item.name}</div>
+            </li>
+            {/foreach}
+        </ul>
+        <h4>系统扩展图标</h4>
+        <ul class="grid">
+            {foreach $data.options.woo as $item}
+            <li data-icon="{$item.icon}" class="{if isset($data.attrs.value) && $data.attrs.value == $item.icon}woo-icon-selected{/if}">
+                <div class="woo-icon-show"><i class="{:return_icon_class($item.icon)}"></i></div>
+                <div class="woo-icon-name" title="{$item.name}">{$item.name}</div>
+            </li>
+            {/foreach}
+        </ul>
+    </div>
+</div>

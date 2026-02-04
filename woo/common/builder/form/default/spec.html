@@ -1,0 +1,165 @@
+{if !empty($data.fields)}
+<div class="spec-container">
+    <input type="hidden" class="spec-form-value" value='{:empty($data.attrs.value.attr) ? "" : json_encode($data.attrs.value.attr, JSON_UNESCAPED_UNICODE)}' size="500" name="{$data.field_name}[attr]">
+    <input type="hidden" class="spec-form-list" data-delimiter="{$data.delimiter ?? ','}" value='{:empty($data.attrs.value.list) ? "" : json_encode($data.attrs.value.list, JSON_UNESCAPED_UNICODE)}' size="500" name="{$data.field_name}[list]">
+    <div class="spec-add-action">
+        <a href="javascript:;" class="layui-btn  btn-2 specAddBtn"><i class="layui-icon layui-icon-add-circle"></i>添加新规格</a>
+        <a href="javascript:;" class="layui-btn woo-theme-btn specCreateBtn">立即生成</a>
+    </div>
+    <div class="spec-add-box">
+        <div class="flex">
+            <div class="spec-name">
+                <label for="specName{$data.field_name}">规格：</label>
+                <input type="text" id="specName{$data.field_name}" class="layui-input specName">
+            </div>
+            <div class="spec-value">
+                <label for="specValue{$data.field_name}">规格值：</label>
+                <input type="text" id="specValue{$data.field_name}" class="layui-input specValue">
+            </div>
+            <div class="spec-btns">
+                <a href="javascript:;" class="layui-btn btn-2 specOk">确定</a>
+                <a href="javascript:;" class="layui-btn btn-1 specCancel">取消</a>
+            </div>
+        </div>
+    </div>
+    <div class="spec-list"></div>
+    <div class="spec-combine">
+        {if !empty($data.attrs.value.attr) && !empty($data.attrs.value.list)}
+        {assign name="attrs" value="$data.attrs.value.attr"/}
+        {assign name="list" value="$data.attrs.value.list"/}
+        <table class="layui-table">
+            <colgroup>
+                {foreach $attrs as $item}
+                <col>
+                {/foreach}
+                {foreach $data.fields as $field => $item}
+                <col {if isset($item.width)}width="{$item.width}"{/if}>
+                {/foreach}
+                <col width="100">
+            </colgroup>
+            <thead>
+                <tr>
+                    {foreach $attrs as $item}
+                    <th class="text-center">{$item.spec_name}</th>
+                    {/foreach}
+                    {foreach $data.fields as $field => $item}
+                    <th>
+                        <cite>{$item.label}</cite>
+                        {if !empty($item.tip)}<div class="woo-form-item-tip woo-tiptool" data-tip-text="{$item.tip}" data-tip-bg="#FF5722" data-tip-type="3"><i class="woo-icon woo-icon-tishi"></i></div>{/if}
+                        {if in_array($item.elem,['text', 'number'])}
+                        <i class="layui-icon layui-icon-edit batch-setting tooltip" data-tip-text="批量设置{$item.label}" data-tip-type="3"></i>
+                        {/if}
+                    </th>
+                    {/foreach}
+                    <th class="text-center">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $list as $key => $item}
+                <tr>
+                    {foreach $item.value as $key1 => $item1}
+                    <td>
+                        {$item1.spec_value_name}
+                        {if $key1 == count($item.value) - 1}
+                        <input type="hidden" name="{$data.field_name}[list][0][value]" value='{:json_encode($item.value)}'>
+                        <input type="hidden" name="{$data.field_name}[list][0][spec_names]" value="{$item.spec_names}"/>
+                        {/if}
+                    </td>
+                    {/foreach}
+                    {foreach $data.fields as $field => $info}
+                    <td>
+                        {if isset($item[$field])}
+                        {assign name="$info.attrs.value" value="$item[$field]"/}
+                        {:\\woo\\common\\builder\\Form::renderHtml($info)}
+                        {else /}
+                        {$item.html | raw}
+                        {/if}
+                    </td>
+                    {/foreach}
+                    <td class="text-center">
+                        <a href="javascript:;" class="layui-btn layui-btn-sm btn-25 spec-remove">删除</a>
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+        {/if}
+    </div>
+    <script type="text/html" class="spec-item-templet">
+        <div class="spec-item flex" data-id="{{d.spec_id}}">
+            <div class="icon spec-item-sortable">
+                <i class="woo-icon woo-icon-jiantou-shangxiaqiehuan"></i>
+            </div>
+            <div class="item">
+                <div class="name"><cite data-id="{{d.spec_id}}" class="specName" data-name="{{d.spec_name}}">{{d.spec_name}}</cite><i class="layui-icon layui-icon-close-fill removeSpec"></i></div>
+                <div class="show flex">
+                    <div class="values flex">
+                        {{# for(var i in d.value) { }}
+                        <span class="item-value"><b></b><cite class="specValue" data-name="{{d.spec_name}}" data-value="{{d.value[i].spec_value_name}}" data-value-id="{{d.value[i].spec_value_id}}">{{d.value[i].spec_value_name}}</cite><i class="layui-icon layui-icon-close removeSpecValue"></i></span>
+                        {{# } }}
+                    </div>
+                    <div class="add-value flex">
+                        <input type="text" placeholder="请继续添加规格值" class="layui-input addSpecValue"><a href="javascript:;" class="layui-btn btn-2 layui-btn-sm specValueOk" data-name="{{d.spec_name}}">确定</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/html" class="spec-combine-templet">
+        <table class="layui-table">
+            <colgroup>
+                {{# for(var i in d[0]) { }}
+                <col>
+                {{# } }}
+                {foreach $data.fields as $field => $item}
+                <col {if isset($item.width)}width="{$item.width}"{/if}>
+                {/foreach}
+                <col width="100">
+            </colgroup>
+            <thead>
+                <tr>
+                    {{# for(var i in d[0]) { }}
+                    <th class="text-center"><cite>{{d[0][i].spec_name}}</cite></th>
+                    {{# } }}
+                    {foreach $data.fields as $field => $item}
+                    <th>
+                        <cite>{$item.label}</cite>
+                        {if !empty($item.tip)}<div class="woo-form-item-tip tooltip" data-tip-text="{$item.tip}" data-tip-bg="#FF5722" data-tip-type="3"><i class="woo-icon woo-icon-tishi"></i></div>{/if}
+                        {if in_array($item.elem,['text', 'number'])}
+                        <i class="layui-icon layui-icon-edit batch-setting tooltip" data-tip-text="批量设置{$item.label}" data-tip-type="3"></i>
+                        {/if}
+                    </th>
+                    {/foreach}
+                    <th class="text-center">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{# for(var i in d) { }}
+                 <tr>
+                     {{# var names = []}}
+                     {{# for(var j in d[0]) { }}
+                     {{# names.push(d[i][j].spec_value_name)}}
+                     <td class="text-center">
+                         {{d[i][j].spec_value_name}}
+                         {{# if (j == d[0].length - 1) { }}
+                         <input type="hidden" name="{$data.field_name}[list][0][value]" value='{{JSON.stringify(d[i]).replace(/\r/g, "")}}'>
+                         <input type="hidden" name="{$data.field_name}[list][0][spec_names]" value="{{names.join('{$data.delimiter ?? ','}')}}"/>
+                         <input type="hidden" class="spec-tag" value="{{names.sort().join('{$data.delimiter ?? ','}')}}">
+                         {{# } }}
+                     </td>
+                     {{# } }}
+                     {foreach $data.fields as $field => $item}
+                     <td>{$item.html | raw}</td>
+                     {/foreach}
+                     <td class="text-center">
+                         <a href="javascript:;" class="layui-btn layui-btn-sm btn-25 spec-remove">删除</a>
+                     </td>
+                 </tr>
+                {{# } }}
+            </tbody>
+        </table>
+    </script>
+</div>
+{else /}
+未定义表单项"fields"属性
+{/if}

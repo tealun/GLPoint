@@ -1,0 +1,454 @@
+<div class="woo-form-page {if $data->getFormInfo('submit_button_fixed')}fixed-show{/if}">
+    <form  class="layui-form layui-form-pane {$data->getFormInfo('class')}" lay-filter="{$data->getFormInfo('lay_filter')}" action="{$data->getFormInfo('action')}" method="{$data->getFormInfo('method')}" enctype="{$data->getFormInfo('enctype')}">
+        <div class="woo-form-body">
+            <div class="layui-tab  {:setting('admin_tab_style')}">
+                {if count($data->getTabs()) > 1}
+                <ul class="layui-tab-title">
+                    {assign name="j" value="0" /}
+                    {foreach $data->getTabs() as $tab}
+                    {if !empty($tab.grids)}
+                    <li class="{if $j == ($args.tab_index ?? 0)}layui-this{/if}">
+                        {if !empty($tab.icon)}<i class="layui-icon {$tab.icon}"></i>{/if}
+                        {$tab.title}
+                    </li>
+                    {/if}
+                    {assign name="j" value="$j+1" /}
+                    {/foreach}
+                </ul>
+                {/if}
+                <div class="layui-tab-content">
+                    {foreach $data->getHiddenItems() as $item}
+                    {if $item.html}
+                    <div class="woo-form-item  woo-form-name-{$item.field_name}">
+                        {$item.html| raw}
+                    </div>
+                    {/if}
+                    {/foreach}
+                    {assign name="j" value="0" /}
+                    {foreach $data->getTabs() as $tab}
+                    {if !empty($tab.grids)}
+                    <div class="woo-form-tab layui-tab-item {if $j == ($args.tab_index ?? 0)}layui-show{/if}">
+                        <div class="layui-row layui-col-space15">
+                            {foreach $tab.grids as $grid}
+                            <div class="woo-form-grid {:get_grid_class($grid.grid)}">
+                                <div class="layui-card">
+                                    {if !empty($grid.icon) || !empty($grid.title)}
+                                    <div class="layui-card-header">
+                                        {if !empty($grid.icon)}<i class="layui-icon {$grid.icon}"></i>{/if}
+                                        {$grid.title}
+                                    </div>
+                                    {/if}
+                                    <div class="layui-card-body clearfix">
+                                        {foreach $grid.items as $itemName => $item}
+                                        {if isset($item.element)}
+                                        <div class="woo-form-item  woo-form-name-{$item.field_name} {$item.form_item_class ?? ''} {if !empty($item.is_not_label) || empty($item.label_tag)} woo-item-not-label {/if} {if $data->getVisibleError($item.field_name)} woo-form-error {/if} woo-form-item-{$item.element} {:get_grid_class($item.grid??12)}{if in_array($item.field_name, $data->getTriggerFields())} woo-trigger-hidden{/if}" data-element="{$item.element}">
+                                            <div class="layui-form-item {if !empty($item.tip)}has-item-tip{/if}">
+                                                {if empty($item.is_not_label) && !empty($item.label_tag)}{$item.label_tag | raw}{/if}
+                                                <div class="layui-input-block {if !empty($item.is_not_label) || empty($item.label_tag)}woo-form-not-label{/if}">
+                                                    {$item.html | raw}
+                                                    {if !empty($item.message)}
+                                                    <blockquote class="layui-elem-quote woo-form-item-message">{$item.message | raw}</blockquote>
+                                                    {/if}
+                                                    {if !empty($item.tip)}<div class="woo-form-item-tip item-tip-list">{$item.tip}</div>{/if}
+                                                    {if $data->getVisibleError($item.field_name) && is_string($data->getVisibleError($item.field_name))}<div class="woo-form-item-error"><i class="layui-icon layui-icon-survey woo-error-close"></i>{$data->getVisibleError($item.field_name)}</div>{/if}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {else /}
+                                        <div class="clear"></div>
+                                        {if is_string($itemName)}<div class="woo-form-group">{/if}
+                                        {if is_string($itemName)}<div class="woo-form-group-title">{$itemName}</div>{/if}
+                                        <div class="layui-row woo-form-group-body layui-col-space10 clearfix ">
+                                            {foreach $item as $itemName1 => $item1}
+                                            {if isset($item1.element)}
+                                            <div class="woo-form-item woo-form-name-{$item1.field_name} {$item1.form_item_class ?? ''} {if !empty($item1.is_not_label) || empty($item1.label_tag)} woo-item-not-label {/if} {if $data->getVisibleError($item1.field_name)} woo-form-error {/if} woo-form-item-{$item1.element} {:get_grid_class($item1.grid??12)}{if in_array($item1.field_name, $data->getTriggerFields())} woo-trigger-hidden{/if}" data-element="{$item1.element}">
+                                                <div class="layui-form-item {if !empty($item1.tip)}has-item-tip{/if}">
+                                                    {if empty($item1.is_not_label) && !empty($item1.label_tag)}{$item1.label_tag | raw}{/if}
+                                                    <div class="layui-input-block {if !empty($item1.is_not_label) || empty($item1.label_tag)}woo-form-not-label{/if}">
+                                                        {$item1.html | raw}
+                                                        {if !empty($item1.message)}
+                                                        <blockquote class="layui-elem-quote woo-form-item-message">{$item1.message | raw}</blockquote>
+                                                        {/if}
+                                                        {if !empty($item1.tip)}<div class="woo-form-item-tip item-tip-list">{$item1.tip}</div>{/if}
+                                                        {if $data->getVisibleError($item1.field_name) && is_string($data->getVisibleError($item1.field_name))}<div class="woo-form-item-error"><i class="layui-icon layui-icon-survey woo-error-close"></i>{$data->getVisibleError($item1.field_name)}</div>{/if}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {else /}
+                                            {if is_array($item1)}
+                                            {foreach $item1 as $itemName2 => $item2}
+                                            {if isset($item2.element)}
+                                            <div class="woo-form-item woo-form-name-{$item2.field_name} {$item2.form_item_class ?? ''} {if !empty($item2.is_not_label) || empty($item2.label_tag)} woo-item-not-label {/if} {if $data->getVisibleError($item2.field_name)} woo-form-error {/if} woo-form-item-{$item2.element} {:get_grid_class($item2.grid??12)}{if in_array($item2.field_name, $data->getTriggerFields())} woo-trigger-hidden{/if}" data-element="{$item2.element}">
+                                                <div class="layui-form-item {if !empty($item2.tip)}has-item-tip{/if}">
+                                                    {if empty($item2.is_not_label) && !empty($item2.label_tag)}{$item2.label_tag | raw}{/if}
+                                                    <div class="layui-input-block {if !empty($item2.is_not_label) || empty($item2.label_tag)}woo-form-not-label{/if}">
+                                                        {$item2.html | raw}
+                                                        {if !empty($item2.message)}
+                                                        <blockquote class="layui-elem-quote woo-form-item-message">{$item2.message | raw}</blockquote>
+                                                        {/if}
+                                                        {if !empty($item2.tip)}<div class="woo-form-item-tip item-tip-list">{$item2.tip}</div>{/if}
+                                                        {if $data->getVisibleError($item2.field_name) && is_string($data->getVisibleError($item2.field_name))}<div class="woo-form-item-error"><i class="layui-icon layui-icon-survey woo-error-close"></i>{$data->getVisibleError($item2.field_name)}</div>{/if}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/if}
+                                            {/foreach}
+                                            {/if}
+                                            {/if}
+                                            {/foreach}
+                                        </div>
+                                        {if is_string($itemName)}</div>{/if}
+                                        {/if}
+                                        {/foreach}
+                                    </div>
+                                </div>
+                            </div>
+                            {/foreach}
+                        </div>
+                    </div>
+                    {/if}
+                    {assign name="j" value="$j+1" /}
+                    {/foreach}
+                </div>
+            </div>
+            {if isset($draftSave)}
+            <input type="hidden" name="is_draft_save" id="isDraftSave" value=""/>
+            {/if}
+            <div class="woo-form-bottom">
+                <button class="layui-btn woo-theme-btn layui-btn-radius btn-spacing-2" lay-submit lay-filter="wooFormSubmit">{$submitText ?? '立即提交'}</button>
+                {if isset($draftSave)}
+                <button class="layui-btn layui-btn-primary layui-btn-radius btn-spacing-2 is-draft-save" type="button">{$draftSaveSubmitText ?? '暂存'}</button>
+                {/if}
+                {if empty($cancelReset)}
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-radius btn-spacing-2">{$resetText ?? '重置'}</button>
+                {/if}
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    if ($('.woo-form-body>.layui-tab>.layui-tab-title>li').length <= 1) {
+        $('.woo-form-body>.layui-tab>.layui-tab-title').remove();
+    } else {
+        var show_index = -1;
+        $('.woo-form-body>.layui-tab>.layui-tab-content>.woo-form-tab').each(function () {
+            if ($(this).find('.woo-form-error').length && show_index < 0) {
+                show_index = $(this).index('.woo-form-tab');
+            }
+        })
+        if (show_index >= 0 && !$('.woo-form-body>.layui-tab>.layui-tab-title>li:eq('+ show_index +')').is('.layui-this')) {
+            $('.woo-form-body>.layui-tab>.layui-tab-title')
+                .children('li.layui-this')
+                .removeClass('layui-this')
+                .end()
+                .children('li:eq(' + show_index + ')')
+                .addClass('layui-this');
+            $('.woo-form-body>.layui-tab>.layui-tab-content')
+                .children('.woo-form-tab.layui-show')
+                .removeClass('layui-show')
+                .end()
+                .children('.woo-form-tab:eq(' + show_index + ')')
+                .addClass('layui-show');
+        }
+    }
+
+    if ($('.woo-form-body>.layui-tab>.layui-tab-content>.woo-form-tab.layui-show').find('.woo-form-error').length) {
+        var ef = $('.woo-form-body>.layui-tab>.layui-tab-content>.woo-form-tab.layui-show').find('.woo-form-error').eq(0).offset();
+        if (ef.top > 0) {
+            $('html,body').animate({
+                scrollTop : ef.top
+            }, 200)
+        } else {
+            setTimeout(function () {
+                var ef = $('.woo-form-body>.layui-tab>.layui-tab-content>.woo-form-tab.layui-show').find('.woo-form-error').eq(0).offset();
+                $('html,body').animate({
+                    scrollTop : ef.top
+                }, 200)
+            }, 100)
+        }
+    }
+
+    var trigger = {:json_encode($data->getTrigger())};
+
+    woo_script_vars['alert'] = merge_error({:json_encode(array_values($data->getHiddenError()))});
+    function merge_error(error) {
+        var errors = []
+        for (var i = 0; i <= error.length -1; i++) {
+            errors.push({
+                'msg' : error[i],
+                'type' : 'error'
+            });
+        }
+        if (typeof(woo_script_vars['alert']) == 'undefined') {
+            return errors;
+        }
+        return woo_script_vars['alert'].concat(errors);
+    }
+
+    var toggle_class  = "woo-trigger-hidden";
+    var isInitialize = true;
+    function trigger_change(field, val) {
+        if (!trigger[field]) {
+            return false;
+        }
+        for (var i in trigger[field]['fields']) {
+            if (!isInitialize) {
+                $('.woo-form-name-' + trigger[field]['fields'][i]).addClass(toggle_class);
+            } else {
+                if (!$('.woo-form-name-' + trigger[field]['fields'][i]).is('.is-initialize-show')) {
+                    $('.woo-form-name-' + trigger[field]['fields'][i]).addClass(toggle_class);
+                }
+            }
+        }
+        if (trigger[field]['values'][val]) {
+            for (var i in trigger[field]['values'][val]) {
+                $('.woo-form-name-' + trigger[field]['values'][val][i]).removeClass(toggle_class)[!isInitialize ? 'removeClass' : 'addClass']('is-initialize-show');
+            }
+        }
+    }
+
+    function xmInitCallback(name, data) {
+        if (!trigger[name]) {
+            return false;
+        }
+        for (var i in trigger[name]['fields']) {
+            $('.woo-form-name-' + trigger[name]['fields'][i]).addClass(toggle_class)
+        }
+        if (trigger[name].callback && window[trigger[name].callback]) {
+            window[trigger[name].callback]({
+                value : data
+            });
+        }
+        for (var i in data) {
+            var val = data[i]
+            if (trigger[name]['values'][val]) {
+                for (var i in trigger[name]['values'][val]) {
+                    setTimeout(function() {
+                        $('.woo-form-name-' + trigger[name]['values'][val][i]).removeClass(toggle_class);
+                    }, 50)
+                }
+            }
+        }
+    }
+
+    function xmCallback(name, data) {
+        if (!trigger[name]) {
+            return false;
+        }
+        for (var i in trigger[name]['fields']) {
+            $('.woo-form-name-' + trigger[name]['fields'][i]).addClass(toggle_class)
+        }
+        var vals = [];
+        for (var i in data.arr) {
+            var val = data.arr[i].value
+            vals.push(val);
+            if (trigger[name]['values'][val]) {
+                for (var i in trigger[name]['values'][val]) {
+                    $('.woo-form-name-' + trigger[name]['values'][val][i]).removeClass(toggle_class)
+                }
+            }
+        }
+        if (trigger[name].callback && window[trigger[name].callback]) {
+            window[trigger[name].callback]({
+                value : vals
+            });
+        }
+    }
+
+    // 表单错误提示 关闭
+    $(document)
+        .on('click', '.woo-form-item-error', function () {
+            $(this).fadeOut(500,function () {
+                $(this).remove()
+            }).closest('.woo-form-error').removeClass('woo-form-error');
+        })
+        .on('click', '.woo-form-error .layui-input,.woo-form-error .layui-textarea', function () {
+            $(this).closest('.woo-form-error').removeClass('woo-form-error').find('.woo-form-item-error').fadeOut(500, function () {
+                $(this).remove()
+            })
+        })
+
+    function layuiReady()
+    {
+        layui.use(['element', 'form'], function(){
+            var element = layui.element;
+            window.layForm = window.layform = layui.form;
+
+            if (window.mytest) {
+                mytest()
+            }
+
+            document.onkeydown = function(event){
+                if (event.keyCode == 81 && event.altKey){
+                    var max_index  =  $('.woo-form-body').children('.layui-tab').children('.layui-tab-title').find('li').length -1 ;
+                    var index    = $('.woo-form-body').children('.layui-tab').children('.layui-tab-title').find('li.layui-this').index() + 1;
+                    if(index > max_index) {
+                        index = 0;
+                    }
+                    $('.woo-form-body').children('.layui-tab').children('.layui-tab-title').find('li:eq('+index+')').trigger('click') ;
+                }
+            }
+
+
+            $('body').on('click', '.woo-has-quick .woo-element', function () {
+                $('.woo-quick').find('.layui-form-select').removeClass('layui-form-selected');
+                $(this).parent().find('.layui-form-select').addClass('layui-form-selected');
+                return false;
+            }) .on('keydown', '.woo-has-quick .woo-element', function () {
+                $(this).parent().find('.layui-form-select').removeClass('layui-form-selected');
+            })
+
+            for (let field in trigger) {
+                var item_element = $('.woo-form-name-' + field).data('element');
+                $('.woo-form-name-' + field).find('.woo-element').not('.woo-element-xmselect').change(function () {
+                    var elem = $(this).closest('.woo-form-item').data('element');
+                    if (elem != 'checkbox') {
+                        if (['checker', 'radio', 'checkbox'].indexOf(elem) == -1) {
+                            var val  = $(this).val();
+                        } else {
+                            var val  = $(this).closest('.layui-input-block').find(':checked').val();
+                        }
+                        if (typeof(val) == 'undefined' && item_element == 'checker') {
+                            var val = $(this).parent().find('[type="hidden"]').val();
+                        }
+                        if (trigger[field].callback && window[trigger[field].callback]) {
+                            window[trigger[field].callback]({
+                                elem : this,
+                                value : val
+                            });
+                        }
+                        trigger_change(field, val)
+                    } else {
+                        for (var i in trigger[field]['fields']) {
+                            $('.woo-form-name-' + trigger[field]['fields'][i]).addClass(toggle_class)
+                        }
+                        var vals = []
+                        $(this).closest('.layui-input-block').find(':checked').each(function () {
+                            var val = $(this).val();
+                            vals.push(val);
+                            if (trigger[field]['values'][val]) {
+                                for (var i in trigger[field]['values'][val]) {
+                                    $('.woo-form-name-' + trigger[field]['values'][val][i]).removeClass(toggle_class)
+                                }
+                            }
+                        })
+                    }
+                }).trigger('change');
+
+                if (['checker', 'radio'].indexOf(item_element) >= 0) {
+                    $format = {"checker" : "switch", "radio" : "radio"};
+                    $event = $format[item_element];
+                    layForm.on($event + "(" + field + ")", function(data){
+                        var val  =  $(this).closest('.layui-input-block').find(':checked').val();
+                        if (typeof(val) == 'undefined' && item_element == 'checker') {
+                            var val = $(this).parent().find('[type="hidden"]').val();
+                        }
+                        data.value = val;
+                        if (trigger[field].callback && window[trigger[field].callback]) {
+                            window[trigger[field].callback](data);
+                        }
+                        trigger_change(field, val)
+                    });
+                    continue;
+                }
+                if (item_element == 'select') {
+                    layForm.on( "select(" + field + ")", function(data){
+                        var val  =  data.value;
+                        $(data.elem).attr('data-value', val);
+                        if (trigger[field].callback && window[trigger[field].callback]) {
+                            window[trigger[field].callback](data);
+                        }
+                        trigger_change(field, val)
+                    })
+                    continue;
+                }
+
+                if (item_element == 'checkbox') {
+                    layForm.on( "checkbox(" + field + ")", function(data){
+                        if (trigger[field].callback && window[trigger[field].callback]) {
+                            window[trigger[field].callback](data);
+                        }
+                        for (var i in trigger[field]['fields']) {
+                            $('.woo-form-name-' + trigger[field]['fields'][i]).addClass(toggle_class)
+                        }
+                        $(this).closest('.layui-input-block').find(':checked').each(function () {
+                            var val = $(this).val();
+                            if (trigger[field]['values'][val]) {
+                                for (var i in trigger[field]['values'][val]) {
+                                    $('.woo-form-name-' + trigger[field]['values'][val][i]).removeClass(toggle_class)
+                                }
+                            }
+                        })
+                    })
+                    continue;
+                }
+            }
+
+            /*{if isset($draftSave)}*/
+            $('.is-draft-save').click(function() {
+                var offset = $(this).offset();
+                layer.confirm("请确认是否{$draftSaveSubmitText ?? '暂存'}数据(不会进行数据验证)",{
+                    title : '确认',
+                    icon : 3,
+                    area: ['292px', '190px'],
+                    offset : (function () {
+                        if ($(window).width() <= 768) {
+                            return 'auto';
+                        }
+                        var t = Math.max(offset.top - 145 - $(window).scrollTop(), 0);
+                        var l = offset.left - 150 + 292 < $(window).width() ?offset.left - 150 : $(window).width() - 292;
+                        return [t + 'px', l + 'px'];
+                    })()
+                }, function(){
+                    $('#isDraftSave').val('1');
+                    $('[lay-filter="wooFormSubmit"]').trigger('click');
+                })
+            })
+            /*{/if}*/
+
+            var isFormLoading = false;
+            layForm.on('submit(wooFormSubmit)', function(data) {
+                if (isFormLoading) {
+                    addAlert('提交太快，休息下吧！');
+                    return false;
+                }
+
+                isFormLoading = true;
+                if (window.OrderItemInstance) {
+                    for (var i in window.OrderItemInstance)  {
+                        var orderItemReturn = window.OrderItemInstance[i].beforeSubmit();
+                        if (!orderItemReturn) {
+                            isFormLoading = false;
+                            return false;
+                        }
+                    }
+                }
+
+                if (window.formSubmitCallback) {
+                    // console.log(data.elem) //被执行事件的元素DOM对象，一般为button对象
+                    // console.log(data.form) //被执行提交的form对象，一般在存在form标签时才会返回
+                    // console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+                    // 自定义回调中return false 可以阻止提交
+                    var callbackReturn = window.formSubmitCallback(data);
+                    if (!callbackReturn) {
+                        isFormLoading = false;
+                        return false;
+                    }
+                }
+
+                if (window.woo_script_vars.rsa_field) {
+                    for (var i in window.woo_script_vars.rsa_field) {
+                        var field = window.woo_script_vars.rsa_field[i];
+                        if (data.field[field]) {
+                            $('[name="' + field + '"]').attr('disabled', true);
+                            $(data.form).append('<input type="hidden" name="'+ field +'" value="' + WOO.setEncrypt(data.field[field]) + '">');
+                        }
+                    }
+                    $(data.form).append('<input type="hidden" name="RSA_FIELD_LIST" value="' + window.woo_script_vars.rsa_field.join(',') + '">');
+                }
+                return true;
+            });
+            isInitialize = false;
+        });
+    }
+</script>

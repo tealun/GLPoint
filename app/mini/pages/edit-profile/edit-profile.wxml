@@ -1,0 +1,50 @@
+<view class="container">
+  <!-- 顶部标题 -->
+  <view class="header">
+    <text class="title">侠客资料</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-card">
+    <view class="form-item">
+      <text class="label">侠客昵称</text>
+      <input class="input-box" placeholder="请输入侠客昵称" value="{{name}}" bindinput="onNameInput"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">侠客性别</text>
+      <view class="gender-select">
+        <view class="gender-option {{gender === 1 ? 'active' : ''}}" 
+              bindtap="onGenderSelect" 
+              data-gender="1">男</view>
+        <view class="gender-option {{gender === 2 ? 'active' : ''}}" 
+              bindtap="onGenderSelect" 
+              data-gender="2">女</view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <text class="label">侠客门派</text>
+      <picker mode="selector"
+              bindchange="onDepartmentChange"
+              value="{{departmentIndex}}"
+              range="{{departments}}"
+              range-key="title">
+        <view class="picker-text">
+          {{
+            departments.length > 0 && departmentIndex < departments.length
+              ? departments[departmentIndex].title
+              : '无门派'
+          }}
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <button class="submit-btn"
+          bindtap="submitProfile"
+          loading="{{submitting}}">
+    保存修改
+  </button>
+</view>

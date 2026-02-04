@@ -1,0 +1,245 @@
+{extend name="global"/}
+{block name="content"}
+<div class="steps">
+    <ul class="grid">
+        <li >
+            <span class="step">1</span>检测环境
+        </li>
+        <li class="current">
+            <span class="step">2</span>验证信息
+        </li>
+        <li>
+            <span class="step">3</span>数据安装
+        </li>
+        <li>
+            <span class="step">4</span>完成安装
+        </li>
+    </ul>
+</div>
+<form method="post" class="layui-form" action="{:url('step4')}">
+    <div class="dbform">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <th width="100%" colspan="4">数据库信息</th>
+            </tr>
+            <tr>
+                <th class="title"><label>数据库地址</label></th>
+                <td width="42%"><input lay-verify="required" value="127.0.0.1" woo-tip="一般为127.0.0.1或localhost"  type="text" class="layui-input" name="dbhost"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>数据库端口</label></th>
+                <td><input  type="text" lay-verify="required" value="3306" woo-tip="Mysql端口一般为3306" class="layui-input" name="dbport"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>数据库用户名</label></th>
+                <td><input  type="text" lay-verify="required"  value="root" class="layui-input" name="dbusername"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>数据库密码</label></th>
+                <td><input  type="password" class="layui-input" lay-verify="dbpassword" value="root"  name="dbpassword"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>数据库名</label></th>
+                <td><input  type="text" lay-verify="required" placeholder="请填写数据库名" woo-tip="该库需要自行提前创建好" class="layui-input" name="dbname"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>数据库表前缀</label></th>
+                <td><input  type="text" lay-verify="required" value="woo_" woo-tip="一个库如果有多个项目可以通过前缀区分" class="layui-input" name="dbprefix"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>数据库编码</label></th>
+                <td>
+                    <select name="dbcharset" lay-verify="required">
+                        <option value="">--请选择数据库编码--</option>
+                        <option value="utf8" >utf8</option>
+                        <option value="utf8mb4" selected="">utf8mb4</option>
+                    </select>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <th width="100%" colspan="4">授权信息</th>
+            </tr>
+            <tr>
+                <th class="title"><label>授权主域名</label></th>
+                <td><input  type="text" value="" class="layui-input" name="domain" woo-tip="不要写http或www，填写主域名即可"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>授权码</label></th>
+                <td><input  type="text" value="" class="layui-input" name="domaincode" woo-tip="官网用户中心-授权界面获取"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th width="100%" colspan="4">创始人信息</th>
+            </tr>
+            <tr>
+                <th class="title"><label>管理员账号</label></th>
+                <td><input  type="text" lay-verify="required"  woo-tip="创始人帐号，拥有后台所有管理权限"  value="admin" class="layui-input" name="username"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>密码</label></th>
+                <td><input  type="password" lay-verify="password" voo-tip="密码长度不低于5位,不高于16位" class="layui-input" name="password"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>确认密码</label></th>
+                <td><input  type="password" lay-verify="repassword" class="layui-input" name="repassword"/></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th class="title"><label>Email</label></th>
+                <td><input  type="text" lay-verify="email" class="layui-input" name="email"/></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="bottom-btns">
+        <a href="{$absroot}?s=install/index/step2" class="layui-btn"><< 上一步</a>
+        <input  type="button" value="测试数据库" onclick="checkDb()" class="layui-btn checkdb  layui-btn-normal"/>
+        <input lay-filter="submit" lay-submit="" type="submit" value="创建数据" class="layui-btn dbsubmit hidden layui-btn-warm"/>
+    </div>
+</form>
+{/block}
+{block name="script"}
+<script>
+    var install = 1;
+    function layuiReady() {
+        //自定义验证规则
+        $('[woo-tip]').focus(function(){
+            var text  = $(this).attr('woo-tip');
+            layer.tips(text, $(this));
+        })
+
+        layForm.verify({
+            password : function (value, item) {
+                if (value.length < 6 || value.length > 16) {
+                    return '密码长度不低于6位,不高于16位';
+                }
+            },
+            repassword : function (value, item) {
+                var pass  = $('[name="password"]').val();
+                if (pass != value) {
+                    return '两次密码输入不一致';
+                }
+            }
+        })
+        //监听提交
+        layForm.on('submit(submit)', function(data){
+
+            var post = {
+                username : data.field.username,
+                password : data.field.password,
+                repassword : data.field.repassword,
+                email    : data.field.email
+            }
+            layer.load({
+                time : 2000
+            })
+            $.post('{:url("storeUser")}', post, function (data) {
+                layer.closeAll();
+                if (data.result == 'success') {
+                   location.href = "{:url('step4')}"
+                } else {
+                    layer.alert(data.message, {
+                        icon : 2
+                    })
+                }
+            }, 'JSON');
+            return false;
+        });
+    }
+
+    function checkDb() {
+        var post = {
+            hostname : $.trim($('[name="dbhost"]').val()),
+            username : $.trim($('[name="dbusername"]').val()),
+            password : $.trim($('[name="dbpassword"]').val()),
+            hostport : $.trim($('[name="dbport"]').val()),
+            database : $.trim($('[name="dbname"]').val()),
+            prefix   : $.trim($('[name="dbprefix"]').val()),
+            charset   : $.trim($('[name="dbcharset"]').val())
+        };
+        layer.load({
+            time : 2000
+        })
+        $.ajax({
+            url: "{:url('writeDbConfig')}",
+            type: 'POST',
+            data: post,
+            dataType: 'JSON',
+            success: function (data) {
+                layer.closeAll();
+                if (data.result == 'success') {
+                    $.get('{:url("testQuery")}', function (data) {
+                        layer.closeAll();
+                        if (data.result == 'success') {
+                            install = 2;
+                            $('<input  type="button" value="授权验证" onclick="checkdomain()" class="layui-btn check-domain  layui-btn-danger"/>').insertAfter($('.checkdb'))
+                            $('.checkdb').remove();
+                            layer.msg(data.message, {
+                                icon : 1,
+                                time : 1000
+                            })
+                        } else {
+                            layer.alert(data.message, {
+                                icon : 2
+                            })
+                        }
+                    }, 'JSON')
+                } else  {
+                    layer.alert(data.message, {
+                        icon : 2
+                    })
+                }
+            }
+        })
+    }
+    
+    function checkdomain() {
+        if (install != 2) {
+            return false;
+        }
+
+        var post = {
+            domain : $.trim($('[name="domain"]').val()),
+            code : $.trim($('[name="domaincode"]').val())
+        }
+        if (!post.domain || !post.code) {
+            layer.alert('请填写好授权信息', {
+                icon : 2
+            })
+            return false;
+        }
+        layer.load({
+            time : 2000
+        })
+        $.post("{:url('checkDomain')}", post, function (data) {
+            layer.closeAll();
+            if (data.result == 'success') {
+                $('.dbsubmit').show();
+                $('.check-domain').remove();
+                layer.msg(data.message, {
+                    icon : 1,
+                    time : 1000
+                })
+                install = 3;
+            } else {
+                layer.alert(data.message, {
+                    icon : 2
+                })
+            }
+        }, 'JSON')
+
+    }
+
+</script>
+{/block}

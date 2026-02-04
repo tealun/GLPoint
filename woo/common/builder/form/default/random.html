@@ -1,0 +1,7 @@
+<div class="woo-random-container">
+    <input type="text"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <a class="layui-btn woo-theme-btn woo-random-action  {if !empty($data.is_hidden_btn)}hidden{/if}" href="javascript:;">随机</a>
+</div>

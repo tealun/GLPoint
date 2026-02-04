@@ -1,0 +1,255 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="woo-treelist">
+            <div class="loading"><i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i></div>
+            <ul class="list"></ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="renderItemToolBar">
+    <a href="{{layTpl(decodeURI(d.this.url)).render(d)}}" class="{{# if(d.this.class) { }}{{d.this.class}}{{# } }}{{# if(d.this.js_func) { }} javascript{{# } }}" {{# if(d.this.js_func) { }}rel="{{d.this.js_func}}"{{# } }}>
+        {{# if(d.this.icon) { }}<i class="{{WOO.returnIconClass(d.this.icon)}}"></i>{{# } }}{{d.this.title}}</a>
+</script>
+
+<script type="text/html" id="sortChild">
+    {{# if (d.children_count > 1) { }}
+    <a href="{{layTpl(decodeURI(d.this.url)).render(d)}}" class="{{# if(d.this.class) { }}{{d.this.class}}{{# } }}{{# if(d.this.js_func) { }} javascript{{# } }}" {{# if(d.this.js_func) { }}rel="{{d.this.js_func}}"{{# } }}>
+        {{# if(d.this.icon) { }}<i class="{{WOO.returnIconClass(d.this.icon)}}"></i>{{# } }}{{d.this.title}}</a>
+    {{# } }}
+</script>
+
+<script type="text/html" id="renderTree">
+    {{# for (var i in d) { }}
+    <li class="clearfix woo-treelist-li"   data-id="{{d[i][options.id]}}" data-children="{{ d[i].children_count }}" data-level="{{ d[i].level }}" data-parent="{{ d[i].parent_id }}" style="margin-left: {{(d[i].level-1) * options.indent}}px;cursor:pointer;">
+        <div class="woo-treelist-self clearfix">
+            {{# if (d[i].children_count > 0){ }}<div class="woo-treelist-field woo-treelist-icon"><i class="layui-icon layui-icon-add-circle"></i></div>{{# } }}
+            <div class="woo-treelist-display woo-treelist-field">{{d[i][options.display]}}</div>
+            <div class="woo-treelist-field woo-treelist-field-id">{{ options.left_delimiter }}ID：{{d[i][options.id]}}{{ options.right_delimiter }}</div>
+            {{# for (var j in options.fields) { }}
+            {{# if (options.fields[j].templet && !showField(j, options.fields[j], d[i])) { }}
+            {{# continue }}
+            {{# } }}
+            <div class="woo-treelist-field woo-treelist-field-{{j}}" style="{{# if (options.fields[j].style) { }} {{options.fields[j].style}} {{# } }}">{{ options.left_delimiter }}{{# if (options.fields[j] && options.fields[j].title){ }}{{options.fields[j].title}}：{{# } }}
+                {{-showField(j, options.fields[j], d[i])}}{{ options.right_delimiter }}</div>
+            {{# } }}
+        </div>
+        <div class="woo-treelist-action">
+            {{# for (var k in options.item_tool_bar) { }}
+            {{# if (options.item_tool_bar[k].templet && !showItemTool(options.item_tool_bar[k], d[i]).trim()) { }}
+            {{# continue }}
+            {{# } }}
+            <div class="woo-tree-itemtool {{# if (options.item_tool_bar[k].name) { }}{{options.item_tool_bar[k].name}}{{# } }}">{{-showItemTool(options.item_tool_bar[k], d[i])}}</div>
+            {{# } }}
+        </div>
+    </li>
+    {{# } }}
+</script>
+{include file="$common_templet_file"/}
+{include file="$woo_templet_file"/}
+<script>
+    function showItemTool(option, row) {
+        row.this = option;
+        if (option.templet && option.templet.charAt(0) == '#' && $(option.templet).length) {
+            option.templet = $(option.templet).html();
+        } else if (option.templet) {
+            option.templet = option.templet;
+        } else {
+            option.templet = $('#renderItemToolBar').html();
+        }
+        return layTpl(option.templet).render(row);
+    }
+
+    function showField(field, option, row) {
+        if (!option ||  !option.templet) {
+            return row[field];
+        }
+        if (option.templet.charAt(0) == '#' && $(option.templet + 'Templet').length) {
+            option.templet = $(option.templet + 'Templet').html();
+        }
+        option.field = field;
+        row.this = option;
+        return layTpl(option.templet).render(row);
+    }
+
+    $('body').on('click', '.woo-treelist-action a', function (e) {
+        e.stopPropagation();
+        if ($(this).hasClass('javascript')) {
+            e.stopPropagation();
+            if(callback = $(this).attr('rel')) {
+                if(window[callback]){
+                    window[callback].call(this);
+                }
+            }
+            return false;
+        } else if ($(this).hasClass('woo-layer-load')) {
+            e.stopPropagation();
+            return WOO.autoLayerLoad.call(this);
+        }
+        return true;
+    })
+
+    function woo_item_tool(href, tip, fn) {
+        href = href || $(this).attr('href');
+        tip = tip || '请确认是否执行该操作？';
+        var offset = $(this).offset();
+        var that = this;
+        layer.confirm(tip,{
+            title : '确认',
+            icon : 3,
+            area: ['292px', '170px'],
+            offset : (function () {
+                if ($(window).width() <= 768) {
+                    return 'auto';
+                }
+                var t = Math.max(offset.top - 128 - $(window).scrollTop(), 0);
+                var l = offset.left - 150 + 292 < $(window).width() ?offset.left - 150 : $(window).width() - 292;
+                return [t + 'px', l + 'px'];
+            })()
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'get',null, {
+                success: function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    if (typeof(fn) == 'function') {
+                        fn.call(that)
+                    }
+                },
+                error : function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+
+    function delete_item() {
+        woo_item_tool.call(this, '', '该操作不可逆，请确认是否删除？', function () {
+            $(this).closest('li').remove();
+        });
+    }
+
+    function renderTree(list) {
+        list = list || [];
+        if (list.length <= 0) {
+            return '';
+        }
+        return layTpl($('#renderTree').html()).render(list);
+    }
+
+    var init_list = {:json_encode($list)};
+    var options   = {:json_encode($options)};
+
+
+    function foldTree1() {
+        $('.woo-treelist-li').find('.woo-treelist-icon i').removeClass('layui-icon-reduce-circle').addClass('layui-icon-add-circle');
+        $('.woo-treelist-li').each(function () {
+            if ($(this).data('parent') != '0') {
+                $(this).hide();
+            }
+            $(this).addClass('is-hide');
+        })
+    }
+
+    function tree_bind_hide1(id, type) {
+        if (!$('.woo-treelist-li[data-parent="'+id+'"]').length) {
+            return false;
+        }
+        if (type == 'show') {
+            $(this).removeClass('is-hide').find('.woo-treelist-icon i').removeClass('layui-icon-add-circle').addClass('layui-icon-reduce-circle')
+            $('.woo-treelist-li[data-parent="'+id+'"]').show();
+        } else {
+            $(this).addClass('is-hide').find('.woo-treelist-icon i').removeClass('layui-icon-reduce-circle').addClass('layui-icon-add-circle')
+            $('.woo-treelist-li[data-parent="'+id+'"]').hide();
+            $('.woo-treelist-li[data-parent="'+id+'"]').each(function () {
+                tree_bind_hide1.call(this, $(this).data('id'),type);
+            })
+        }
+    }
+
+    function layuiReady() {
+
+        $('body').on('click', '.woo-treelist-display', function (e) {
+            $(this).closest('li').find('.woo-tree-itemtool.modify ').find('a')[0].click();
+            e.stopPropagation();
+        })
+
+        /*{if !$is_mobile}*/
+        $('body').on('mouseover', '.woo-treelist-li', function () {
+            $(this).addClass('hover');
+        })
+        $('body').on('mouseout', '.woo-treelist-li', function () {
+            $(this).removeClass('hover');
+        })
+        /*{/if}*/
+
+        $('body').on('click', function () {
+            $('.woo-treelist-li').removeClass('hover');
+        }).on('click', '.woo-treelist-li', function (e) {
+            e.stopPropagation();
+            /*{if $is_mobile}*/
+            if ($(this).hasClass('hover')) {
+                $(this).removeClass('hover')
+            } else  {
+                $(this).parent().find('li.hover').removeClass('hover').end().end().addClass('hover');
+            }
+            /*{/if}*/
+            if (options.is_ajax && !$(this).hasClass('is_ajax_loaded') && $(this).data('children') > 0) {
+                var index = layer.load(3, {
+                    time : 3000
+                });
+                var pid = $(this).data('id');
+                var level = $(this).data('level');
+                var that = this;
+                WOO.request.call(this, "{:url('getTreeList')}", 'get', {
+                    'parent_id' : pid,
+                    'level' : level
+                }, {
+                    success: function (msg,data) {
+                        layer.close(index);
+                        $(renderTree(data)).insertAfter($(that));
+                        $(that).addClass('is_ajax_loaded').removeClass('is-hide').find('.woo-treelist-icon i').removeClass('layui-icon-reduce-add').addClass('layui-icon-reduce-circle')
+                    },
+                    error : function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'error');
+                    }
+                })
+                return false;
+            }
+            var id = $(this).data('id');
+            tree_bind_hide1.call(this, id, $(this).hasClass('is-hide') ? 'show' : 'hide');
+            return true;
+        })
+
+        layui.use(['laytpl'], function () {
+            window.layTpl = layui.laytpl;
+            $('.woo-treelist').find('.loading').remove();
+            if (init_list.length > 0) {
+                $('.woo-treelist ul').append(renderTree(init_list));
+                if (options.is_fold) {
+                    foldTree1();
+                } else {
+                    $('.woo-treelist-li').each(function () {
+                        $(this).find('.woo-treelist-icon i').removeClass('layui-icon-add-circle').addClass('layui-icon-reduce-circle')
+                    })
+                }
+            } else {
+                $('.woo-treelist').append('<div style="text-align: center;color:#999;">当前条件下，没有找到数据哦</div>')
+            }
+        })
+    }
+</script>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}

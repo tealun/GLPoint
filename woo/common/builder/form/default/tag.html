@@ -1,0 +1,7 @@
+<div class="woo-element-tag-container clearfix">
+    <input type="hidden"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <input  type="text" class="woo-tag-write {$data.attrs.write_class ?? ''}" autocomplete="off"/>
+</div>

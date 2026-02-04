@@ -1,0 +1,78 @@
+.appeal-list-page {
+  min-height: 100vh;
+  background: #f7f8fa;
+  padding: 0 32rpx 32rpx 32rpx;
+  box-sizing: border-box;
+}
+.page-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+  margin: 48rpx 0 32rpx 0;
+  letter-spacing: 2rpx;
+}
+.tabs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f1f2;
+  border-radius: 40rpx;
+  margin-bottom: 32rpx;
+  padding: 8rpx;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  font-size: 30rpx;
+  color: #888;
+  border-radius: 32rpx;
+  transition: background 0.2s, color 0.2s;
+}
+.tab.active {
+  background: #fff;
+  color: #44bbbb;
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx #e0e0e0;
+}
+.appeal-item {
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 28rpx;
+  padding: 32rpx 28rpx;
+  box-shadow: 0 4rpx 16rpx #f0f1f2;
+  transition: box-shadow 0.2s;
+  position: relative;
+}
+.appeal-item:active {
+  box-shadow: 0 8rpx 24rpx #e0e0e0;
+}
+.reason {
+  font-size: 32rpx;
+  color: #222;
+  font-weight: 500;
+  margin-bottom: 12rpx;
+}
+.status {
+  font-size: 26rpx;
+  color: #44bbbb;
+  margin-bottom: 8rpx;
+}
+.date {
+  font-size: 24rpx;
+  color: #bbb;
+}
+.no-data {
+  text-align: center;
+  color: #bbb;
+  margin-top: 120rpx;
+  font-size: 30rpx;
+  letter-spacing: 2rpx;
+}
+.reply {
+  font-size: 26rpx;
+  color: #ff9900;
+  margin-top: 8rpx;
+  word-break: break-all;
+}

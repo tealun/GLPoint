@@ -1,0 +1,17 @@
+<div class="woo-relation2-container woo-relation2-{$data.field_name}">
+    <div class="input-box">
+        <input type="hidden"
+               {foreach $data.attrs as $key => $value}
+        {$key}="{$value}"
+        {/foreach}
+        data-href="{:url($data['relation_controller'] . '/' . $data['relation_action'], ['field' => $data.field_name, 'id' => $values[$data['current_model_pk'] ?? 'id'] ?? null, 'keyword' => 'KEYWORD', 'page' => 'PAGE', 'tabname' => 'TABNAME', 'limit' => 'LIMIT'])}"
+        />
+        <div class="woo-relation-show">
+            {if !empty($data.display)}
+            {$data.display | raw}
+            {else /}
+            <span class="not-select">未选择</span>
+            {/if}
+        </div>
+    </div>
+</div>

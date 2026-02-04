@@ -1,0 +1,343 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+
+        <div class="new-power">
+            <div class="new-power-a">
+                <div class="new-power-b">
+                    <div class="layui-tab layui-tab-brief">
+                        <ul class="layui-tab-title">
+                            <li class="{if $tab == 0}layui-this{/if}">按角色授权</li>
+                            <li class="{if $tab == 1}layui-this{/if}">按用户授权</li>
+                        </ul>
+                        <div class="layui-tab-content">
+                            <div class="layui-tab-item {if $tab == 0}layui-show{/if}">
+                                <div class="new-power-action">
+                                    <div class="group" >
+                                        <button class="layui-btn  btn-22 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="checkAll">全选</button>
+                                        <button class="layui-btn  btn-22 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="invertAll">反选</button>
+
+                                        <button class="layui-btn  btn-23 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="moveDown">展开</button>
+                                        <button class="layui-btn  btn-23 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="moveUp">闭合</button>
+                                    </div>
+                                    {if $show['group_action']}
+                                    <div class="submit">
+                                        <button class="layui-btn woo-theme-btn power-submit-group">提交授权</button>
+                                        {if $show['group_action_remove']}
+                                        <button class="layui-btn btn-4 power-remove-group tooltip" data-tip-text="清除当前角色授权数据"><i class="woo-icon woo-icon-shanchu"></i></button>
+                                        {/if}
+                                    </div>
+                                    {/if}
+                                </div>
+                                {if !empty($group)}
+                                <div class="role-show"><i class="woo-icon woo-icon-quanxian"></i>正在对角色"<span class="woo-theme-color">{$group.title}</span>"进行授权</div>
+                                {else}
+                                <div class="role-show"><i class="woo-icon woo-icon-tishi"></i>请点击需要授权的"角色"名称</div>
+                                {/if}
+                                <div id="groupTreeShow"></div>
+                            </div>
+                            <div class="layui-tab-item {if $tab == 1}layui-show{/if}">
+                                <div class="new-power-action">
+                                    <div class="group" >
+                                        <button class="layui-btn  btn-22 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="checkAll">全选</button>
+                                        <button class="layui-btn  btn-22 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="invertAll">反选</button>
+
+                                        <button class="layui-btn  btn-23 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="moveDown">展开</button>
+                                        <button class="layui-btn  btn-23 layui-btn-sm" dtree-id="dTreeContainer" dtree-menu="moveUp">闭合</button>
+                                    </div>
+                                    {if !empty($show['admin_action'])}
+                                    <div class="submit">
+                                        <button class="layui-btn woo-theme-btn power-submit-admin">提交授权</button>
+                                        {if !empty($show['admin_action_remove'])}
+                                        <button class="layui-btn btn-4 power-remove-admin tooltip" data-tip-text="清除当前用户授权数据"><i class="woo-icon woo-icon-shanchu"></i></button>
+                                        {/if}
+                                    </div>
+                                    {/if}
+                                    <div class="search">
+                                        <input type="text" class="layui-input" id="searchKw" placeholder="搜索用户名/姓名/手机">
+                                        <button class="layui-btn btn-2" id="searchAdmin"><i class="layui-icon layui-icon-search"></i></button>
+                                    </div>
+                                    <div class="admin-list search-admin-list">
+                                        <h4>搜索用户列表：</h4>
+                                        <ul class="list">
+                                            <li>
+                                                <a href=""><span class="u1 woo-theme-color">admin</span><span class="u2">13688106654</span><span class="u3">张三</span></a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {if !empty($admin)}
+                                    <div class="admin-list">
+                                        <h4>当前正在授权用户：</h4>
+                                        <ul class="list">
+                                            <li>
+                                                <a href="javascript:;"><span class="u1 woo-theme-color">{$admin.username}</span><span class="u2">{$admin.mobile??''}</span><span class="u3">{$admin.truename}</span></a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    {/if}
+
+                                    {if !empty($admin_list)}
+                                    <div class="admin-list">
+                                        <h4>独立授权用户列表：</h4>
+                                        <ul class="list">
+                                            {foreach $admin_list as $item}
+                                            <li>
+                                                <a href="{:url('index', ['admin_id' => $item.id])}">
+                                                    <span class="u1 ">{$item.username}</span><span class="u2">{$item.mobile ?? ''}</span><span class="u3">{$item.truename}</span>
+                                                </a>
+                                            </li>
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                    {/if}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="new-power-tree">
+               <div class="new-power-tree-scroll">
+                   <ul id="dTreeContainer"></ul>
+               </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    var groupTreeData = {:json_encode($groupTreeData)};
+    var treeData = {:json_encode($treeData)};
+
+    var dTree,
+        layTree,
+        dTreeInstance;
+    function layuiReady() {
+        layui.use(['laytpl', 'dtree', 'tree'], function () {
+            dTree = layui.dtree;
+            layTree = layui.tree;
+
+            layTree.render({
+                elem : '#groupTreeShow',
+                data : groupTreeData,
+                showCheckbox : false,
+                id   : 'groupTree',
+                onlyIconControl:true,
+                click: function (obj) {
+                    window.location.href = obj.data.href;
+                }
+            })
+
+            /*{if !empty($group)}*/
+            setTimeout(function () {
+                $('#groupTreeShow').find('[data-id="{$group.id}"]').children('.layui-tree-entry').find('.layui-tree-txt').addClass('woo-theme-color')
+            }, 100)
+            /*{/if}*/
+
+            dTreeInstance = dTree.render({
+                elem: "#dTreeContainer",
+                initLevel: 4,
+                checkbar:true,
+                checkbarType: 'all',
+                data: treeData,
+                width: '100%',
+                menubar:true,
+                menubarTips:{
+                    group:[]
+                },
+                formatter: {
+                    title:function (data) {
+                        var s = data.title;
+                        if (data.rule) {
+                            s += ' <span class="power-tree-rule">' + data.rule + '</span>';
+                        }
+                        return s;
+                    }
+                }
+            });
+        })
+    }
+
+    /*{if $show['group_action']}*/
+    $('.power-submit-group').click(function () {
+        layer.confirm('请确认是否对角色"{$group.title}"提交授权？', {
+            title: '确认',
+            icon : 3
+        }, function () {
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            var params = dTree.getCheckbarNodesParam("dTreeContainer");
+            var ids = [];
+            for (var i in params)  {
+                ids.push(params[i].nodeId);
+            }
+            WOO.request.call(this,'{:url("setPower")}', 'post', {
+                    'admin_group_id' : "{$group.id}",
+                    'tree_ids' : ids
+                },
+                {
+                    success: function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'success', 1500, 0, 'reload');
+                    },
+                    error : function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'error');
+                    }
+                })
+        })
+    })
+    /*{/if}*/
+
+    /*{if $show['admin_action']}*/
+    $('.power-submit-admin').click(function () {
+        layer.confirm('请确认是否对用户"{$admin.username}"提交授权？', {
+            title: '确认',
+            icon : 3
+        }, function () {
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            var params = dTree.getCheckbarNodesParam("dTreeContainer");
+            var ids = [];
+            for (var i in params)  {
+                ids.push(params[i].nodeId);
+            }
+            WOO.request.call(this,'{:url("setPower")}', 'post', {
+                    'admin_id' : "{$admin.id}",
+                    'tree_ids' : ids
+                },
+                {
+                    success: function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'success', 1500, 0, 'reload');
+                    },
+                    error : function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'error');
+                    }
+                })
+        })
+    })
+    /*{/if}*/
+
+    /*{if $show['group_action_remove']}*/
+    $('.power-remove-group').click(function () {
+        layer.confirm('请确认是否清除角色"{$group.title}"的授权数据？', {
+            title: '确认',
+            icon : 3
+        }, function () {
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this,'{:url("clearPower")}', 'post', {
+                    'admin_group_id' : "{$group.id}"
+                },
+                {
+                    success: function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'success', 1500, 0, 'reload');
+                    },
+                    error : function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'error');
+                    }
+                })
+        })
+    })
+    /*{/if}*/
+
+    /*{if $show['admin_action_remove']}*/
+    $('.power-remove-admin').click(function () {
+        layer.confirm('请确认是否清除用户"{$admin.username}"的授权数据？', {
+            title: '确认',
+            icon : 3
+        }, function () {
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this,'{:url("clearPower")}', 'post', {
+                    'admin_id' : "{$admin.id}"
+                },
+                {
+                    success: function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'success', 1500, 0, 'reload');
+                    },
+                    error : function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'error');
+                    }
+                })
+        })
+    })
+    /*{/if}*/
+
+    $(window).resize(function () {
+        if ($(window).width() > 768) {
+            $('.new-power-tree-scroll').height($(window).height() - 150)
+        } else {
+            $('.new-power-tree-scroll').height('auto')
+        }
+    }).trigger('resize')
+
+    $('#searchKw').keydown(function (e) {
+        if (e.keyCode == 13) {
+            $('#searchAdmin').trigger('click');
+        }
+    })
+
+    $('#searchAdmin').click(function () {
+        var kw = $.trim($('#searchKw').val());
+        if (!kw) {
+            return addAlert('请先输入搜索关键词', 'warning')
+        }
+
+        var href = '{:url("searchAdmin")}';
+        if (!href) {
+            return false;
+        }
+        var index = layer.load({
+            time: 3000
+        })
+
+        WOO.request.call(this,href,'get',{kw:kw},{
+            'success':function(msg,data){
+                layer.close(index);
+                var html = '';
+                for (var i in data) {
+                    html += '<li>\n' +
+                        '    <a href="' + WOO.url('power/index?admin_id=' + data[i].id) +'"><span class="u1">'+ data[i].username +'</span>\n' +
+                        '        <span class="u2">'+ (data[i].mobile ? data[i].mobile : '') +'</span>\n' +
+                        '        <span class="u3">'+ data[i].truename +'</span>\n' +
+                        '    </a>\n' +
+                        '</li>';
+                }
+                $('.search-admin-list').find('ul').html(html).end().show();
+            },
+            'error':function(msg,data){
+                layer.close(index);
+                $('.search-admin-list').hide().find('ul').html('');
+                addAlert(msg, 'error')
+            }
+        })
+    })
+
+</script>
+{/block}

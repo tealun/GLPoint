@@ -1,0 +1,58 @@
+<view class="container">
+  <view class="header">
+    <text class="title">{{title}}</text>
+  </view>
+
+  <!-- 优化后的用户当前等级徽章 -->
+  <view wx:if="{{userLevelName}}" class="user-level-badge-wrap">
+    <view class="user-level-badge">
+      <text class="badge-label">当前称号：</text>
+      <view class="badge-main">
+        <text class="badge-name">{{userLevelName}}</text>
+        <text class="badge-icon">🥇</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="content {{loading ? 'loading' : ''}}">
+    <view class="content-inner">
+      <!-- 等级说明文本 -->
+      <view class="level-desc-text">
+        欢迎来到积分江湖！在这里，您的每一分努力都将化作江湖中的荣耀。等级将根据您的积分自动提升，快来看看您的江湖称号吧！
+      </view>
+
+      <!-- 等级表格 -->
+      <view wx:if="{{levels.length}}">
+        <view class="level-table">
+          <view class="level-table-row level-table-header">
+            <view class="level-table-cell">等级</view>
+            <view class="level-table-cell">积分区间</view>
+          </view>
+          <block wx:for="{{levels}}" wx:key="index">
+            <view class="level-table-row {{userLevelName === item.name ? 'active' : ''}}">
+              <view class="level-table-cell">{{item.name}}</view>
+              <view class="level-table-cell">{{item.range}}</view>
+            </view>
+          </block>
+        </view>
+        <!-- 美化后的激励语卡片 -->
+        <view class="level-motivation-card">
+          <view class="motivation-icon">
+            <text>✨</text>
+          </view>
+          <view class="motivation-text">
+            <block wx:if="{{userLevelName}}">
+              江湖路远，<text class="motivation-level">{{userLevelName}}</text>，继续努力，江湖榜上必有你名！
+            </block>
+            <block wx:else>
+              积分江湖风云起，英雄榜上见真章！不断挑战自我，勇攀高峰，成为江湖中的传说吧！
+            </block>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{!levels.length && !loading}}" class="empty-text">暂无等级数据</view>
+
+      <view wx:if="{{loading}}" class="loading-text">加载中...</view>
+    </view>
+  </view>
+</view>

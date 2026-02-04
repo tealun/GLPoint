@@ -1,0 +1,212 @@
+.container {
+  min-height: 100vh;
+  background: #f8f8f8;
+  padding-bottom: 40rpx;
+}
+
+/* 标题 */
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+/* 表单卡片 */
+.form-card {
+  margin: 30rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 选择框和输入框 */
+.input-item {
+  display: flex;
+  align-items: center;
+  border-bottom: 1rpx solid #ddd;
+  padding: 20rpx 0;
+  margin-bottom: 20rpx;
+}
+.label {
+  width: 180rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.picker-text {
+  font-size: 28rpx;
+  color: #666;
+  flex: 1;
+  text-align: right;
+}
+.input-box {
+  font-size: 28rpx;
+  flex: 1;
+  border: none;
+  text-align: right;
+}
+.textarea-box {
+  font-size: 28rpx;
+  width: 100%;
+  height: 120rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 10rpx;
+  padding: 10rpx;
+}
+.input {
+  width: 100%;
+  height: 80rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  margin-top: 10rpx;
+}
+.textarea {
+  width: 100%;
+  height: 160rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  margin-top: 10rpx;
+}
+
+/* 提交按钮 */
+.submit-btn {
+  margin: 40rpx 30rpx;
+  background: #44BBBB;
+  color: #fff;
+  border-radius: 8rpx;
+}
+
+.header {
+  background: #44BBBB;
+  padding: 40rpx 30rpx;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 500;
+}
+
+.list-btn {
+  background: #fff;
+  color: #44BBBB;
+  font-size: 26rpx;
+  border-radius: 32rpx;
+  padding: 0 32rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  margin-left: 20rpx;
+  border: none;
+  box-shadow: 0 2rpx 8rpx rgba(68,187,187,0.08);
+}
+
+.section {
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 20rpx;
+}
+
+.picker-item {
+  margin-bottom: 20rpx;
+}
+
+.picker-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+}
+
+.label {
+  color: #666;
+  font-size: 28rpx;
+}
+
+.value {
+  color: #333;
+  font-size: 28rpx;
+}
+
+.employee-selection {
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  padding: 20rpx;
+}
+
+.checkbox-item {
+  margin: 10rpx 0;
+}
+
+.employee-list {
+  margin-top: 20rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.count-badge {
+  background: #e0f7fa;
+  color: #44BBBB;
+  font-size: 22rpx;
+  border-radius: 20rpx;
+  padding: 4rpx 16rpx;
+  margin-left: 16rpx;
+  min-width: 40rpx;
+  text-align: center;
+  line-height: 32rpx;
+}
+
+.debug-info {
+  display: none;
+}
+
+/* 订阅消息区域 */
+.subscribe-section {
+  margin-top: 40rpx;
+  padding: 30rpx;
+  text-align: center;
+  border-top: 1rpx solid #eee;
+}
+
+.subscribe-btn {
+  background: linear-gradient(45deg, #44BBBB, #5ECCCC);
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  font-size: 28rpx;
+  padding: 20rpx 40rpx;
+  margin-bottom: 20rpx;
+}
+
+.subscribe-btn:active {
+  opacity: 0.8;
+}
+
+.subscribe-tip {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.5;
+  display: block;
+}

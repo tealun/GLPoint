@@ -1,0 +1,405 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="admin_home">
+    <div class="admin_content">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md8">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md6">
+                        <div class="layui-card shortcut">
+                            <div class="layui-card-header"><a href="{:url('Shortcut/index')}" class="action new_tab" data-title="快捷方式" ><span class="woo-circle-icon blue"><i class="woo-icon woo-icon-kuaijie d-icon"></i></span>快捷方式</a></div>
+                            <div class="layui-card-body">
+                                <div class="layui-carousel admin-carousel admin-shortcut" data-height="194">
+                                    <div carousel-item>
+                                        <ul class="grid quick-link layui-row layui-col-space15">
+                                            {assign name="j" value="1" /}
+                                            {foreach $shortcut as $item}
+                                            <li class="layui-col-xs3">
+                                                <a href="{:url($item.url)}" class="woo-theme-hover-color {if $item.type=='func'}javascript{/if} {if $item.type=='url' && $item.target=='newtab'}new_tab{/if}" {if $item.type=='url' && $item.target=='blank'}target="_blank"{/if} {if $item.type=='url' && $item.target=='newtab'}data-title="{$item.title}"{/if}  {if $item.type=='func'}rel="{$item.func}"{/if}>
+                                                    <i class="{:return_icon_class($item.icon)} woo-theme-color"></i>
+                                                    <span>{$item.title}</span>
+                                                </a>
+                                            </li>
+                                            {if $j % 8 == 0 && $j != count($shortcut)}
+                                        </ul>
+                                        <ul class="grid quick-link layui-row layui-col-space15">
+                                            {/if}
+                                            {assign name="j" value="$j+1" /}
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md6">
+                        <div class="layui-card mcount">
+                            <div class="layui-card-header"><a href="{:url('Statistics/index')}" class="action new_tab"><span class="woo-circle-icon green"><i class="woo-icon woo-icon-tongji d-icon"></i></span>数据统计</a></div>
+                            <div class="layui-card-body">
+                                <div class="layui-carousel admin-carousel admin-mcount" data-height="194">
+                                    <div carousel-item>
+                                        <ul class="grid layui-row layui-col-space15">
+                                            {assign name="j" value="1" /}
+                                            {foreach $statistics as $item}
+                                            <li class="layui-col-xs6">
+                                                <a href="{:create_statistics_link($item)}" class="new_tab" data-title="{$item.title}列表">
+                                                    <h2>{$item.title}</h2>
+                                                    <span class="number-timer">{$item.count}</span>
+                                                </a>
+                                            </li>
+                                            {if $j % 4 == 0 && $j != count($statistics)}
+                                        </ul>
+                                        <ul class="grid quick-link layui-row layui-col-space15">
+                                            {/if}
+                                            {assign name="j" value="$j+1" /}
+                                            {/foreach}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md6">
+                        <div class="layui-card b3">
+                            <div class="layui-card-header"><a href="{:url('Setting/set', ['parent_id' => 1])}" class="action new_tab "><span class="woo-circle-icon"><i class="woo-icon woo-icon-qiye d-icon"></i></span>使用企业</a></div>
+                            <div class="layui-card-body">
+                                <ul class="list admin-use-info">
+                                    <li><i class="woo-icon woo-icon-guanli-2"></i>公司：<span>{:setting('project_corp_title')}</span></li>
+                                    <li><i class="layui-icon layui-icon-website"></i>网站：<span>{:setting('project_title')}</span></li>
+                                    <li><i class="layui-icon layui-icon-ie"></i>网址：<span class="en-font"><a href="{$absroot}" target="_blank">{$absroot}</a></span></li>
+                                    <li><i class="woo-icon woo-icon-dianhua"></i>电话：<span class="en-font">{:setting('project_tel')}</span></li>
+                                    <li><i class="layui-icon layui-icon-email"></i>邮箱：<span class="en-font">{:setting('project_email')}</span></li>
+                                    <li><i class="layui-icon layui-icon-location"></i>地址：<span>{:setting('project_address')}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md6">
+                        <div class="layui-card b4">
+                            <div class="layui-card-header"><span class="woo-circle-icon yellow"><i class="woo-icon woo-icon-program-full d-icon"></i></span>开发企业</div>
+                            <div class="layui-card-body ">
+                                <ul class="list admin-use-info">
+                                    <li><i class="woo-icon woo-icon-guanli-2"></i>公司：<span>{$about.title}</span></li>
+                                    <li><i class="layui-icon layui-icon-ie"></i>网址：<span class="en-font"><a href="{$about.site}" target="_blank">{$about.site}</a></span></li>
+                                    <li><i class="layui-icon layui-icon-service"></i>客服：<span class="en-font">{$about.service}</span></li>
+                                    <li><i class="woo-icon woo-icon-dianhua"></i>电话：<span class="en-font">{$about.tel}</span></li>
+                                    <li><i class="layui-icon layui-icon-email"></i>邮箱：<span class="en-font">{$about.email}</span></li>
+                                    <li><i class="layui-icon layui-icon-location"></i>地址：<span>{$about.address}</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <div class="layui-card b5">
+                            <div class="layui-card-header"><span class="woo-circle-icon cyan"><i class="layui-icon layui-icon-chart-screen"></i></span>数据分析</div>
+                            <div class="layui-card-body">
+                                <div class="layui-carousel admin-carousel admin-charts-box" lay-filter="charts" data-anim="fade" data-height="330">
+                                    <div carousel-item>
+                                        {foreach $charts as $item}
+                                        <div class="admin-charts"></div>
+                                        {/foreach}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="layui-col-md4">
+                <div class="layui-card userinfo">
+                    <div class="layui-card-header"><span class="woo-circle-icon lime"><i class="layui-icon layui-icon-username"></i></span>个人信息</div>
+                    <div class="layui-card-body">
+                        <div class="admin_user">
+                            <div class="admin_user_rght">
+                                <div class="headimg">
+                                    <i></i>
+                                    <a href="{:url('admin/home',['id'=>$login.id])}" data-title="个人主页" class="new_tab"><img  src="{:thumb($login.avatar ?: $root . 'static/images/admin/default_headimg.png', 200,200)}" alt="{$login.username}"/></a>
+                                </div>
+                                <div class="welcome en-font">
+                                    您好！<span>{$login.nickname ?: $login.username}</span>
+                                    <a href="{:url('admin/logout')}"  class="javascript" rel="logout"><i style="color: #F56C6C;position: relative;top:1.5px;" class="layui-icon layui-icon-logout" ></i></a>
+                                </div>
+                            </div>
+                            <div class="admin_user_left">
+                                <ul class="list">
+                                    <li>真实姓名：<span class="c">{$login.truename ?:'未设置'}</span></li>
+                                    <li>所在部门：<span class="c">{$login.Department.title ?? ''}</span></li>
+                                    <li>登录地址：<span class="c">{$login.login_ip}</span></li>
+                                    <li>登录时间：<span class="c">{:date('Y-m-d H:i:s', $login.login_time)}</span></li>
+                                </ul>
+                                <div class="user_link">
+                                    <a href="{:url('Admin/home', ['id' =>$login.id])}" class="layui-btn woo-theme-btn layui-btn-primary layui-border-green layui-btn-radius new_tab" data-title="个人信息">
+                                        <i class="woo-icon woo-icon-guanli-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-card env">
+                    <div class="layui-card-header"><span class="woo-circle-icon purple"><i class="layui-icon layui-icon-engine"></i></span>运行环境</div>
+                    <div class="layui-card-body">
+                        <div class="layui-carousel admin-carousel admin-env"  data-interval="10000" data-anim="fade" data-height="244">
+                            <div carousel-item>
+                                <div>
+                                    <table class="layui-table">
+                                        <colgroup>
+                                            <col width="33.33%">
+                                            <col width="33.33%">
+                                            <col width="33.33%">
+                                        </colgroup>
+                                        <tr>
+                                            <th>配额限制</th>
+                                            <th>空间使用</th>
+                                            <th>域名到期</th>
+                                        </tr>
+                                        <tr>
+                                            <td>-</td>
+                                            <td><a href="{:url('tool/getSiteSize')}" class="javascript link" rel="get_site_size"><span id="showSiteSize" class="layui-badge">0KB</span></a></td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>操作系统</th>
+                                            <th>服务器</th>
+                                            <th>服务器IP</th>
+                                        </tr>
+                                        <tr>
+                                            <td>{$operating.php_os | raw}</td>
+                                            <td>{$operating.server_software | raw}</td>
+                                            <td>{$operating.server_name | raw}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>上传限制</th>
+                                            <th>PHP</th>
+                                            <th>MYSQL</th>
+                                        </tr>
+                                        <tr>
+                                            <td>{$operating.upload_max_filesize | raw}</td>
+                                            <td>{$operating.php_version | raw}</td>
+                                            <td>{$operating.mysql_version | raw}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div>
+                                    <!--第二版信息可以自行添加更多-->
+                                    <table class="layui-table" >
+                                        <colgroup>
+                                            <col width="33.33%">
+                                            <col width="33.33%">
+                                            <col width="33.33%">
+                                        </colgroup>
+                                        <tr>
+                                            <th>PDO</th>
+                                            <th>CURL</th>
+                                            <th>MBstring</th>
+                                        </tr>
+                                        <tr>
+                                            <td>{$operating.pdo_extension | raw}</td>
+                                            <td>{$operating.curl_extension | raw}</td>
+                                            <td>{$operating.mbstring_extension | raw}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Fileinfo</th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                        <tr>
+                                            <td>{$operating.fileinfo | raw}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-card takerates">
+                    <div class="layui-card-header"><span class="woo-circle-icon blue"><i class="woo-icon woo-icon-jiankong d-icon"></i></span>数据监控</div>
+                    <div class="layui-card-body">
+                        <div class="progress-init">
+                            <div class="layui-progress" lay-showpercent="yes">
+                                <h3>CPU使用率</h3>
+                                <div class="layui-progress-bar" lay-percent="58%"></div>
+                            </div>
+                            <div class="layui-progress mt" lay-showpercent="yes">
+                                <h3>内存占用率</h3>
+                                <div class="layui-progress-bar layui-bg-red" lay-percent="78%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-card woo-copyright">
+                    <div class="layui-card-header"><span class="woo-circle-icon red"><i class="woo-icon woo-icon-banben d-icon"></i></span>软件信息</div>
+                    <div class="layui-card-body">
+                        <table class="layui-table">
+                            <colgroup>
+                                <col width="50%">
+                                <col width="50%">
+                            </colgroup>
+                            <tr>
+                                <th>系统版本</th>
+                                <th>THINKPHP</th>
+                            </tr>
+                            <tr>
+                                <td class="woo-theme-color">{:\\woo\\common\\controller\\Controller::version()}</td>
+                                <td class="woo-theme-color">{:app()->version()}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    var winWidth = $(window).width();
+    var winHight = $(window).height();
+    var charts_options = {:json_encode($charts ?? [])};
+
+
+    layui.use(['element', 'carousel', 'layer'], function () {
+        var element = layui.element;
+        var carousel = layui.carousel;
+        layer = layui.layer;
+
+        $('.admin-carousel').each(function() {
+            carousel.render({
+                elem: this
+                ,width: '100%'
+                ,height : $(this).data('height') + 'px'
+                ,arrow: $(this).data('arrow') ? $(this).data('arrow') : 'none'
+                ,anim : $(this).data('anim') ? $(this).data('anim') : 'default'
+                ,trigger: $(this).data('trigger') ? $(this).data('trigger') : 'mouseover'
+                ,autoplay: $(this).data('autoplay') ? true : false
+                ,interval : $(this).data('interval') ? $(this).data('interval') : 3000
+            });
+        })
+
+        carousel.on('change(charts)', function(obj){
+            charts_change(null, 1)
+        });
+        if (winWidth > 998) {
+            charts_change(null, 1)
+        } else {
+            charts_change()
+        }
+        setTimeout(function () {
+            $(".number-timer").countTo({
+                lastSymbol:"",
+                from: 0,
+                speed: 500,
+                refreshInterval: 10,
+                beforeSize:0,
+                decimals: 0
+            });
+        }, top.pearAdminInstance ? 800 : 0);
+    })
+
+    function charts_change(index, time) {
+        time = time || 300;
+        if (typeof(index) == 'undefined' || index === null) {
+            index = $('.admin-charts-box').find('.layui-carousel-ind').find('li.layui-this').index();
+            if (charts_options.length == 1) {
+                index = 0
+            }
+        }
+
+        if (index >= 0) {
+            if ($('.admin-charts:eq(' + index + ')').is('.is-instance')) {
+                return false;
+            }
+            $('.admin-charts:eq(' + index + ')').attr('_echarts_instance_', 0);
+            setTimeout(function(){
+                try {
+                    var myChart = echarts.init($('.admin-charts')[index]);
+                    myChart.setOption(charts_options[index]);
+                    $('.admin-charts:eq(' + index + ')').addClass('is-instance');
+                } catch (e) {
+                    console.log(e)
+                }
+
+            }, time)
+        }
+    }
+
+    $(window).resize(function(){
+        winWidth = $(window).width();
+        winHight = $(window).height();
+        charts_change()
+    }).trigger('resize')
+
+    function get_site_size(){
+        var url = $(this).attr('href');
+        layer.msg('查询中请稍后...',{ time:30*60*1000, shade :[0.01, '#393D49']});
+        WOO.request.call(this,url,'get',null,
+            {
+                'success':function(msg,data){
+                    layer.closeAll();
+                    $('#showSiteSize').html(msg)
+                },
+                'error':function(msg,data){
+                    layer.closeAll();
+                    layer.msg(msg)
+                }
+            }
+        );
+    }
+
+    function simple_clear() {
+        var href = $(this).attr('href');
+        if (!href) {
+            return false;
+        }
+        var index = layer.load({
+            time: 3000
+        })
+        WOO.request.call(this,href,'get',null,{
+            'success':function(msg,data){
+                layer.close(index);
+                addAlert(msg, 'success')
+            },
+            'error':function(msg,data){
+                layer.close(index);
+                addAlert(msg, 'error')
+            }
+        })
+    }
+
+    $(function () {
+        if (window.touch) {
+            touch.on('body', 'swipeleft', function (ev) {
+                if ($(ev.target).closest('[carousel-item]').length && $(ev.target).closest('[carousel-item]').parent().find('.layui-carousel-ind').find('li').length > 1) {
+                    var length = $(ev.target).closest('[carousel-item]').parent().find('.layui-carousel-ind').find('li').length;
+                    var current = $(ev.target).closest('[carousel-item]').parent().find('.layui-carousel-ind').find('li.layui-this').index() + 1;
+                    if (current <= length - 1) {
+                        $(ev.target).closest('[carousel-item]').parent().find('.layui-carousel-ind').find('li:eq('+current+')').trigger('mouseover');
+                    }
+                    return;
+                }
+            });
+            touch.on('body', 'swiperight', function (ev) {
+                if ($(ev.target).closest('[carousel-item]').length && $(ev.target).closest('[carousel-item]').parent().find('.layui-carousel-ind').find('li').length > 1) {
+                    var current = $(ev.target).closest('[carousel-item]').parent().find('.layui-carousel-ind').find('li.layui-this').index() - 1;
+                    if (current >= 0) {
+                        $(ev.target).closest('[carousel-item]').parent().find('.layui-carousel-ind').find('li:eq('+current+')').trigger('mouseover');
+                    }
+                    return;
+                }
+            });
+        }
+    })
+</script>
+{/block}

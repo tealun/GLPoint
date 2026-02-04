@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>404错误页面</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            font: 14px Helvetica Neue,Helvetica,PingFang SC,Tahoma,Arial,sans-serif;
+            background: #f2f2f2;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .error{
+            position:absolute;
+            top: 50%;
+            width: 100%;
+            left: 0;
+            text-align: center;
+            -webkit-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+        .error .img-svg{
+            display: inline-block;
+            margin-right: 100px;
+            height: 300px;
+            max-width: 400px;
+        }
+        .error .show{
+            display: inline-block;
+            vertical-align: top;
+        }
+        .error .show h2{
+            font-size: 72px;
+            color: #434e59;
+            margin-bottom: 24px;
+            font-weight: bold;
+        }
+        .error .show p{
+            font-size: 20px;
+            color: rgba(0, 0, 0, .45);
+            margin-bottom: 16px;
+        }
+        .error .show a.return-index{
+            display: inline-block;
+            height: 38px;
+            line-height: 38px;
+            padding: 0 18px;
+            background-color: #36b368;
+            color: #fff;
+            white-space: nowrap;
+            text-align: center;
+            font-size: 14px;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="error">
+    <img src="/static/woo/images/404.svg" alt="" class="img-svg">
+    <div class="show">
+        <h2>404</h2>
+        <p>抱歉，你访问的页面被外星人切断啦( ╯□╰ )</p>
+        <a href="/" class="return-index">返回首页</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,418 @@
+{extend name="$extend_list"/}
+
+{block name="script"}
+<script id="basicCustomHeader" type="text/html">
+    <div>{{checkboxChooseRender()}}</div>
+</script>
+
+<script type="text/html" id="basicCustomRowTemplet">
+    <div>
+        {{checkboxRender(d.row)}}
+        {{d.row.cname}}
+        {{d.cols.is_import.templet(d.row)}}
+        {{d.cols.item_toolbar.templet(d.row)}}
+    </div>
+</script>
+
+<script type="text/html" id="deleteTip">
+    <blockquote class="layui-elem-quote"><b>您正在删除模型【{{d.addon ? d.addon + '.' : ''}}{{d.model}}：{{d.cname}}】，该操作不可逆，请谨慎操作！并选择需同步删除的结构：</b></blockquote>
+    <table class="layui-table layui-form">
+        <colgroup>
+            <col width="80">
+            <col width="240">
+            <col>
+        </colgroup>
+        <thead>
+        <tr>
+            <th>选择</th>
+            <th>需删除部分</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><input type="checkbox" lay-skin="primary" name="delete_together" value="table"></td>
+            <td>数据表结构</td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" lay-skin="primary" name="delete_together" value="model"></td>
+            <td>模型文件</td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" lay-skin="primary" name="delete_together" value="controller"></td>
+            <td>控制器文件</td>
+        </tr>
+        <tr>
+            <td><input type="checkbox" lay-skin="primary" name="delete_together" checked value="menu"></td>
+            <td>后台菜单</td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+
+<script type="text/html" id="copyModel">
+    <blockquote class="layui-elem-quote">您正在进行复制【{{d.addon ? d.addon + '.' : ''}}{{d.model}}】模型操作，请修改一个模型名：</blockquote>
+    <table class="layui-table layui-form" style="margin: 0;">
+        <colgroup>
+            <col width="120">
+            <col width="240">
+            <col>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th style="color: #f56c6c;">模型(类)名：</th>
+            <td><input type="text" placeholder="请输入新的模型名(必须)" id="copyModelName" class="layui-input"></td>
+        </tr>
+        <tr>
+            <th>模型名称：</th>
+            <td><input type="text" id="copyCname" placeholder="请输入新的模型名称，为空即复制原模型" class="layui-input"></td>
+        </tr>
+        <tr>
+            <th>二级目录：</th>
+            <td><input type="text" id="copyAddonName" value="{{d.addon}}" class="layui-input"></td>
+        </tr>
+        <tr>
+            <th>完整表名：</th>
+            <td><input type="text" id="copyFullTable" placeholder="请填写完整表名，不填由系统自动处理" class="layui-input"></td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+
+<script type="text/html" id="showExportData">
+    <textarea class="layui-textarea" style="height: {{d.height}}px" id="showExportDataValue" readonly>{{JSON.stringify(d.data)}}</textarea>
+    <p style="color: #FF5722;">注：以上模型升级数据，{{d.data.expire}}前导入有效</p>
+</script>
+
+<script type="text/html" id="modelImport">
+    <table class="layui-table layui-form" style="margin: 0;" id="modelImportForm">
+        <colgroup>
+            <col width="140">
+            <col width="340">
+            <col>
+        </colgroup>
+        <tbody>
+            <tr>
+                <th>导入密钥：</th>
+                <td><input type="text" placeholder="请输入导出方提供的密钥" class="layui-input" name="import_key"></td>
+            </tr>
+            <tr>
+                <th>是否替换数据：</th>
+                <td><input type="checkbox" lay-skin="primary" name="is_import_list"></td>
+            </tr>
+            <tr>
+                <th>模型升级数据：</th>
+                <td>
+                    <textarea class="layui-textarea" name="import_data"></textarea>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</script>
+
+<script type="text/html" id="modelImportZip">
+    <table class="layui-table layui-form" style="margin: 0;" id="modelImportZipForm">
+        <colgroup>
+            <col width="140">
+            <col width="340">
+            <col>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th>导入密钥：</th>
+            <td><input type="text" placeholder="请输入导出方提供的密钥" class="layui-input" name="import_key"></td>
+        </tr>
+        <tr>
+            <th>是否替换数据：</th>
+            <td><input type="checkbox" lay-skin="primary" name="is_import_list"></td>
+        </tr>
+        <tr>
+            <th>升级包上传：</th>
+            <td>
+                <div class="woo-upload">
+                    <div class="woo-upload-action layui-btn-group">
+                        <a href="javascript:;" class="layui-btn woo-upload-handle btn-5"><i class="layui-icon layui-icon-file"></i>上传</a>
+                        {if get_installed_addons('woofinder') && admin_link_power('attachement/index')}
+                        <a href="javascript:;" class="layui-btn woo-upload-select btn-6"
+                        data-url="{:addons_url('woofinder://index/index', ['model' => 'Model'])}"
+                        ><i class="layui-icon layui-icon-cart"></i>选择</a>
+                        {/if}
+                    </div>
+                    <ul class="woo-upload-preview  clearfix">
+                    </ul>
+                    <input type="hidden" class="woo-element woo-element-upload" name="import_file" data-url="{:url('zipUpload')}" data-multiple="" data-number="1" data-field="import_file" data-model="Model" data-accept-mime=".zip"  data-accept="file" data-exts="zip" data-size="2048">
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</script>
+
+<script>
+    function api_development(data) {
+        if (data.data.length != 1) {
+            layer.msg('请选择一个模型来进行API开发操作', {
+                icon : 2
+            });
+            return false;
+        }
+        var url = $(this).attr('href').replace('MODELID', data.data[0].id);
+        if(parent && parent.wooTab){
+            parent.wooTab.add({
+                title: 'API开发',
+                href : url
+            });
+        }
+        else{
+            location.href = url;
+        }
+    }
+
+    function copy_model(data) {
+        if (data.data.length != 1) {
+            layer.msg('请选择一个模型来进行模型复制操作', {
+                icon : 2
+            });
+            return false;
+        }
+        var url = $(this).attr('href').replace('MODELID', data.data[0].id);
+        var tip =  layTpl($('#copyModel').html()).render(data.data[0]);
+
+        layer.open({
+            title : '复制模型',
+            content : tip,
+            btn: ['确认复制', '取消'],
+            yes : function (index, layero) {
+                var model = $.trim($('#copyModelName').val());
+                var addon = $.trim($('#copyAddonName').val());
+                var table = $.trim($('#copyFullTable').val());
+                var cname = $.trim($('#copyCname').val())
+                if (!model) {
+                    $('#copyModelName').focus().addClass('error')
+                    return false;
+                }
+                layer.closeAll();
+                var index = layer.load(3, {
+                    time: 3000
+                });
+                WOO.request.call(this, url, 'post',{
+                    model : model,
+                    addon :addon,
+                    table : table,
+                    cname : cname
+                }, {
+                    success: function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'success');
+                        renderTab(currentTabIndex, 'refresh');
+                        if (tabAttr[currentTabName].table.data) {
+                            location.reload()
+                        }
+                    },
+                    error : function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'error');
+                    }
+                })
+            }
+        })
+    }
+
+    function model_delete(data) {
+        var href = $(this).attr('href');
+        var tip =  layTpl($('#deleteTip').html()).render(data.data);
+        setTimeout(function () {
+            layForm.render('checkbox');
+        }, 100)
+        layer.confirm(tip,{
+            title : '确认',
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            var together =  [];
+            $('[name="delete_together"]').each(function () {
+                if ($(this).prop('checked')) {
+                    together.push($(this).val())
+                }
+            })
+            WOO.request.call(this, href, 'post',{
+                together:together
+            }, {
+                success: function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    renderTab(currentTabIndex, 'refresh');
+                    if (tabAttr[currentTabName].table.data) {
+                        location.reload()
+                    }
+                },
+                error : function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+    
+    function  model_export_data(data) {
+        if (data.data.length == 0) {
+            addAlert('您还没有选择任何项目', 'warn');
+            return false ;
+        }
+        var href = $(this).attr('href');
+        var ids = [];
+        for (var i  in data.data) {
+            ids.push(data.data[i].id);
+        }
+
+        layer.confirm('请确认是否导出该[' +ids.length+ ']个模型数据',{
+            title : '确认',
+            icon : 3
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'post',{
+                ids:ids
+            }, {
+                success: function (msg,data) {
+                    layer.close(index);
+                    var height =  $(window).height() * 0.8 <= 650 ? $(window).height() * 0.8 : 650;
+                    var content =  layTpl($('#showExportData').html()).render({data: data, height:height - 51 - 47 - 40- 44});
+                    layer.open({
+                        title : '模型导出',
+                        content : content,
+                        btn: ['复制', '取消'],
+                        area:[($(window).width() * 0.8 <= 1200 ? $(window).width() * 0.8 : 1200) + 'px',height + 'px'],
+                        yes : function (index, layero) {
+                            WOO.copy($('#showExportDataValue').val());
+                            layer.close(index);
+                        }
+                    })
+                },
+                error : function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+    
+    function model_export_zip(data) {
+        if (data.data.length == 0) {
+            addAlert('您还没有选择任何项目', 'warn');
+            return false ;
+        }
+        var href = $(this).attr('href');
+        var ids = [];
+        for (var i  in data.data) {
+            ids.push(data.data[i].id);
+        }
+
+        layer.confirm('请确认是否下载该[' +ids.length+ ']个模型的升级包',{
+            title : '确认',
+            icon : 3
+        }, function(){
+            layer.closeAll();
+            location.href = href + '?ids=' + ids.join(',');
+        })
+    }
+
+    function model_import_data() {
+        var href = $(this).attr('href');
+        var content =  layTpl($('#modelImport').html()).render({});
+
+         setTimeout(function () {
+             layForm.render('checkbox');
+         }, 100)
+
+        layer.open({
+            title : '模型升级导入',
+            content : content,
+            btn: ['提交升级', '取消'],
+            yes : function (index, layero) {
+                var key = $.trim($('#modelImportForm [name="import_key"]').val());
+                var is_list = $('#modelImportForm [name="is_import_list"]').prop('checked') ? 1: 0;
+                var data = $('#modelImportForm [name="import_data"]').val();
+                if (!key) {
+                    return addAlert('请输入导入密钥', 'warn');
+                }
+                if (!data) {
+                    return addAlert('请复制出模型升级数据', 'warn');
+                }
+
+                var index2 = layer.load(3, {
+                    time : 10000
+                });
+                WOO.request.call(this, href, 'post',{
+                    key:key,
+                    is_list: is_list,
+                    data: data
+                }, {
+                    success: function (msg,data) {
+                        layer.close(index2);
+                        layer.close(index);
+                        addAlert(msg, 'success');
+                        renderTab(currentTabIndex, 'refresh');
+                    },
+                    error : function (msg,data) {
+                        layer.close(index2);
+                        addAlert(msg, 'error');
+                    }
+                })
+            }
+        })
+    }
+    
+    function model_import_zip() {
+        var href = $(this).attr('href');
+        var content =  layTpl($('#modelImportZip').html()).render({});
+
+        setTimeout(function () {
+            layForm.render('checkbox');
+            WOO.renderUpload();
+        }, 100)
+
+        layer.open({
+            title : '模型升级上传',
+            content : content,
+            btn: ['提交升级', '取消'],
+            yes : function (index, layero) {
+                var key = $.trim($('#modelImportZipForm [name="import_key"]').val());
+                var is_list = $('#modelImportZipForm [name="is_import_list"]').prop('checked') ? 1: 0;
+                var file = $.trim($('#modelImportZipForm [name="import_file"]').val());
+
+                if (!key) {
+                    return addAlert('请输入导入密钥', 'warn');
+                }
+                if (!file) {
+                    return addAlert('请上传升级包', 'warn');
+                }
+
+                var index2 = layer.load(3, {
+                    time : 10000
+                });
+                WOO.request.call(this, href, 'post',{
+                    key:key,
+                    is_list: is_list,
+                    file: file
+                }, {
+                    success: function (msg,data) {
+                        layer.close(index2);
+                        layer.close(index);
+                        addAlert(msg, 'success');
+                        renderTab(currentTabIndex, 'refresh');
+                    },
+                    error : function (msg,data) {
+                        layer.close(index2);
+                        addAlert(msg, 'error');
+                    }
+                })
+            }
+        })
+    }
+
+</script>
+{/block}

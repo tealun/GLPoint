@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{block name="title"}{if !empty($meta.title)}{:implode(' - ', $meta.title)}{else}后台管理{/if}{/block}</title>
+<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta name="renderer" content="webkit"/>
+<meta name="HandheldFriendly" content="true"/>
+<meta name="format-detection" content="telephone=no, email=no"/>
+{block name="keywords"}<meta name="keywords" content="{if !empty($meta.keywords)}{:implode(',', $meta.keywords)}{/if}"/>{/block}
+{block name="description"}<meta name="description" content="{if !empty($meta.description)}{:implode(',', $meta.description)}{/if}"/>{/block}
+<link rel="shortcut icon" href="{$root}favicon.ico"/>
+{block name="css"}{$woo_static_links.css | raw}{/block}
+{if !empty($darkMode)}
+<style>
+    body.woo-dark{ background-color: #000;}
+    body.woo-dark.is-drawer-frame,
+    body.woo-dark.is-layer-frame,
+    body.woo-dark.getRelationOptions,
+    .loader-main,.loader-main .loader
+    {background-color: #28333E;}
+</style>
+{/if}
+<script>
+var woo_script_vars = {$woo_script_vars | raw};
+woo_script_vars.woo = {
+    wwwroot : woo_script_vars.wwwroot || '{$root}',
+    approot : woo_script_vars.approot || '{$approot}',
+    isLoadLayui : true,
+    isGlobalLayer : true,
+    layerCallback : {
+        layform : function() {},
+        layer : function () {}
+    }
+};
+</script>
+{block name="js"}{$woo_static_links.js | raw}{/block}
+{block name="headscript"}{/block}
+</head>
+<body class="woo-global-body {if !empty($darkMode)} woo-dark{/if} {if !empty($is_pear)} layui-layout-body pear-admin {/if}  {$params.controller ?? ' '} {$params.action ?? ' '}  {$system_theme ?? ''}  {if isset($params.args.layer)}is-layer-frame{/if} {if isset($params.args.drawer)}is-drawer-frame{/if} {if isset($params.args.open)}is-open-frame{/if} {if $is_mobile} close-bar-state is-mobile{/if}">
+{block name="header"}{/block}
+{block name="content"}{/block}
+{block name="footer"}{/block}
+{block name="deferjs"}{$woo_static_links.deferjs | raw}{/block}
+<script>
+    WOO.request.defaultSuccessHandlers= {
+        'success':function(msg,data){
+            layer.closeAll();
+            addAlert(msg, 'success');
+        },
+        'error':function(msg,data){
+            layer.closeAll();
+            addAlert(msg, 'error');
+        },
+        'nopower':function(msg,data){
+            layer.closeAll();
+            addAlert(msg, 'error');
+        },
+        'nologin':function(msg,data){
+            layer.closeAll();
+            addAlert('登录状态已超时，2秒以后自动跳转', 'warn');
+            setTimeout(function () {
+                (self !== top ? top.location : location).href = '{:url("admin/login")}';
+            }, 2000)
+        }
+    };
+    WOO.request.defaultErrorHandlers={
+        403:function(text,rerun){
+            layer.closeAll();
+            addAlert('访问被拒绝', 'error');
+        },
+        404:function(text,rerun){
+            layer.closeAll();
+            addAlert('页面不存在', 'error');
+        },
+        500 : function (text,rerun) {
+            layer.closeAll();
+            addAlert(text, 'error');
+        }
+    };
+    // 避免提示挡住抽屉
+    if ($('body').hasClass('is-drawer-frame')) {
+        parent.$('#fixedAlert').empty();
+    }
+</script>
+{block name="script"}{/block}
+<script>
+/*{if !empty($topBar)}*/
+window.layui && layui.use(['topBar']);
+/*{/if}*/
+/*{if !empty($watermark) && is_string($watermark)}*/
+window.layui && layui.use('watermark', function () {
+    new (layui.watermark)({
+        content: "{$watermark}"
+    });
+})
+/*{/if}*/
+</script>
+</body>
+</html>

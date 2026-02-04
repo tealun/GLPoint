@@ -1,0 +1,124 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="woo-admin-home">
+            <div class="layui-row">
+                <div class="layui-col-md4">
+                    <div class="woo-home">
+                        <form class="layui-form layui-form-pane" method="post">
+                            <div class="woo-home-show">
+                                <div class="avatar woo-upload-avatar">
+                                    <i></i>
+                                    <input type="hidden" value="{$login.avatar}" name="avatar" class="layui-input layui-input-disabled">
+                                    <img src="{:thumb($login.avatar ?: $root . 'static/images/admin/default_headimg.png', 200, 200)}">
+                                    <div class="cover">点击编辑</div>
+                                </div>
+                                <div class="username">{$login.username}</div>
+                                <div class="email">{$login.email}</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">用户名：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" value="{$login.username}" disabled class="layui-input layui-input-disabled">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">邮　箱：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" value="{$login.email}" autocomplete="new-password" name="email" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">密　码：</label>
+                                <div class="layui-input-block">
+                                    <input type="password" name="password"  autocomplete="new-password" placeholder="不修改请保持为空" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">昵　称：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="nickname" value="{$login.nickname}" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">姓　名：</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="truename" value="{$login.truename}" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn woo-theme-btn layui-btn-radius btn-spacing-2" lay-submit lay-filter="adminHome">提交</button>
+                                    <button type="reset" class="layui-btn layui-btn-radius btn-spacing-2 btn-1">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="layui-col-md8">
+                    {$table | raw}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    layui.use(['form', 'upload'], function () {
+        var form = layui.form;
+        var layuiUpload = layui.upload;
+
+        layuiUpload.render({
+            elem : $('.woo-upload-avatar')[0],
+            url : "{:url('attachement/upload')}",
+            data : {
+                "model" : 'Admin',
+                "field" : 'avatar',
+                "accept" : 'images'
+            },
+            auto : true,
+            accept : 'images',
+            exts  : 'jpg|png|gif|jpeg',
+            drag : true,
+            field : 'upload',
+            before : function() {
+                layer.load({
+                    time : 3000
+                })
+            },
+            done : function (res, index, upload) {
+                layer.closeAll();
+                if (res.type == 'success') {
+                    $('.woo-upload-avatar').find('input').val(res.url).end().find('img').attr('src', res.url);
+                } else {
+                    addAlert(res.message, 'error');
+                }
+            }
+        })
+
+        form.on('submit(adminHome)', function(data){
+            data.field.RSA_FIELD_LIST = '';
+            if (data.field.password && window.woo_script_vars.rsa_field && $.inArray('password', window.woo_script_vars.rsa_field) >= 0) {
+                data.field.password = WOO.setEncrypt(data.field.password);
+                data.field.RSA_FIELD_LIST = ['password'];
+            }
+            WOO.request.call(this,'{:url("setHome")}', 'post', data.field,{
+                function (msg, data) {
+                    addAlert(msg, 'success');
+                },
+                function (msg) {
+                    addAlert(msg, 'error');
+                }
+            })
+            return false;
+        });
+    })
+</script>
+{/block}

@@ -1,0 +1,47 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="woo-setting woo-form-body">
+            <form class="layui-form" action="{:url('set',['parent_id' => $args.parent_id])}" method="post" enctype="multipart/form-data">
+                {assign name="j" value="0" /}
+                {foreach $form->getVisibleItems() as $key => $item}
+                {assign name="j" value="$j+1" /}
+                <div class="setting-row clearfix {if $j % 2 == 1}setting-odd{/if}">
+                    <div class="setting-row-title">{$item.label_tag|raw}</div>
+                    <div class="setting-row-value">
+                        <div class="setting-input">{$item.html | raw}</div>
+                        {if $item.tip}<div class="setting-tip">{$item.tip}</div>{/if}
+                    </div>
+                    {if $is_debug}
+                    <div class="setting-row-call {if $j != 1}more-top{/if}">
+                        {if $j == 1}部署模式下，自动隐藏调用提示<br>{/if}
+                        调用：<span class="woo-copy" data-text="addons_setting('{$item.field_name}')">{literal}addons_setting('{/literal}{$item.field_name}{literal}'){/literal}</span>
+                    </div>
+                    {/if}
+                </div>
+                {/foreach}
+                <div class="setting-row setting-action clearfix">
+                    <div class="setting-row-title"></div>
+                    <div class="setting-row-value">
+                        <button class="layui-btn woo-theme-btn layui-btn-radius btn-spacing-2" lay-submit lay-filter="formDemo">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-radius btn-spacing-2 btn-1">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function layuiReady() {
+
+    }
+</script>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}
+

@@ -1,0 +1,198 @@
+<script type="text/html" id="filterContainer">
+    <div class="woo-search-top"><span class="wooSearchBtn"><i class="layui-icon layui-icon-search"></i><cite>展开搜索</cite></span><i class="line"></i></div>
+    <div class="woo-search-container clearfix ">
+        <form method="post" class="layui-form layui-form-pane layui-col-space15 clearfix">
+            {{# for (var i in d) { }}
+                {{# if (d[i].hide) { }}
+                    {{# continue}}
+                {{# } }}
+                <div class="layui-col-lg4 layui-col-md4 layui-col-sm6">
+                    <div class="layui-form-item">
+                        <a href="javascript:;" class="filter-sigle-clear"><i class="layui-icon layui-icon-close-fill"></i></a>
+                        <label class="layui-form-label">{{d[i].title}}</label>
+                        <div class="layui-input-block clearfix">
+                            {{# if (document.getElementById(d[i].templet + 'Filter')) { }}
+                                {{-layTpl(document.getElementById(d[i].templet + 'Filter').innerHTML).render(d[i])}}
+                            {{# } else { }}
+                                搜索模板{{d[i].templet + 'Filter'}}不存在
+                            {{# } }}
+                        </div>
+                    </div>
+                </div>
+            {{# } }}
+            <div class="layui-col-lg4 layui-col-md4 layui-col-sm6">
+                <div class="layui-form-item ">
+                    <div class="layui-input-inline search-btns">
+                        <button class="layui-btn layui-btn-radius woo-theme-btn" lay-submit lay-filter="filter"><i class="layui-icon layui-icon-search"></i></button><button class="layui-btn layui-btn-primary layui-btn-radius woo-filter-reset"><i class="layui-icon layui-icon-delete"></i></button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</script>
+
+<script type="text/html" id="stringFilter">
+    <div class="woo-compare-sign">
+        <select name="{{d.field}}_like">
+            <option value="">请选择≡条件≡</option>
+            <option value="left">%左匹配</option>
+            <option value="right">右匹配%</option>
+            <option value="like" selected>%包含%</option>
+            <option value="eq">等于=</option>
+        </select>
+    </div>
+    <div class="woo-compare-input">
+        <input type="text" name="{{d.field}}"
+               {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input'}}
+        {{# for (var name in d.attrs) { }}
+        {{name}}="{{d.attrs[name]}}"
+        {{# }}}
+        >
+    </div>
+</script>
+
+<script type="text/html" id="textFilter">
+    <input type="text" name="{{d.field}}"
+           {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input'}}
+    {{# for (var name in d.attrs) { }}
+    {{name}}="{{d.attrs[name]}}"
+    {{# }}}
+    >
+</script>
+
+<script type="text/html" id="relationFilter">
+    <div class="relation-box">
+        <div class="relation-search-bar"><i class="layui-icon layui-icon-search"></i></div>
+        <input type="hidden" class="relation-post-input" name="{{d.field}}">
+        <input type="text" data-model="{{d.foreign[0]}}"  data-display="{{d.foreign[1]}}"
+               {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input woo-filter-relation'}}
+        {{# for (var name in d.attrs) { }}
+        {{name}}="{{d.attrs[name]}}"
+        {{# }}}
+
+        onkeydown="if(event.keyCode==13)return false;"
+        >
+    </div>
+</script>
+
+<script type="text/html" id="relationFilterRender">
+    <div class="relation-filter-container" style="width:{{d.width}}px">
+        <div class="relation-filter-list">
+            {{# if (d.list.length > 0) { }}
+            <ul class="list">
+                {{# for (var i in d.list) { }}
+                <li data-id="{{d.list[i][d.field_map.id]}}" data-display="{{d.list[i][d.field_map.display]}}"><span class="filter-id">{{d.list[i][d.field_map.id]}}</span> : <span class="filter-display">{{d.list[i][d.field_map.display]}}</span></li>
+                {{# } }}
+            </ul>
+            {{# } else { }}
+            <div class="filter-no-data"><i class="layui-icon-face-cry layui-icon"></i>没有搜索到数据</div>
+            {{# } }}
+        </div>
+        {{# if (d.page.last_page > 1) { }}
+        <div class="relation-filter-page">
+            <div class="prev-page {{d.page.current_page==1 ? 'disabled' : ''}}"><i class="layui-icon layui-icon-prev"></i></div>
+            <div class="page-show">{{d.page.current_page}}/{{d.page.last_page}}</div>
+            <div class="next-page {{d.page.current_page==d.page.last_page ? 'disabled' : ''}}"><i class="layui-icon layui-icon-next"></i></div>
+        </div>
+        {{# } }}
+    </div>
+</script>
+
+<script type="text/html" id="compareFilter">
+    <div class="woo-compare-sign">
+        <select name="{{d.field}}_sign">
+            <option value="">请选择≡条件≡</option>
+            <option value="eq" selected>等于</option>
+            <option value="gt">大于</option>
+            <option value="lt">小于</option>
+            <option value="neq">不等</option>
+        </select>
+    </div>
+    <div class="woo-compare-input">
+        <input type="text" name="{{d.field}}"
+               {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input'}}
+        {{# for (var name in d.attrs) { }}
+        {{name}}="{{d.attrs[name]}}"
+        {{# }}}
+        >
+    </div>
+</script>
+
+<script type="text/html" id="selectFilter">
+    <select name="{{d.field}}"
+        {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-select'}}
+        {{# for (var name in d.attrs) { }}
+        {{name}}="{{d.attrs[name]}}"
+        {{# }}}>
+                <option value="">请选择≡{{d.title}}≡</option>
+    {{# if (d.options) { }}
+        {{# for (var v in d.options) { }}
+            {{# if (typeof(d.options[v]) != 'object') { }}
+                <option value="{{v}}" {{# if (d.attrs.value==v) { }}selected{{#}}}>{{d.options[v]}}</option>
+            {{#  } else { }}
+                <optgroup label="{{v}}">
+                    {{# for (var v1 in d.options[v]) { }}
+                    <option value="{{v1}}" {{# if (d.attrs.value==v) { }}selected{{#}}}>{{d.options[v][v1]}}</option>
+                    {{# } }}
+                </optgroup>
+            {{# } }}
+        {{# } }}
+    {{# } }}
+    </select>
+</script>
+
+<script type="text/html" id="dateFilter">
+    <input type="text" name="{{d.field}}"
+           {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input'}}
+    {{# for (var name in d.attrs) { }}
+    {{name}}="{{d.attrs[name]}}"
+    {{# }}}
+    >
+</script>
+
+<script type="text/html" id="numberFilter">
+    <input type="number" name="{{d.field}}"
+           {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input'}}
+    {{# for (var name in d.attrs) { }}
+    {{name}}="{{d.attrs[name]}}"
+    {{# }}}
+    >
+</script>
+
+<script type="text/html" id="numberRangeFilter">
+    <div class="woo-number_range woo-number_range_min">
+        <input type="number" name="{{d.field}}[min]"
+               {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input'}}
+        {{# for (var name in d.attrs) { }}
+        {{name}}="{{d.attrs[name]}}"
+        {{# }}}
+        >
+    </div>
+    <div class="woo-number_range_delimiter">-</div>
+    <div class="woo-number_range woo-number_range_max">
+        <input type="number" name="{{d.field}}[max]"
+               {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + ' layui-input'}}
+        {{# for (var name in d.attrs) { }}
+        {{name}}="{{d.attrs[name]}}"
+        {{# }}}
+        >
+    </div>
+</script>
+
+<script type="text/html" id="cascaderFilter">
+    <div class="woo-cascader">
+        <div class="cascader-show layui-input">
+            <div class="show close-reduction" data-placeholder="请选择≡{{d.title}}≡">请选择≡{{d.title}}≡</div>
+            <i class="layui-edge"></i>
+            <input type="hidden" name="{{d.field}}"
+                {{# d.attrs.class = (d.attrs.class ? d.attrs.class : '') + 'woo-element layui-input'}}
+                {{# for (var name in d.attrs) { }}
+                {{name}}="{{d.attrs[name]}}"
+                {{# }}}
+            >
+        </div>
+        <div class="cascader-container">
+        </div>
+        <div class="hidden tree-json">{{d.options}}</div>
+    </div>
+</script>

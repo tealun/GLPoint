@@ -1,0 +1,76 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="by-your-self" style="padding: 15px">
+            <!--该div以内的内容都由你自行控制-->
+
+            <div >
+                <h5 style="padding-bottom: 8px">按钮配色方案 <i style="font-size: 10px;color: #ccc;font-style: normal">(点击可复制类名)</i>：</h5>
+                <a href="javascript:;" class="layui-btn woo-theme-btn woo-copy"  style="margin-bottom: 10px;">woo-theme-btn</a>
+                <a href="javascript:;" class="layui-btn woo-theme-btn btn-1 woo-copy"  style="margin-bottom: 10px;">woo-theme-btn btn-1</a>
+                {for start="0" end="42"}
+                 <a href="javascript:;" class="layui-btn btn-{$i} woo-copy"  style="margin-bottom: 10px;">btn-{$i}</a>
+                {/for}
+            </div>
+            <div>
+                <h5>功能按钮：</h5>
+                <p>按钮中含有类名`new_tab`：新Tab打开网页</p>
+                <p>按钮中含有类名`is-blank`：新窗口打开网页，用于表格中的按钮</p>
+                <p>
+                &lt;a href="url地址" class="javascript" rel="myfunc"&gt;&lt;/a&gt;：
+                    点击以后，不会跳转地址，而是执行myfunc这个你自定义的函数，函数中this可获取当前a连接对象，$(this)获取jquery对象
+
+                </p>
+                <p>
+                    &lt;a class="tooltip" data-tip-type="1" data-tip-text="修改" href=""&gt;&lt;/a&gt;：
+                    鼠标移入显示提示文字 data-tip-type="1-4" 为提示方向 data-tip-text="提示内容" 其他标签也可用
+                </p>
+            </div>
+            <script>
+                function myjsfunc() {
+                    console.log($(this), $(this).attr('href'))// 获取到你点击的对象 和 URL
+                    layer.alert('嗨！小哥哥有什么事吗？')
+                }
+            </script>
+            <pre class="layui-code">
+$this->setHeaderInfo('title', '自定义标题');
+$this->setHeaderInfo('ex_title', '自定义副标题');
+$this->setHeaderInfo('ex_title_href', '副标题链接');
+$this->setHeaderInfo('tip', '自定义网页提示语');
+//$this->addAction('随意的唯一标识', '按钮名', 'URL地址', '类名自定义类名；btn-0到btn-17设置按钮样式', '图标', 排序权重, JS函数名（然后自定义对应的函数名，默认false）);
+$this->addAction('mybtn1', '自定义按钮', (string)url('admin/index'), 'btn-8', 'layui-icon-gift', 10, 'myjsfunc');
+$this->addAction('mybtn2', '按钮', '', 'btn-5');
+$this->addAction('mybtn3', '按钮', '', 'btn-11');
+$this->assign->addCss('/files/loaders/loaders');// 添加自己的css文件
+$this->assign->addJs('/js/jquery', true);// 添加自己的js文件 true 表示js加到body结尾 反之加到head中
+$this->assign->setScriptData('myvar', 'test');// 添加自己的全局Js变量值  Js代码中通过 ：woo_script_vars.myvar 获取
+$this->local['topBar'] = true;// 自动渲染返回顶部按钮
+$this->local['watermark'] = '水印测试';// 自动渲染网页水印
+return $this->fetch('demo5');
+            </pre>
+
+            <script>
+                function layuiReady() {
+                    layui.use(['code'], function(){
+                        layui.code({
+                            title : '方法代码',
+                            height : '360px',
+                            encode: true,
+                            skin: 'notepad',
+                            about: false
+                        });
+                    });
+                }
+            </script>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}
+

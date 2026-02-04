@@ -1,0 +1,244 @@
+{extend name="$extend_list"/}
+
+{block name="script"}
+<script id="basicCustomHeader" type="text/html">
+    <style>
+        .layui-custom-table{ overflow: hidden;background: #f0f2f5; margin-right:0;}
+    </style>
+    <div class="custom-user-header">
+        <div class="checkbox">{{-checkboxChooseRender()}}</div>
+        <ul class="grid">
+            <li class="dt">排序方式：</li>
+            <li>{{-customFieldSortRender('id', 'ID')}}</li>
+            <li>{{-customFieldSortRender('user_group_id', '分组')}}</li>
+            <li>{{-customFieldSortRender('user_grade_id', '等级')}}</li>
+            <li>{{-customFieldSortRender('money', '余额')}}</li>
+            <li>{{-customFieldSortRender('score', '积分')}}</li>
+            <li>{{-customFieldSortRender('create_time', '创建日期')}}</li>
+            <li>{{-customFieldSortRender('login_time', '登录日期')}}</li>
+        </ul>
+    </div>
+</script>
+<script type="text/html" id="basicCustomBody">
+    <div class="custom-user-list layui-row layui-col-space15">
+    {{# for (var i in d.list) { }}
+        <div class="list-item layui-col-md4 layui-col-sm6 layui-col-xs12">
+            <div class="item">
+                <div class="item-fields">
+                    <div class="row1 ov">
+                        <div class="avatar">
+                            <img src="{{WOO.thumb(d.list[i].avatar, 50, 50,null, '/static/images/admin/default_headimg.png')}}" alt="">
+                        </div>
+                        <div class="check">{{-checkboxRender(d.list[i])}}</div>
+                        <div class="id en-font">ID：{{d.list[i].id}}</div>
+                        <div class="username en-font">{{d.list[i].username}}</div>
+                    </div>
+                    <div class="row2 ov">
+                        <div class="field user_group_id">{{-d.cols.user_group_id ? d.cols.user_group_id.templet(d.list[i]) : ''}}</div>
+                        <div class="field user_grade_id">{{-d.cols.user_grade_id ? d.cols.user_grade_id.templet(d.list[i]) : ''}}</div>
+                        <div class="field status">{{-d.cols.status ? d.cols.status.templet(d.list[i]) : ''}}</div>
+                    </div>
+                    <div class="row2 ov">
+                        <div class="field"><span>昵称：</span>{{-d.cols.nickname ? d.cols.nickname.templet(d.list[i]) : ''}}</div>
+                        <div class="field"><span>姓名：</span>{{-d.cols.truename ? d.cols.truename.templet(d.list[i]) : ''}}</div>
+                        <div class="field"><span>性别：</span>{{-d.cols.sex ? d.cols.sex.templet(d.list[i]) : ''}}</div>
+                    </div>
+                    <div class="row2  row3 ov">
+                        <div class="field"><span>登录：</span>{{-d.cols.login_time ? d.cols.login_time.templet(d.list[i]) : ''}}</div>
+                        <div class="field"><span>IP：</span>{{-d.cols.login_ip ? d.cols.login_ip.templet(d.list[i]) : ''}}</div>
+                    </div>
+                    <div class="row2  row3 ov">
+                        <div class="field"><span>注册：</span>{{-d.cols.create_time ? d.cols.create_time.templet(d.list[i]) : ''}}</div>
+                        <div class="field"><span>IP：</span>{{-d.cols.register_ip ? d.cols.register_ip.templet(d.list[i]) : ''}}</div>
+                    </div>
+                    <div class="tab-select">
+                        <ul>
+                            <li class="tooltip" data-tip-text="基本信息">
+                                <i class="layui-icon layui-icon-username"></i>
+                            </li>
+                            <li class="tooltip" data-tip-text="联系方式">
+                                <i class="layui-icon layui-icon-cellphone"></i>
+                            </li>
+                            <li class="tooltip" data-tip-text="资金信息">
+                                <i class="layui-icon layui-icon-rmb"></i>
+                            </li>
+                            <li class="tooltip" data-tip-text="时间统计">
+                                <i class="layui-icon layui-icon-time"></i>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab">
+                        <div class="tab-item ">
+                            <div class="tab-row">
+                                <div class="field"><span>ID：</span>{{-d.list[i].id}}</div>
+                                <div class="field"><span>账号：</span>{{-d.list[i].username}}</div>
+                                <div class="field long"><span>姓名：</span>{{-d.cols.truename ? d.cols.truename.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>昵称：</span>{{-d.cols.nickname ? d.cols.nickname.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>性别：</span>{{-d.cols.sex ? d.cols.sex.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>生日：</span>{{-d.cols.birthday ? d.cols.birthday.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>状态：</span>{{-d.cols.status ? d.cols.status.templet(d.list[i]) : ''}}</div>
+                            </div>
+                        </div>
+                        <div class="tab-item">
+                            <div class="tab-row">
+                                <div class="field"><span>姓名：</span>{{-d.cols.truename ? d.cols.truename.templet(d.list[i]) : ''}}</div>
+                                <div class="field"><span>生日：</span>{{-d.cols.birthday ? d.cols.birthday.templet(d.list[i]) : ''}}</div>
+                                <div class="field"><span>QQ：</span>-</div>
+                                <div class="field"><span>微信：</span>-</div>
+                                <div class="field"><span>手机：</span>{{-d.cols.mobile ? d.cols.mobile.templet(d.list[i]) : ''}}</div>
+                                <div class="field"><span>绑定：</span>{{-d.cols.is_bind_mobile ? d.cols.is_bind_mobile.templet(d.list[i]) : ''}}</div>
+                                <div class="field"><span>邮箱：</span>{{-d.cols.email ? d.cols.email.templet(d.list[i]) : ''}}</div>
+                                <div class="field"><span>绑定：</span>{{-d.cols.is_bind_email ? d.cols.is_bind_email.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>地区：</span>{{-d.cols.region ? d.cols.region.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>地址：</span>{{-d.cols.address ? d.cols.address.templet(d.list[i]) : ''}}</div>
+                            </div>
+                        </div>
+                        <div class="tab-item">
+                            <div class="tab-row">
+                                <div class="field long"><span>分组：</span>{{-d.cols.user_group_id ? d.cols.user_group_id.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>等级：</span>{{-d.cols.user_grade_id ? d.cols.user_grade_id.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>余额：</span>{{-d.cols.money ? d.cols.money.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>积分：</span>{{-d.cols.score ? d.cols.score.templet(d.list[i]) : ''}}</div>
+                            </div>
+                        </div>
+                        <div class="tab-item">
+                            <div class="tab-row">
+                                <div class="field long"><span>最后登录时间：</span>{{-d.cols.login_time ? d.cols.login_time.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>最后登录IP：</span>{{-d.cols.login_ip ? d.cols.login_ip.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>注册时间：</span>{{-d.cols.create_time ? d.cols.create_time.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>注册IP：</span>{{-d.cols.register_ip ? d.cols.register_ip.templet(d.list[i]) : ''}}</div>
+                                <div class="field long"><span>注册方式：</span>{{-d.cols.register_type ? d.cols.register_type.templet(d.list[i]) : ''}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item-tools">
+                    <ul class="grid">
+                        <li class="modify">
+                            <a class="woo-layer-load tooltip" data-tip-type="1" data-tip-text="修改" href="{{woo_script_vars.approot}}/User/modify.html?id={{d.list[i].id}}"><i class="woo-icon woo-icon-xiugai"></i></a>
+                            <i class="line"></i>
+                        </li>
+                        <li class="delete">
+                            <a class="tabletool tooltip" data-tip-type="1" data-tip-text="删除" rel="woo_delete" data-tip="请确定删除会员信息？删除以后可在回收站找回" href="{{woo_script_vars.approot}}/User/delete.html?id={{d.list[i].id}}"><i class="layui-icon layui-icon-delete"></i></a>
+                            <i class="line"></i>
+                        </li>
+                        <li class="detail">
+                            <a class="woo-layer-load tooltip" data-tip-type="1" data-tip-text="详情" href="{{woo_script_vars.approot}}/User/detail.html?id={{d.list[i].id}}"><i class="woo-icon woo-icon-visible"></i></a>
+                            <i class="line"></i>
+                        </li>
+                        <li class="more">
+                            <a href="javascript:;"><i class="layui-icon layui-icon-more"></i></a>
+                            <ul class="list">
+                                <li><a class="new_tab" href="{{woo_script_vars.approot}}/Certification/index.html?parent_id={{d.list[i].id}}">实名认证</a></li>
+                                <li><a class="woo-layer-load" href="{{woo_script_vars.approot}}/user/scene.html?id={{d.list[i].id}}&scene_id=2">修改密码</a></li>
+                                <li><a class="woo-layer-load" href="{{woo_script_vars.approot}}/user/scene.html?id={{d.list[i].id}}&scene_id=3">支付密码</a></li>
+                                <li><a class="new_tab" href="{{woo_script_vars.approot}}/user_login/index.html?parent_id={{d.list[i].id}}">登录日志</a></li>
+                                <li><a class="new_tab" href="{{woo_script_vars.approot}}/user_money/index.html?parent_id={{d.list[i].id}}">收支记录</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {{# } }}
+    </div>
+</script>
+
+<script type="text/html" id="counter1">
+    <div class="counter-demo-item">
+        <div class="icon">
+            <i class="layui-icon layui-icon-user"></i>
+        </div>
+        <div class="show">
+            <div class="number">{{d.value}}</div>
+            <div class="title">{{d.title}}</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="counter2">
+    <div class="counter-demo-item bg2">
+        <div class="icon">
+            <i class="layui-icon layui-icon-male"></i>
+        </div>
+        <div class="show">
+            <div class="number">{{d.value}}</div>
+            <div class="title">{{d.title}}</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="counter3">
+    <div class="counter-demo-item bg3">
+        <div class="icon">
+            <i class="layui-icon layui-icon-female"></i>
+        </div>
+        <div class="show">
+            <div class="number">{{d.value}}</div>
+            <div class="title">{{d.title}}</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="counter4">
+    <div class="counter-demo-item bg4">
+        <div class="icon">
+            <i class="layui-icon layui-icon-rmb"></i>
+        </div>
+        <div class="show">
+            <div class="number">{{d.value}}</div>
+            <div class="title">{{d.title}}</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="counterRegister">
+    <div id="counterRegisterShow" style="height: {{d.height ? d.height : 200}}px"></div>
+    {{# renderEcharts('#counterRegisterShow', d.value)}}
+</script>
+
+<script>
+    function renderEcharts(dom, data)
+    {
+        // 检查是否渲染完成
+        var i = 0;
+        var timer = setInterval(function () {
+            i++;
+            if (i >= 20) {
+                // 检查失败 停止检查
+                clearInterval(timer);
+            }
+            if ($(dom).length) {
+                // 渲染完成
+                clearInterval(timer);
+                var myChart = echarts.init($(dom)[0]);
+                myChart.setOption(data);
+            }
+        }, 10);
+    }
+
+    $('body').on('click', '.tab-select li', function () {
+        var index = $(this).index();
+        if ($(this).hasClass('show')) {
+            $(this).parent().find('.show').removeClass('show').closest('.item').find('.tab .tab-item.current').removeClass('current');
+        } else {
+            $(this).parent().find('.show').removeClass('show').end().find('li:eq('+index+')').addClass('show').end()
+                .closest('.item').find('.tab .tab-item.current').removeClass('current').end().find('.tab-item:eq('+index+')').addClass('current');
+
+        }
+    })
+</script>
+
+<script type="text/html" id="basicCustomBody1">
+    {{# for (var i in d.list) { }}
+    <div>
+        {{checkboxRender(d.list[i])}}
+        {{d.list[i].id}}
+        {{d.list[i].username}}
+        {{d.cols.user_group_id.templet(d.list[i])}}
+        {{d.cols.is_bind_mobile.templet(d.list[i])}}
+        {{d.cols.item_toolbar.templet(d.list[i])}}
+    </div>
+    {{# } }}
+</script>
+{/block}

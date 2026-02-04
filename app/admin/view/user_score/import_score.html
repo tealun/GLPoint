@@ -1,0 +1,32 @@
+{extend name="$extend_global"/}
+{block name="content"}
+<div class="layui-card" style="max-width:500px;margin:40px auto;">
+    <div class="layui-card-header" style="font-weight:bold;">导入积分记录（Excel）</div>
+    <div class="layui-card-body">
+        <form class="layui-form" action="{:url('importScoreFromExcel')}" method="post" enctype="multipart/form-data">
+            <div class="layui-form-item">
+                <label class="layui-form-label">选择文件</label>
+                <div class="layui-input-block">
+                    <input type="file" name="file" accept=".xls,.xlsx" required class="layui-input">
+                    <div style="color:#888;font-size:13px;margin-top:6px;">
+                        支持Excel文件，表头需包含：<b>日期、姓名、积分、事由、开具人</b>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-top:24px;">
+                <div class="layui-input-block">
+                    <button class="layui-btn layui-btn-normal" lay-submit lay-filter="import">上传并导入</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+layui.use(['form'], function(){
+    var form = layui.form;
+});
+</script>
+{/block}

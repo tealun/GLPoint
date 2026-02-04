@@ -1,0 +1,213 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="woo-power clearfix">
+            <div id="powerTarget">
+                <div class="power-init">
+                    <div class="power-action">
+                        <div class="layui-btn-group" style="margin-bottom: 10px">
+                            <a class="layui-btn  btn-5 " id="powerSubmit">提交</a>
+                            <a class="layui-btn  btn-6 btn-action-1">全选</a>
+                            <a class="layui-btn  btn-7 btn-action-2">反选</a>
+                        </div>
+                        <br>
+                        <div class="layui-btn-group" style="margin-bottom:5px">
+                            <a class="layui-btn  btn-7 btn-action-3">简洁</a>
+                            <a class="layui-btn  btn-7 btn-action-4">展开</a>
+                            <a class="layui-btn  btn-7 btn-action-5">闭合</a>
+                        </div>
+                    </div>
+                    <ul class="list">
+                        {foreach $list as $ag}
+                        <li >
+                            <a class="ag-name" data-id="{$ag.id}">{$ag.title}</a>
+                        </li>
+                        {/foreach}
+                    </ul>
+                </div>
+            </div>
+
+
+            <div class="show-tree-box">
+                <div class="show-tree-init">
+                    <div id="powerTo">您当前正在对角色【<span>aa</span>】进行授权操作</div>
+                    <div id="showTree">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    var layui_tree = {:json_encode($layui_tree)};
+    var selected_id = 0;
+    var selected_text = '';
+    var selected_power_ids = [];
+    var layTree;
+    layui.use(['form', 'tree'], function () {
+        var form = layui.form;
+        layTree = layui.tree;
+
+        layTree.render({
+            elem : '#showTree',
+            data : layui_tree,
+            showCheckbox : true,
+            id   : 'powerTree'
+
+        })
+    })
+
+    $('#powerSubmit').click(function () {
+        if (!selected_id) {
+            layer.alert('请点击左侧"会员分类"名称来确定对哪个会员组进行授权？', {
+                icon : 3
+            })
+            return false;
+        }
+
+        selected_power_ids = [];
+        var checkData = layTree.getChecked('powerTree');
+        for (var i = 0; i <= checkData.length-1; i++) {
+            getSelectedPowerIds(checkData[i])
+        }
+        console.log(selected_power_ids)
+
+        layer.confirm('请确认是否对会员分类"'+selected_text+'"提交授权？', {
+            icon : 3
+        }, function () {
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this,'{:url("setPower")}', 'post', {
+                    'id' : selected_id,
+                    'tree_ids' : selected_power_ids
+                },
+                {
+                    success: function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'success');
+                    },
+                    error : function (msg,data) {
+                        layer.close(index);
+                        addAlert(msg, 'error');
+                    }
+                })
+        })
+
+    })
+
+    function getSelectedPowerIds(obj) {
+        if (/^\d{1,}$/.test(obj.id)) {
+            selected_power_ids.push(obj.id)
+        }
+        if (obj.children && obj.children.length > 0) {
+            for (var i = 0; i <= obj.children.length - 1 ; i++) {
+                getSelectedPowerIds(obj.children[i]);
+            }
+        }
+    }
+
+
+    $('.ag-name').click(function () {
+        if ($(this).hasClass('selected')) {
+            return false;
+        }
+        selected_id = $(this).data('id');
+        selected_text = $(this).text();
+
+        var index = layer.load(3, {
+            time : 3000
+        });
+        var that = this;
+        WOO.request.call(this,'{:url("getUserGroupInfo")}', 'get', {
+                'id' : selected_id,
+            },
+            {
+                success: function (msg,data) {
+                    layTree.reload('powerTree', {
+                        data : data
+                    });
+
+                    layer.close(index);
+                    $('#powerTo').show().find('span').html(selected_text)
+                    $('.ag-name.selected').removeClass('selected');
+                    $(that).addClass('selected');
+                },
+                error : function (msg,data) {
+                    layTree.reload('powerTree', {
+                        data : layui_tree
+                    });
+                    layer.close(index);
+                    $('#powerTo').show().find('span').html(selected_text)
+                    $('.ag-name.selected').removeClass('selected');
+                    $(that).addClass('selected');
+                }
+            })
+    })
+
+
+    $('.btn-action-1').click(function () {
+        $('.layui-tree').find('.layui-tree-set').each(function () {
+            $(this).find('.layui-form-checkbox').each(function () {
+                if (!$(this).hasClass('layui-form-checked')) {
+                    $(this).trigger('click');
+                }
+            })
+        })
+    })
+
+
+    $('.btn-action-2').click(function () {
+        $('.layui-tree').find('.layui-tree-set').each(function () {
+            if ($(this).find('.layui-tree-pack').length == 0) {
+                $(this).find('.layui-form-checkbox').trigger('click');
+            }
+        })
+    })
+    $('.btn-action-3').click(function () {
+        $('.woo-route').toggle();
+    })
+    $('.btn-action-4').click(function () {
+        $('.layui-tree-pack').each(function () {
+            if ($(this).is(':hidden')){
+                $(this).closest('.layui-tree-set').children('.layui-tree-entry').find('.layui-tree-txt').trigger('click')
+            }
+        })
+    })
+    $('.btn-action-5').click(function () {
+        $('.layui-tree-pack').each(function () {
+            if ($(this).is(':visible')){
+                $(this).closest('.layui-tree-set').children('.layui-tree-entry').find('.layui-tree-txt').trigger('click')
+            }
+        })
+    })
+
+    $('.power-more').click(function () {
+        if ($(this).closest('li').hasClass('power-close')) {
+            $(this).closest('li').removeClass('power-close').find('dl').stop(true,true).slideDown(300)
+        } else {
+            $(this).closest('li').addClass('power-close').find('dl').stop(true,true).slideUp(300);
+        }
+    })
+
+    $(window).resize(function () {
+        if ($(window).width() > 750) {
+            $('.show-tree-box,.power-init').height($(window).height() - 146)
+        } else {
+            $('.show-tree-box,.power-init').height('auto')
+        }
+
+    }).trigger('resize')
+
+</script>
+{/block}

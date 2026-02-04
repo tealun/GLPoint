@@ -1,0 +1,16 @@
+<div class="sortvalues-container">
+    <input type="hidden"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    {if !empty($data.options)}
+    <div class="sort-list">
+        {assign name="values" value=":explode(',', $data.attrs.value)"/}
+        {foreach $values as $v}
+        <div class="sort-item" data-value="{$v}" {if isset($data.background) && is_array($data.background) && array_key_exists($v, $data.background)}style="background-color: {$data.background[$v]}"{/if}>{$data.options[$v]}</div>
+        {/foreach}
+    </div>
+    {else}
+    未定义options值列表
+    {/if}
+</div>

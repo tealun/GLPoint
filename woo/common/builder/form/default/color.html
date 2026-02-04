@@ -1,0 +1,9 @@
+<div class="woo-element-container">
+    <input type="{:isset($data.attrs.type) && in_array($data.attrs.type, ['text', 'hidden'])? $data.attrs.type : 'text'}"
+        {foreach $data.attrs as $key => $value}
+        {if $key != 'type'}
+        {$key}="{$value}"
+        {/if}
+        {/foreach}>
+    <div class="woo-colorpicker-select"></div>
+</div>

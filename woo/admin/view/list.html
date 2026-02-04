@@ -1,0 +1,14 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        {$table | raw}
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}

@@ -1,0 +1,39 @@
+<div class="woo-upload">
+    <div class="woo-upload-action">
+        <a href="javascript:;" class="layui-btn woo-theme-btn woo-upload-handle btn-5"><i class="layui-icon {if strpos($data.element, 'image') !==false}{if strpos($data.element, 'multi') ===false}layui-icon-picture{else}layui-icon-carousel{/if}{else/}layui-icon-file{/if}"></i>上传</a>
+        {if get_installed_addons('woofinder') && admin_link_power('attachement/index')}
+        <a href="javascript:;" class="layui-btn woo-theme-btn woo-upload-select btn-6"
+            {if strpos($data.element,'image') !==false}
+            data-url="{:addons_url('woofinder://index/index', ['filetype' => 'image', 'model' => $data.current_model])}"
+            {else}
+            data-url="{:addons_url('woofinder://index/index', ['model' => $data.current_model])}"
+            {/if}
+        ><i class="layui-icon woo-theme-btn layui-icon-cart"></i>选择</a>
+        {/if}
+    </div>
+    <ul class="woo-upload-preview  clearfix {if strpos($data.element, 'multi') !== false}multi-upload{/if}">
+        {if !empty($data.attrs.value)}
+        {assign name="$values" value="$data.attrs.value"/}
+        {if is_string($values)}{assign name="$values" value=":array($values)"/}{/if}
+        {foreach $values as $item}
+        {assign name="$ext" value=":get_ext($item)"}
+        <li data-file="{$item}" {if in_array($ext, ['jpg', 'jpeg', 'png','gif','webp'])}style="background-image: url('{:thumb($item, 100, 100)}');"{/if}>
+            {if !in_array($ext, ['jpg', 'jpeg', 'png','gif','webp'])}
+            <img src="{$root}static/woo/images/fileicon/{$ext}.png" onerror="this.src='{$root}static/woo/images/fileicon/file.png'" alt="">
+            {/if}
+            <div class="woo-upload-cover">
+                <a href="javascript:;" class="woo-upload-remove"><i class="layui-icon layui-icon-delete"></i></a>
+                <a href="javascript:;" class="woo-upload-prev"><i class="layui-icon layui-icon-left"></i></a>
+                <a href="javascript:;" class="woo-upload-next"><i class="layui-icon layui-icon-right"></i></a>
+                <a href="{$item}" target="_blank" class="woo-upload-link"><i class="layui-icon layui-icon-link"></i></a>
+            </div>
+        </li>
+        {/foreach}
+        {/if}
+    </ul>
+    {if isset($data.attrs.value) && is_array($data.attrs.value)}{assign name="$data.attrs.value" value=":json_encode($data.attrs.value)"/}{/if}
+    <input type="hidden"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+</div>

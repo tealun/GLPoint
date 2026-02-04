@@ -1,0 +1,89 @@
+<view class="container {{loading ? 'loading' : ''}}">
+  <view class="header">
+    <text class="title">{{isOperator ? '积分发放' : '积分申请'}}</text>
+    <!-- 新增申请列表入口 -->
+    <button class="list-btn" size="mini" bindtap="goToPointRequires">申请列表</button>
+  </view>
+
+  <view class="form-card">
+    <!-- 规则选择区域 -->
+    <view class="section">
+      <view class="section-title">规则选择</view>
+      
+      <picker class="picker-item" mode="selector" range="{{ruleCategories}}" range-key="category_name" bindchange="onCategoryChange">
+        <view class="picker-content">
+          <text class="label">一级分类</text>
+          <text class="value">{{selectedCategory ? selectedCategory.category_name : '请选择'}}</text>
+          <view class="count-badge">{{ruleCategories.length}}</view>
+        </view>
+      </picker>
+
+      <picker class="picker-item" mode="selector" range="{{subCategories}}" range-key="category_name" bindchange="onSubCategoryChange">
+        <view class="picker-content">
+          <text class="label">二级分类</text>
+          <text class="value">{{selectedSubCategory ? selectedSubCategory.category_name : '请选择'}}</text>
+          <view class="count-badge">{{subCategories.length}}</view>
+        </view>
+      </picker>
+
+      <picker class="picker-item" mode="selector" range="{{rules}}" range-key="rule_name" bindchange="onRuleChange">
+        <view class="picker-content">
+          <text class="label">具体规则</text>
+          <text class="value">{{selectedRule ? selectedRule.rule_name : '请选择'}}</text>
+          <view class="count-badge">{{rules.length}}</view>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 管理员专用：接收人选择 -->
+    <view class="section" wx:if="{{isOperator}}">
+      <view class="section-title">接收人</view>
+      <view class="employee-selection">
+        <picker class="picker-item" mode="selector" range="{{employeeOptions}}" range-key="name" bindchange="onEmployeeSelectChange">
+          <view class="picker-content">
+            <text class="label">接收人</text>
+            <text class="value">{{selectedEmployeeOption.name || '请选择'}}</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <!-- 积分信息 -->
+    <view class="section">
+      <view class="section-title">积分信息</view>
+      <view class="input-item">
+        <text class="label">奖励分值</text>
+        <input 
+          class="input" 
+          type="number" 
+          value="{{points}}" 
+          bindinput="onPointsInput"
+          placeholder="请输入积分值"
+        />
+      </view>
+      <view class="input-item">
+        <text class="label">奖励说明</text>
+        <textarea 
+          class="textarea" 
+          value="{{reason}}" 
+          bindinput="onReasonInput"
+          placeholder="请输入奖励说明"
+          maxlength="200"
+        ></textarea>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <button class="submit-btn" bindtap="submitForm">
+      {{isOperator ? '确认发放' : '提交申请'}}
+    </button>
+
+    <!-- 订阅消息按钮 - 仅在申请页面显示 -->
+    <view class="subscribe-section" wx:if="{{!isOperator}}">
+      <button class="subscribe-btn" bindtap="onSubscribeMessage">
+        订阅消息通知
+      </button>
+      <text class="subscribe-tip">订阅后可及时收到积分变动、审核结果等通知</text>
+    </view>
+  </view>
+</view>

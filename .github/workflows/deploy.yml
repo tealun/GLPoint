@@ -1,0 +1,192 @@
+name: 部署到生产服务器
+
+on:
+  push:
+    branches:
+      - main  # 当推送到 main 分支时触发
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 获取完整历史记录
+
+      - name: 设置 PHP 环境
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          extensions: mbstring, pdo_mysql, redis
+          coverage: none
+
+      - name: 安装 Composer 依赖
+        run: |
+          composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: 准备部署文件
+        run: |
+          # 创建排除文件列表
+          echo ".git/" > .deployignore
+          echo ".github/" >> .deployignore
+          echo "node_modules/" >> .deployignore
+          echo "tests/" >> .deployignore
+          echo ".env.example" >> .deployignore
+          echo "README.md" >> .deployignore
+          echo "docs/" >> .deployignore
+          
+          # 打包文件（排除不需要的）
+          tar -czf deploy.tar.gz \
+            --exclude-from=.deployignore \
+            --exclude='.env' \
+            --exclude='runtime/*' \
+            --exclude='public/uploads/*' \
+            .
+
+      - name: 部署到服务器
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            # 设置变量
+            PROJECT_DIR="${{ secrets.PROJECT_DIR }}"
+            BACKUP_DIR="${{ secrets.BACKUP_DIR }}"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            
+            echo "====== 开始部署 ======"
+            echo "时间: $(date '+%Y-%m-%d %H:%M:%S')"
+            
+            # 1. 备份当前版本
+            echo "1. 备份当前版本..."
+            mkdir -p $BACKUP_DIR
+            if [ -d "$PROJECT_DIR" ]; then
+              tar -czf $BACKUP_DIR/glpoint_$TIMESTAMP.tar.gz -C $PROJECT_DIR .
+              echo "备份完成: $BACKUP_DIR/glpoint_$TIMESTAMP.tar.gz"
+            fi
+            
+            # 2. 创建临时目录
+            echo "2. 创建临时目录..."
+            TEMP_DIR="/tmp/glpoint_deploy_$TIMESTAMP"
+            mkdir -p $TEMP_DIR
+            
+            # 3. 确保项目目录存在
+            mkdir -p $PROJECT_DIR
+            
+            # 4. 备份配置文件
+            echo "3. 备份配置文件..."
+            if [ -f "$PROJECT_DIR/.env" ]; then
+              cp $PROJECT_DIR/.env $TEMP_DIR/.env.backup
+            fi
+            if [ -d "$PROJECT_DIR/public/uploads" ]; then
+              cp -r $PROJECT_DIR/public/uploads $TEMP_DIR/uploads_backup
+            fi
+            if [ -d "$PROJECT_DIR/runtime" ]; then
+              cp -r $PROJECT_DIR/runtime $TEMP_DIR/runtime_backup
+            fi
+
+      - name: 上传部署包
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: "deploy.tar.gz"
+          target: "/tmp"
+
+      - name: 执行部署脚本
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            # 设置变量
+            PROJECT_DIR="${{ secrets.PROJECT_DIR }}"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            TEMP_DIR="/tmp/glpoint_deploy_$TIMESTAMP"
+            
+            # 5. 解压新代码
+            echo "4. 解压新代码..."
+            cd $PROJECT_DIR
+            tar -xzf /tmp/deploy.tar.gz
+            
+            # 6. 恢复配置文件
+            echo "5. 恢复配置文件..."
+            if [ -f "$TEMP_DIR/.env.backup" ]; then
+              cp $TEMP_DIR/.env.backup $PROJECT_DIR/.env
+              echo ".env 已恢复"
+            fi
+            
+            if [ -d "$TEMP_DIR/uploads_backup" ]; then
+              rm -rf $PROJECT_DIR/public/uploads
+              cp -r $TEMP_DIR/uploads_backup $PROJECT_DIR/public/uploads
+              echo "uploads 目录已恢复"
+            fi
+            
+            if [ -d "$TEMP_DIR/runtime_backup" ]; then
+              rm -rf $PROJECT_DIR/runtime
+              cp -r $TEMP_DIR/runtime_backup $PROJECT_DIR/runtime
+              echo "runtime 目录已恢复"
+            fi
+            
+            # 7. 设置权限
+            echo "6. 设置权限..."
+            chown -R ${{ secrets.WEB_USER || 'www' }}:${{ secrets.WEB_USER || 'www' }} $PROJECT_DIR
+            chmod -R 755 $PROJECT_DIR
+            chmod -R 777 $PROJECT_DIR/runtime
+            chmod -R 777 $PROJECT_DIR/public/uploads
+            
+            # 8. 清理缓存
+            echo "7. 清理缓存..."
+            cd $PROJECT_DIR
+            php think clear
+            php think optimize:route
+            php think optimize:schema
+            
+            # 9. 重启服务
+            echo "8. 重启 PHP-FPM..."
+            systemctl restart php-fpm || service php-fpm restart
+            
+            # 10. 清理临时文件
+            echo "9. 清理临时文件..."
+            rm -f /tmp/deploy.tar.gz
+            rm -rf $TEMP_DIR
+            
+            echo "====== 部署完成 ======"
+            echo "版本: $(cd $PROJECT_DIR && git log -1 --format='%H %s')"
+
+      - name: 健康检查
+        run: |
+          echo "执行健康检查..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_URL }}/api/index/index)
+          if [ $HTTP_CODE -eq 200 ]; then
+            echo "✅ 健康检查通过 (HTTP $HTTP_CODE)"
+          else
+            echo "❌ 健康检查失败 (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
+      - name: 发送部署通知
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            🚀 GLpoint 部署完成
+            
+            仓库: ${{ github.repository }}
+            分支: ${{ github.ref }}
+            提交: ${{ github.sha }}
+            作者: ${{ github.actor }}
+            状态: ${{ job.status }}
+            
+            时间: $(date '+%Y-%m-%d %H:%M:%S')

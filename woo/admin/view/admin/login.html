@@ -1,0 +1,178 @@
+{extend name="$extend_global"/}
+
+{block name="headscript"}
+<script>
+    if (top !== self) {
+        top.window.location = "{:url('login')}"
+    }
+</script>
+{/block}
+{block name="header"}
+{/block}
+{block name="content"}
+<!--[if IE]>
+<p style="text-align: center;padding-top:100px;">由于后台使用了高级语法，不支持IE浏览器；请使用高版本浏览器进入后台管理（建议浏览器：Firefox、Chrome）</p>
+<p><a href="http://www.firefox.com.cn/">下载Firefox浏览器</a></p>
+<p><a href="http://www.google.cn/chrome/browser//">下载Chrome浏览器</a></p>
+<div style="display:none">
+<![endif]-->
+{if setting('admin_login_bg')}
+<style>
+    body{ background-image: url("{:setting('admin_login_bg')}");}
+</style>
+{/if}
+<div id="login">
+    <h1>
+        <strong>{$admin_info.login_title}</strong>
+        <em class="en-font">Management System</em>
+    </h1>
+    <div class="user info">
+        <label>U</label>
+        <input type="text" name="username" id="username" class="en-font" placeholder="账号" autocomplete="off">
+    </div>
+    <div class="pwd info">
+        <label>P</label>
+        <input type="password" name="password" id="password" class="en-font" placeholder="密码" autocomplete="off">
+    </div>
+    <div class="code info">
+        <label>V</label>
+        <input type="text" name="captcha" class="en-font" placeholder="验证码" autocomplete="off">
+        <span class="vimg">
+            <img src="{:captcha_src()}" id="captchaimg" class="tooltip"
+                 onclick="this.src='{:captcha_src()}?'+Math.random()"/>
+        </span>
+    </div>
+    <div class="sub">
+        <input type="submit" id="loginSubmit" value="立即登录"/>
+    </div>
+    <div class="copy"><a href="{$admin_info.login_copyright_link|default='javascript:;'}" {if $admin_info.login_copyright_link}target="_blank"{/if}>{$admin_info.login_copyright}</a></div>
+</div>
+<div class="auth">
+    <div class="loading">
+        <div class="loader-inner ball-clip-rotate-multiple"></div>
+    </div>
+    <p>验证中...</p>
+</div>
+<!--[if lt IE 10]>
+</div>
+<![endif]-->
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    layui.use(['layer'], function () {
+        var layer = layui.layer;
+        /*{if !empty($error)}*/
+        layer.msg('{$error}');
+        /*{/if}*/
+    });
+
+    $('body').keydown(function (e) {
+        if (e.keyCode == 13) {
+            $('#loginSubmit').trigger('click');
+        }
+    })
+
+    var isLogining = false;
+    $('#loginSubmit').click(function () {
+        if (isLogining) return false;
+        isLogining = true;
+        layer.closeAll();
+        var username = $.trim($('#username').val());
+        if (!username) {
+            layer.alert('请填写用户名', {
+                shade: 0,
+                anim: 2,
+                offset: '10px',
+                time: 3000,
+                icon: 2
+            });
+            isLogining = false;
+            return false;
+        }
+        var password = $.trim($('#password').val());
+        if (!password) {
+            layer.alert('请填写密码', {
+                shade: 0,
+                anim: 2,
+                offset: '10px',
+                time: 3000,
+                icon: 2
+            });
+            isLogining = false;
+            return false;
+        }
+        var captcha = $.trim($('input[name="captcha"]').val());
+        /*{if !$isDebug}*/
+        if (!captcha) {
+            layer.alert('请填写验证码', {
+                shade: 0,
+                anim: 2,
+                offset: '10px',
+                time: 3000,
+                icon: 2
+            });
+            isLogining = false;
+            return false;
+        }
+        /*{/if}*/
+        $('#login').addClass('checking');
+        setTimeout(function () {
+            $('#login').animate({
+                'margin-left': -450
+            }, 200, 'easeOutQuint')
+            $('.auth').addClass('checking');
+        }, 500)
+        var redirect = '{$redirect}';
+
+        var rsa_field_list = '';
+        if (password && window.woo_script_vars.rsa_field && $.inArray('password', window.woo_script_vars.rsa_field) >= 0) {
+            password = WOO.setEncrypt(password);
+            rsa_field_list = 'password';
+        }
+        setTimeout(function () {
+            $.post("{:url('Admin/ajaxLogin')}", {
+                username: username,
+                password: password,
+                captcha: captcha,
+                RSA_FIELD_LIST : rsa_field_list
+            }, function (data) {
+                isLogining = false;
+                var json = data;
+                if (json['result'] == 'success') {
+                    layer.alert(json['message'], {
+                        shade: 0,
+                        anim: 2,
+                        offset: '10px',
+                        time: 3000,
+                        title: '成功',
+                        icon: 6
+                    });
+                    setTimeout(function () {
+                        location.href = redirect;
+                    }, 800)
+                } else {
+                    $('#login').animate({
+                        'margin-left': -180
+                    }, 200, 'easeOutQuint')
+                    $('.auth').removeClass('checking');
+                    setTimeout(function () {
+                        $('#login').removeClass('checking');
+                    }, 250)
+                    setTimeout(function () {
+                        $('#captchaimg').trigger('click');
+                        layer.alert(json['message'], {
+                            shade: 0,
+                            anim: 2,
+                            offset: '10px',
+                            time: 3000,
+                            title: '失败',
+                            icon: 5
+                        });
+                    }, 550)
+                }
+            })
+        }, 1500)
+    })
+</script>
+{/block}

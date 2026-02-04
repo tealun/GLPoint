@@ -1,0 +1,7 @@
+<div class="bank-card-container">
+    <input type="text"
+           {foreach $data.attrs as $key => $value}
+    {if $key != 'name'}{$key}="{$value}"{/if}
+    {/foreach}>
+    <input type="hidden" name="{$data.attrs.name ?? ''}" value="{$data.attrs.value ?? ''}">
+</div>

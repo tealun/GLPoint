@@ -1,0 +1,78 @@
+<view class="container">
+  <view class="header">
+    <text class="title">积分申诉</text>
+  </view>
+
+  <view class="form-card">
+    <!-- 无可申诉记录提示 -->
+    <view wx:if="{{noRecordTip}}" class="status-message">
+      {{noRecordTip}}
+    </view>
+
+    <!-- 有可申诉记录时展示 -->
+    <block wx:if="{{!noRecordTip}}">
+      <!-- 记录选择器（多条记录时） -->
+      <view class="form-item" wx:if="{{pointRecords.length > 1}}">
+        <text class="label">选择记录</text>
+        <picker 
+          class="picker" 
+          bindchange="onRecordChange" 
+          range="{{pointRecords}}" 
+          range-key="shortContent"
+        >
+          <view class="picker-text">
+            {{selectedRecord ? selectedRecord.shortContent : '请选择积分记录'}}
+          </view>
+        </picker>
+      </view>
+
+      <!-- 记录详情 -->
+      <view class="detail-section" wx:if="{{selectedRecord}}">
+        <view class="detail-item">
+          <text class="detail-label">时间：</text>
+          <text class="detail-value">{{selectedRecord.create_time}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">变化：</text>
+          <text class="detail-value {{selectedRecord.score >= 0 ? 'positive' : 'negative'}}">
+            {{selectedRecord.score >= 0 ? '+' : ''}}{{selectedRecord.score}}
+          </text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">原因：</text>
+          <text class="detail-value">{{selectedRecord.remark}}</text>
+        </view>
+      </view>
+
+      <!-- 申诉表单 -->
+      <view class="form-item">
+        <text class="label">申诉理由</text>
+        <textarea 
+          class="appeal-input"
+          placeholder="请详细描述您的申诉理由..."
+          maxlength="300"
+          value="{{appealText}}"
+          bindinput="onAppealInput"
+        ></textarea>
+        <text class="counter">{{appealText.length}}/300</text>
+      </view>
+
+      <button 
+        class="submit-btn"
+        disabled="{{isSubmitting || !selectedRecord}}"
+        bindtap="submitAppeal"
+      >
+        {{isSubmitting ? '提交中...' : '提交申诉'}}
+      </button>
+    </block>
+  </view>
+  <!-- 新增：我的申诉入口（文本链接样式） -->
+  <view style="margin-top: 60rpx; text-align: center;">
+    <text 
+      style="color:#44BBBB;font-size:30rpx;text-decoration:underline;letter-spacing:2rpx;cursor:pointer;"
+      bindtap="goAppealList"
+    >
+      我的申诉
+    </text>
+  </view>
+</view>

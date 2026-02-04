@@ -1,0 +1,21 @@
+{if isset($data.options)}
+<select
+    {foreach $data.attrs as $key => $attr}
+        {if $key != 'value'}
+        {$key}="{$attr}"
+        {/if}
+    {/foreach} lay-search>
+    <option value="" {if empty($data.attrs.value)}selected{/if}>{:__('Please choose')}≡{$data.label}≡</option>
+    {foreach $data.options as $value => $title}
+        {if !is_array($title)}
+            <option value="{$value}" {if isset($data.attrs.value) && $data.attrs.value == $value}selected{/if}>{$title | raw}</option>
+        {else/}
+            <optgroup label="{$value}">
+                {foreach $title as $value1 => $title1}
+                <option value="{$value1}" {if isset($data.attrs.value) && $data.attrs.value == $value1}selected{/if}>{$title1 | raw}</option>
+                {/foreach}
+            </optgroup>
+        {/if}
+    {/foreach}
+</select>
+{/if}

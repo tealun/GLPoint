@@ -1,0 +1,88 @@
+{if !empty($data.fields)}
+{if !empty($data.error) && is_string($data.error)}
+{$data.error}
+{/if}
+<div class="woo-together2-container"
+     data-max="{$data.attrs.max ?? 0}"
+     data-pk="{$data.together.pk}"
+     data-display="{$data.together.display}"
+     data-insert="{$data.attrs.insert ?? ''}"
+     data-tab="{$data.attrs.insert ?? ''}"
+     data-delete-url="{:url($data.together.foreign . '/delete')}"
+     data-cname="{$data.together.cname}"
+>
+    {if !empty($data.attrs.value) && is_string($data.attrs.value) && is_json($data.attrs.value)}
+    {assign name="$data.attrs.value" value=":json_decode($data.attrs.value,true)"/}
+    {/if}
+
+    {if !empty($data.error) && is_array($data.error)}
+    {assign name="errors" value="$data.error"/}
+    {else}
+    {assign name="errors" value=":json_decode('[]',true)"/}
+    {/if}
+    <script>
+        // 打印错误信息 可以F12查看分析
+        console.log({:json_encode($errors)})
+    </script>
+    <div class="together2-tab">
+        <h2 class="tab-title">编辑{$data.together.cname}</h2>
+        <div class="tab-header">
+            <ul>
+                {if !empty($data.together.tab)}
+                {foreach $data.together.tab as $index => $item}
+                <li class="{if $index == 0}current{/if}" data-id="{$data.attrs.value[$index][$data.together.pk] ?? 0}">
+                    <cite>{$item ?: '编辑中...'}</cite>
+                    {if empty($data.multiattrs.cancel_delete)}
+                    <i class="layui-icon layui-icon-close tab-close-handler"></i>
+                    {/if}
+                </li>
+                {/foreach}
+                {/if}
+            </ul>
+        </div>
+        <div class="tab-body">
+            {if !empty($data.together.tab)}
+            {foreach $data.together.tab as $index => $item}
+            <div class="tab-body-item {if $index == 0}current{/if}">
+                {foreach $data.fields as $field => $item}
+                {if $field != $data.together.pk}<div class="layui-form-item">{/if}
+                {if $field != $data.together.pk}{$item.label_tag|raw}{/if}
+                {if $field != $data.together.pk}<div class="layui-input-block ">{/if}
+                    {if isset($data.attrs.value[$index][$field])}
+                    {assign name="$item.attrs.value" value="$data.attrs.value[$index][$field]"/}
+                    {:str_replace('PLACEINDEX', $index,\\woo\\common\\builder\\Form::renderHtml($item))}
+                    {else /}
+                    {:str_replace('PLACEINDEX', $index, $item.html)}
+                    {/if}
+                    {if $field != $data.together.pk}</div>{/if}
+                {if $errors && $field != $data.together.pk && isset($errors[$index]) && isset($errors[$index][$field])}
+                <div class="woo-form-item-error"><i class="layui-icon layui-icon-survey woo-error-close"></i><i class="point"></i>{$errors[$index][$field]}</div>
+                {/if}
+                {if $field != $data.together.pk}</div>{/if}
+                {/foreach}
+            </div>
+            {/foreach}
+            {/if}
+        </div>
+        {if empty($data.multiattrs.cancel_create)}
+        <div class="tab-next">
+            <a href="javascript:;" class="layui-btn woo-theme-btn tab-insert-handler">新增一个{$data.together.cname}</a>
+        </div>
+        {/if}
+    </div>
+    <script type="text/html" class="form-demo">
+        <div class="tab-body-item">
+            {foreach $data.fields as $field => $item}
+            {if $field != $data.together.pk}<div class="layui-form-item">{/if}
+            {if $field != $data.together.pk}{$item.label_tag|raw}{/if}
+            {if $field != $data.together.pk}<div class="layui-input-block ">{/if}
+                {:str_replace('PLACEINDEX', 0, $item.html)}
+                {if $field != $data.together.pk}</div>{/if}
+            {if $field != $data.together.pk}</div>{/if}
+            {/foreach}
+        </div>
+    </script>
+</div>
+{else /}
+未定义表单项"fields"属性
+{/if}

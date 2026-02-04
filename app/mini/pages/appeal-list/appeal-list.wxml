@@ -1,0 +1,21 @@
+<view class="appeal-list-page">
+  <!-- 选项卡 -->
+  <view class="tabs">
+    <view class="tab {{activeTab === 0 ? 'active' : ''}}" bindtap="onTabChange" data-index="0">申诉中</view>
+    <view class="tab {{activeTab === 1 ? 'active' : ''}}" bindtap="onTabChange" data-index="1">已处理</view>
+  </view>
+  <!-- 列表区域 -->
+  <block wx:if="{{filteredList.length}}">
+    <block wx:for="{{filteredList}}" wx:key="id">
+      <view class="appeal-item" data-id="{{item.id}}" bindtap="onItemTap">
+        <view class="reason">{{item.shortReason}}</view>
+        <view class="status">{{item.statusText}}</view>
+        <view class="date">{{item.created_at}}</view>
+        <!-- ...不再展示回复内容... -->
+      </view>
+    </block>
+  </block>
+  <block wx:else>
+    <view class="no-data">{{noDataTip}}</view>
+  </block>
+</view>

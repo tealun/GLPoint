@@ -1,0 +1,50 @@
+<view class="detail-container" wx:if="{{detail}}">
+  <view class="row">
+    <text class="label">申请时间：</text>
+    <text>{{detail.create_time}}</text>
+  </view>
+  <view class="row">
+    <text class="label">申请内容：</text>
+    <text>{{detail.content}}</text>
+  </view>
+  <view class="row">
+    <text class="label">状态：</text>
+    <text>{{detail.status == 0 ? '申请中' : '已处理'}}</text>
+  </view>
+
+  <!-- 操作员且申请中，显示操作区 -->
+  <block wx:if="{{isOperator && detail.status == 0}}">
+    <view class="row">
+      <text class="label">分值：</text>
+      <radio-group class="score-radio" bindchange="onScoreTypeChange">
+        <label>
+          <radio value="fixed" checked="{{scoreType=='fixed'}}" />申请分值({{detail.score}})
+        </label>
+        <label>
+          <radio value="custom" checked="{{scoreType=='custom'}}" />自定义
+        </label>
+      </radio-group>
+      <input wx:if="{{scoreType=='custom'}}" class="custom-score-input" type="number" placeholder="输入分值" value="{{customScore}}" bindinput="onCustomScoreInput"/>
+    </view>
+    <view class="btn-row">
+      <button class="accept-btn" type="primary" bindtap="onAccept">接受</button>
+      <button class="reject-btn" type="warn" bindtap="onReject">拒绝</button>
+    </view>
+  </block>
+
+  <!-- 已处理状态，显示审核信息 -->
+  <block wx:if="{{detail.status == 1}}">
+    <view class="row">
+      <text class="label">审核时间：</text>
+      <text>{{detail.audit_time || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="label">审核人：</text>
+      <text>{{detail.auditor_name || '-'}}</text>
+    </view>
+    <view class="row">
+      <text class="label">积分数：</text>
+      <text>{{detail.score}}</text>
+    </view>
+  </block>
+</view>

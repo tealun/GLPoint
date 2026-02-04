@@ -1,0 +1,28 @@
+<div class="woo-b-header {$header_info.class ?? ''}">
+    <div class="woo-header-many clearfix">
+        <div class="title">{$header_info.title ?: $params.action ?? ''}{if !empty($header_info.ex_title)}<a href="{$header_info.ex_title_href ?? 'javascript:;'}" class="extitle">{$header_info.ex_title}</a>{/if}</div>
+        {if count($action_list ?? []) > 0}
+        <div class="line"></div>
+        <div class="action">
+            <div class="layui-btn-group">
+                {foreach $action_list ?? [] as $button}
+                <a href="{$button.url}" class="{$button.class} layui-btn layui-btn-sm  {if $button.js_func}javascript{/if}" rel="{$button.js_func}">{if $button.icon}<i class="{:return_icon_class($button.icon)}"></i>{/if}{$button.title}</a>
+                {/foreach}
+            </div>
+        </div>
+        {else}
+        <div class="action"></div>
+        {/if}
+        <div class="right-tools">
+            <ul class="grid">
+                <li title="全屏" id="frameToFull"><i class="layui-icon layui-icon-screen-full"></i></li>
+                {if !empty($model_link_url)}<li data-title="模型配置" title="模型配置" id="tableToModelSet" data-url="{$model_link_url}"><i class="woo-icon woo-icon-program-full"></i></li>{/if}
+                {if !empty($field_link_url)}<li data-title="模型字段" title="模型字段" id="tableToFieldSet" data-url="{$field_link_url}"><i class="woo-icon woo-icon-shuxing"></i></li>{/if}
+                <li title="返回主页" id="returnToIndex" class="hidden"><i class="layui-icon layui-icon-home"></i></li>
+            </ul>
+        </div>
+    </div>
+    {if !empty($header_info.tip)}
+    <div class="tip"><i class="woo-icon woo-icon-tishi"></i> {$header_info.tip ?? ''}</div>
+    {/if}
+</div>

@@ -1,0 +1,9 @@
+<script type="text/plain"
+        {foreach $data.attrs as $key => $value}
+            {if $key != 'value'}
+            {$key}="{$value}"
+            {/if}
+        {/foreach}>{if isset($data.attrs.value)}{$data.attrs.value | raw}{/if}</script>
+{if !get_installed_addons('ueditor')}
+<div style="color: red;padding-top: 5px;">未安装"ueditor"插件，编辑器的上传和文件相关功能可能不能正常使用</div>
+{/if}

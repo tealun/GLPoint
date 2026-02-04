@@ -1,0 +1,23 @@
+/.idea
+/.vscode
+/vendor
+*.log
+.env
+
+# 数据库配置（如果使用本地配置文件）
+/data/config/database.php
+
+# API层配置（如果包含敏感信息）
+/app/api/config/wechat.php
+
+# 小程序本地开发配置（不提交，但保留 .example 模板）
+/app/mini/project.private.config.json
+!/app/mini/project.private.config.example.json
+/app/mini/config/index.js
+!/app/mini/config/index.example.js
+
+# 开发文档（不提交）
+/docs/ARCHITECTURE.md
+/docs/DEVELOPMENT.md
+/docs/SECURITY_CONFIG.md
+/docs/GIT_SECURITY_GUIDE.md

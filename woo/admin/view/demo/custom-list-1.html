@@ -1,0 +1,125 @@
+{extend name="$extend_list"/}
+
+{block name="script"}
+<script type="text/html" id="customOrderHeader">
+    <table class="layui-table custom-woo-table">
+        <colgroup>
+            <col width="50">
+            <col width="30%">
+            <col width="10%">
+            <col width="10%">
+            <col width="20%">
+            <col width="10%">
+        </colgroup>
+        <thead>
+        <tr>
+            <th align="center">{{-checkboxChooseRender()}}</th>
+            <th>商品</th>
+            <th>{{-customFieldSortRender('id', '单价/数量')}}</th>
+            <th>{{-customFieldSortRender('list_order', '实付金额')}}</th>
+            <th>买家/收货人</th>
+            <th>交易状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+    </table>
+</script>
+<script type="text/html" id="customOrderBody">
+    <div class="custom-order-list">
+        <table class="layui-table custom-woo-table">
+            <colgroup>
+                <col width="50">
+                <col width="30%">
+                <col width="10%">
+                <col width="10%">
+                <col width="20%">
+                <col width="10%">
+            </colgroup>
+            <tbody>
+            {{# for (var i in d.list) { }}
+                <tr class="item-header">
+                    <td rowspan="4" align="center">{{-checkboxRender(d.list[i])}}</td>
+                    <td colspan="6" class="item-header-info">
+                        <div class="order-header">
+                            <span>订单号：2021080422532001</span>
+                            <span>创建日期：2020-04-17 15:59:50</span>
+                            <span>来源：微信小程序</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="item-content">
+                    <td>
+                        <div class="order-image">
+                            <img src="{{woo_script_vars .absroot}}static/images/admin/testimg.jpg">
+                        </div>
+                        <div class="order-info">
+                            <a class="title">荣耀10青春版 幻彩渐变 2400万AI自拍 全网通版4GB+64GB 渐变蓝 移动联通电信4G全面屏手机</a>
+                            <div class="row">颜色:黑色 CPU:I5 屏幕:15寸</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="order-price-num text-align-right">
+                            <div class="price">6899.00</div>
+                            <div class="num">×1件</div>
+                        </div>
+                    </td>
+                    <td rowspan="2">
+                        <div class="text-align-right">
+                            <div class="money">￥6899.00</div>
+                            <div class="row">运费：0.00</div>
+                            <div class="row"><a href="javascript:;" class="update-money">修改金额</a></div>
+                        </div>
+                    </td>
+                    <td rowspan="2">
+                        <div class="contact-info">
+                            <div class="row username">zhangsan</div>
+                            <div class="row contact">三哥<span class="mobile">13688886666</span></div>
+                            <div class="row">北京市-北京市-东城区 测试详细地址</div>
+                        </div>
+                    </td>
+                    <td rowspan="2">
+                        <div class="text-align-center">
+                            <div class="row status">交易成功</div>
+                            <div class="row"><a href="" class="detail-btn">详情</a></div>
+                        </div>
+                    </td>
+                    <td rowspan="2">
+                        <div class="text-align-center order-actions">
+                            <div class="row"><a href="" style="color: #5fb878">修改订单</a></div>
+                            <div class="row"><a href="" class="tabletool" rel="woo_item_tool" style="color: #f56c6c">取消订单</a></div>
+                            <div class="row"><a href="" data-tip="请确认是否发货？" class="tabletool" rel="woo_item_tool" style="color: #ff976a">确定发货</a></div>
+                            <div class="row"><a href="" style="color: #909399">备注</a></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="item-content">
+                    <td>
+                        <div class="order-image">
+                            <img src="{{woo_script_vars .absroot}}static/images/admin/testimg.jpg">
+                        </div>
+                        <div class="order-info">
+                            <a class="title">荣耀10青春版 幻彩渐变 2400万AI自拍 全网通版4GB+64GB 渐变蓝 移动联通电信4G全面屏手机</a>
+                            <div class="row">颜色:黑色 CPU:I5 屏幕:15寸</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="order-price-num text-align-right">
+                            <div class="price">6899.00</div>
+                            <div class="num">×1件</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="remark-row"><td colspan="6">卖家备注：这是备注</td></tr>
+                <tr class="item-separation">
+                    <td colspan="7"></td>
+                </tr>
+            {{# } }}
+            </tbody>
+        </table>
+    </div>
+</script>
+
+<script type="text/html" id="customOrderFooter">
+
+</script>
+{/block}

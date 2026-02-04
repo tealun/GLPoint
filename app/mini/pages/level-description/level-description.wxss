@@ -1,0 +1,374 @@
+.container {
+  min-height: 100vh;
+  background: #f8f8f8;
+  padding-bottom: 40rpx;
+}
+
+/* 页面标题 */
+.page-title {
+  font-size: 36rpx;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 30rpx;
+  color: #333;
+}
+
+/* 文章内容 */
+.content {
+  margin: 30rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  min-height: 300rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.8;
+}
+
+.content-inner {
+  padding: 30rpx;
+}
+
+/* 加载中样式 */
+.loading .content-inner {
+  opacity: 0.6;
+}
+
+.loading-text {
+  text-align: center;
+  color: #999;
+  padding: 40rpx 0;
+}
+
+/* 富文本内容样式 */
+rich-text {
+  display: block;
+}
+
+.header {
+  background: #44BBBB;
+  padding: 40rpx 30rpx 24rpx 30rpx;
+  color: #fff;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 500;
+  flex: 1;
+  text-align: center;
+  color: #fff;
+}
+
+.refresh-btn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2rpx 8rpx rgba(68,187,187,0.10);
+  margin-left: 18rpx;
+  font-size: 40rpx;
+  color: #44BBBB;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.level-desc-text {
+  font-size: 28rpx;
+  color: #444;
+  margin-bottom: 30rpx;
+  line-height: 1.7;
+}
+
+.level-table {
+  width: 100%;
+  border-radius: 8rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  margin-top: 12rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 24rpx rgba(225,91,140,0.06);
+}
+
+.level-table-row {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1rpx solid #eee;
+  background: #fff;
+}
+
+.level-table-row.active {
+  background: linear-gradient(90deg, #fff0f6 0%, #ffe4ec 100%);
+  border-left: 6rpx solid #e15b8c;
+  font-weight: bold;
+  color: #e15b8c;
+  box-shadow: 0 2rpx 8rpx rgba(225,91,140,0.08);
+  position: relative;
+  z-index: 1;
+}
+
+.level-table-header {
+  background: #f0f7fa;
+  font-weight: bold;
+}
+
+.level-table-cell {
+  flex: 1;
+  padding: 18rpx 10rpx;
+  font-size: 26rpx;
+  color: #333;
+  word-break: break-all;
+}
+
+.level-table-row:last-child {
+  border-bottom: none;
+}
+
+.empty-text {
+  text-align: center;
+  color: #bbb;
+  padding: 30rpx 0;
+  font-size: 26rpx;
+}
+
+.level-motivation {
+  margin-top: 30rpx;
+  padding: 24rpx 0 0 0;
+  color: #1a8cff;
+  font-size: 28rpx;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.level-motivation-card {
+  margin: 36rpx auto 0 auto;
+  padding: 32rpx 24rpx 28rpx 24rpx;
+  background: linear-gradient(100deg, #fff7fa 0%, #eaf6ff 100%);
+  border-radius: 18rpx;
+  box-shadow: 0 4rpx 24rpx rgba(225,91,140,0.10);
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  max-width: 90vw;
+  min-height: 80rpx;
+}
+
+.motivation-icon {
+  font-size: 48rpx;
+  color: #e15b8c;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+
+.motivation-text {
+  font-size: 28rpx;
+  color: #444;
+  line-height: 1.8;
+  word-break: break-all;
+  flex: 1;
+}
+
+.motivation-level {
+  color: #e15b8c;
+  font-weight: bold;
+}
+
+.iconfont {
+  font-family: "iconfont";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-decoration: none;
+  text-align: center;
+  text-transform: none;
+  line-height: 1;
+  /* 你可以根据实际项目引入 iconfont 或替换为 emoji */
+}
+
+/* 移除梅花相关 */
+.plum-blossom {
+  display: none;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 40rpx 30rpx 24rpx 30rpx;
+  background: #44BBBB;
+  position: relative;
+}
+
+.avatar {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  margin-right: 32rpx;
+  background: #fff;
+  object-fit: cover;
+  box-shadow: 0 2rpx 8rpx rgba(68,187,187,0.10);
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.user-main-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 18rpx; /* 用户名和徽章间距 */
+}
+
+.username {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 0;
+}
+
+.user-level-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(90deg, #fff0f6 0%, #eaf6ff 100%);
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(225,91,140,0.08);
+  padding: 4rpx 18rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #e15b8c;
+  gap: 8rpx;
+}
+
+.badge-icon-mini {
+  font-size: 28rpx;
+  margin-left: 4rpx;
+}
+
+.badge-label-mini {
+  color: #888;
+  font-size: 20rpx;
+  margin-right: 2rpx;
+}
+
+.badge-name-mini {
+  color: #e15b8c;
+  font-weight: bold;
+  font-size: 24rpx;
+  margin-right: 2rpx;
+}
+
+/* 移除进度条相关样式 */
+.user-level-progress-wrap {
+  display: none;
+}
+.user-level-progress-bar {
+  display: none;
+}
+.user-level-progress-inner {
+  display: none;
+}
+.user-level-progress-text {
+  display: none;
+}
+.progress-next {
+  display: none;
+}
+
+.user-level-badge-mini {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(90deg, #fff0f6 0%, #eaf6ff 100%);
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(225,91,140,0.08);
+  padding: 4rpx 18rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #e15b8c;
+  margin-top: 8rpx;
+  gap: 8rpx;
+}
+
+.badge-icon-mini {
+  font-size: 28rpx;
+  margin-right: 4rpx;
+}
+
+.badge-label-mini {
+  color: #888;
+  font-size: 20rpx;
+  margin-right: 2rpx;
+}
+
+.badge-name-mini {
+  color: #e15b8c;
+  font-weight: bold;
+  font-size: 24rpx;
+  margin-right: 2rpx;
+}
+
+.user-level-badge-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 32rpx;
+  margin-bottom: 0;
+  padding-top: 18rpx;
+}
+
+.user-level-badge {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #fff0f6 0%, #eaf6ff 100%);
+  border-radius: 32rpx;
+  box-shadow: 0 2rpx 12rpx rgba(225,91,140,0.08);
+  padding: 14rpx 36rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #e15b8c;
+  gap: 18rpx;
+  width: 92vw;
+  max-width: 700rpx;
+  min-width: 0;
+  box-sizing: border-box;
+  justify-content: center;
+}
+
+.badge-label {
+  color: #888;
+  font-size: 26rpx;
+  margin-right: 8rpx;
+}
+
+.badge-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.badge-name {
+  color: #e15b8c;
+  font-weight: bold;
+  font-size: 30rpx;
+}
+
+.badge-icon {
+  font-size: 38rpx;
+  margin-left: 2rpx;
+}
+
+.badge-range {
+  color: #888;
+  font-size: 24rpx;
+  margin-left: 12rpx;
+}

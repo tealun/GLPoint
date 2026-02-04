@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>数据库升级管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <style>
+        .upgrade-card {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .upgrade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .version-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .version-current {
+            background: #5FB878;
+            color: #fff;
+        }
+        .version-available {
+            background: #FFB800;
+            color: #fff;
+        }
+        .version-old {
+            background: #F0F0F0;
+            color: #999;
+        }
+        .upgrade-info {
+            color: #666;
+            line-height: 1.8;
+        }
+        .status-icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+        .current-version {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .current-version h2 {
+            margin: 0;
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .current-version p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <!-- 当前版本 -->
+            <div class="current-version">
+                <h2>{$current_version}</h2>
+                <p>当前数据库版本</p>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="layui-btn-container" style="margin-bottom: 20px;">
+                <button class="layui-btn layui-btn-primary" onclick="checkUpgrade()">
+                    <i class="layui-icon layui-icon-refresh"></i> 检查更新
+                </button>
+                <button class="layui-btn layui-btn-normal" onclick="upgradeAll()">
+                    <i class="layui-icon layui-icon-upload"></i> 一键升级到最新版本
+                </button>
+                <button class="layui-btn layui-btn-warm" onclick="backupDatabase()">
+                    <i class="layui-icon layui-icon-download-circle"></i> 备份数据库
+                </button>
+            </div>
+
+            <!-- 升级脚本列表 -->
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <h3>可用的升级脚本</h3>
+                </div>
+                <div class="layui-card-body">
+                    {volist name="upgrade_list" id="item"}
+                    <div class="upgrade-card">
+                        <div class="upgrade-header">
+                            <div>
+                                <span class="version-badge {eq name='item.is_installed' value='1'}version-old{else/}version-available{/eq}">
+                                    {$item.version}
+                                </span>
+                                <strong style="margin-left: 15px; font-size: 16px;">{$item.title}</strong>
+                            </div>
+                            <div>
+                                {eq name="item.is_installed" value="1"}
+                                    <span class="status-icon" style="color: #5FB878;">
+                                        <i class="layui-icon layui-icon-ok-circle"></i> 已安装
+                                    </span>
+                                {else/}
+                                    <button class="layui-btn layui-btn-sm layui-btn-normal" 
+                                            onclick="upgradeVersion('{$item.version}', '{$item.title}')">
+                                        <i class="layui-icon layui-icon-upload"></i> 立即升级
+                                    </button>
+                                {/eq}
+                            </div>
+                        </div>
+                        <div class="upgrade-info">
+                            <p><strong>描述：</strong>{$item.description}</p>
+                            <p><strong>发布日期：</strong>{$item.date}</p>
+                            <p><strong>脚本文件：</strong>{$item.file}</p>
+                        </div>
+                    </div>
+                    {/volist}
+
+                    {empty name="upgrade_list"}
+                    <div style="text-align: center; padding: 50px; color: #999;">
+                        <i class="layui-icon layui-icon-face-smile" style="font-size: 48px;"></i>
+                        <p style="margin-top: 20px;">暂无可用的升级脚本</p>
+                    </div>
+                    {/empty}
+                </div>
+            </div>
+
+            <!-- 升级说明 -->
+            <div class="layui-card" style="margin-top: 20px;">
+                <div class="layui-card-header">
+                    <h3>升级说明</h3>
+                </div>
+                <div class="layui-card-body">
+                    <blockquote class="layui-elem-quote">
+                        <p><i class="layui-icon layui-icon-tips" style="color: #FFB800;"></i> <strong>升级前建议：</strong></p>
+                        <ol style="margin-left: 20px; line-height: 2;">
+                            <li>在执行升级前，强烈建议先备份数据库</li>
+                            <li>确保有数据库的完整备份，以便出现问题时恢复</li>
+                            <li>升级过程中请勿关闭页面或刷新浏览器</li>
+                            <li>如果升级失败，系统会自动回滚到升级前的状态</li>
+                            <li>建议在业务低峰期进行升级操作</li>
+                        </ol>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/layui/layui.js"></script>
+<script>
+layui.use(['layer', 'jquery'], function(){
+    var layer = layui.layer;
+    var $ = layui.jquery;
+
+    // 检查更新
+    window.checkUpgrade = function() {
+        layer.load();
+        $.get('/admin/database_upgrade/checkStatus', function(res) {
+            layer.closeAll('loading');
+            if (res.code === 1) {
+                if (res.data.has_upgrade) {
+                    layer.msg('发现新版本：' + res.data.latest_version, {icon: 6});
+                } else {
+                    layer.msg('已是最新版本', {icon: 1});
+                }
+            } else {
+                layer.msg(res.msg || '检查失败', {icon: 2});
+            }
+        });
+    };
+
+    // 单个版本升级
+    window.upgradeVersion = function(version, title) {
+        layer.confirm('确定要升级到 ' + version + ' 吗？<br><br><span style="color: #FF5722;">升级前请确保已备份数据库！</span>', {
+            title: '升级确认 - ' + title,
+            icon: 3,
+            btn: ['立即升级', '取消']
+        }, function(index) {
+            layer.close(index);
+            var loadIndex = layer.load(2, {content: '正在升级，请稍候...'});
+            
+            $.post('/admin/database_upgrade/upgrade', {
+                version: version
+            }, function(res) {
+                layer.close(loadIndex);
+                if (res.code === 1) {
+                    layer.alert('升级成功！', {
+                        icon: 1,
+                        title: '成功',
+                        btn: ['刷新页面']
+                    }, function() {
+                        location.reload();
+                    });
+                } else {
+                    layer.alert('升级失败：' + (res.msg || '未知错误'), {
+                        icon: 2,
+                        title: '失败'
+                    });
+                }
+            }).fail(function() {
+                layer.close(loadIndex);
+                layer.msg('请求失败', {icon: 2});
+            });
+        });
+    };
+
+    // 一键升级所有
+    window.upgradeAll = function() {
+        layer.confirm('确定要一键升级到最新版本吗？<br><br><span style="color: #FF5722;">升级前请确保已备份数据库！</span>', {
+            title: '批量升级确认',
+            icon: 3,
+            btn: ['开始升级', '取消']
+        }, function(index) {
+            layer.close(index);
+            var loadIndex = layer.load(2, {content: '正在批量升级，请稍候...'});
+            
+            $.post('/admin/database_upgrade/upgradeAll', {}, function(res) {
+                layer.close(loadIndex);
+                if (res.code === 1) {
+                    var msg = '升级成功！<br>已升级版本：' + res.data.upgraded.join(', ');
+                    layer.alert(msg, {
+                        icon: 1,
+                        title: '成功',
+                        btn: ['刷新页面']
+                    }, function() {
+                        location.reload();
+                    });
+                } else {
+                    var errorMsg = '升级失败！';
+                    if (res.data && res.data.failed) {
+                        errorMsg += '<br>失败的版本：<br>';
+                        res.data.failed.forEach(function(item) {
+                            errorMsg += '- ' + item.version + ': ' + item.error + '<br>';
+                        });
+                    }
+                    layer.alert(errorMsg, {
+                        icon: 2,
+                        title: '失败'
+                    });
+                }
+            }).fail(function() {
+                layer.close(loadIndex);
+                layer.msg('请求失败', {icon: 2});
+            });
+        });
+    };
+
+    // 备份数据库
+    window.backupDatabase = function() {
+        layer.confirm('确定要备份当前数据库吗？', {
+            title: '备份确认',
+            icon: 3,
+            btn: ['开始备份', '取消']
+        }, function(index) {
+            layer.close(index);
+            var loadIndex = layer.load(2, {content: '正在备份，请稍候...'});
+            
+            $.post('/admin/database_upgrade/backup', {}, function(res) {
+                layer.close(loadIndex);
+                if (res.code === 1) {
+                    layer.msg('备份成功！文件：' + res.data.file, {
+                        icon: 1,
+                        time: 3000
+                    });
+                } else {
+                    layer.msg('备份失败：' + (res.msg || '未知错误'), {icon: 2});
+                }
+            }).fail(function() {
+                layer.close(loadIndex);
+                layer.msg('请求失败', {icon: 2});
+            });
+        });
+    };
+});
+</script>
+</body>
+</html>

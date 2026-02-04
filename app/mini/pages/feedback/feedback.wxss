@@ -1,0 +1,136 @@
+.container {
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f8f8f8; /* 应用背景色 */
+}
+
+/* 页面标题 */
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30rpx;
+  color: #333;
+}
+
+/* 顶部标题样式 */
+.header {
+  background: #44BBBB; /* 应用主色调 */
+  padding: 40rpx 30rpx;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  color: #fff; /* 应用标题文字色 */
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* 描述文本 */
+.description {
+  margin: 0 auto 20px auto;
+  max-width: 600px;
+  text-align: center;
+}
+
+.description-text {
+  font-size: 16px;
+  color: #666; /* 应用描述文字色 */
+  line-height: 1.5;
+}
+
+/* 输入框卡片 */
+.form-card {
+  margin: 0 auto 20px auto;
+  max-width: 600px;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05); /* 应用卡片样式 */
+}
+.feedback-card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  text-align: center; /* 确保内容居中 */
+}
+.feedback-input {
+  width: calc(100% - 20px); /* 调整宽度，避免与卡片边距冲突 */
+  height: 120px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+  color: #333;
+  background-color: #fff; /* 应用输入框样式 */
+  margin: 0 auto; /* 居中显示 */
+  display: block; /* 确保块级布局 */
+}
+
+.feedback-input::placeholder {
+  color: #aaa;
+}
+
+/* 动作按钮 */
+.action-buttons {
+  display: flex;
+  justify-content: center; /* 确保按钮组水平居中 */
+  gap: 20px; /* 扩大按钮间隔 */
+  margin: 0 auto; /* 移除多余的 margin-bottom，确保居中 */
+  max-width: 600px;
+  padding: 0;
+}
+
+.submit-btn, .reset-btn {
+  flex: none; /* 防止按钮拉伸 */
+  width: 40%; /* 调整按钮宽度为更小 */
+  padding: 8px 12px; /* 调整内边距 */
+  font-size: 14px; /* 调整字体大小 */
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  background-color: #44BBBB; /* 应用提交按钮样式 */
+}
+
+.reset-btn {
+  background-color: #ff4d4f;
+  color: #fff; /* 应用重置按钮样式 */
+}
+
+.submit-btn.submitting {
+  background-color: #999;
+}
+
+/* 分割线 */
+.divider {
+  width: 100%;
+  height: 1px;
+  background-color: #e0e0e0; /* 应用分割线色彩 */
+  margin: 20px auto;
+}
+
+/* 跳转按钮 */
+.navigation-links {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.nav-link {
+  display: inline-block;
+  margin: 0 15px;
+  font-size: 16px;
+  color: #44BBBB; /* 使用项目主色 */
+  text-decoration: none;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-link:hover {
+  background-color: #e6f7ff; /* 添加著色背景 */
+  color: #007aff; /* 悬停时使用辅助色 */
+}

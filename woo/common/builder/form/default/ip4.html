@@ -1,0 +1,14 @@
+<div class="woo-ip4-container">
+    <input type="hidden"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <div class="input-list clearfix">
+        <input type="text" class="layui-input ip-each" maxlength="3"><em>·</em>
+        <input type="text" class="layui-input ip-each" maxlength="3"><em>·</em>
+        <input type="text" class="layui-input ip-each" maxlength="3"><em>·</em>
+        <input type="text" class="layui-input ip-each" maxlength="3">
+    </div>
+</div>
+
+

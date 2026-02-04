@@ -1,0 +1,67 @@
+<view class="container">
+  <!-- 顶部用户信息 -->
+  <view class="user-info">
+    <image class="avatar" src="{{userInfo.avatar_url}}" mode="aspectFill"></image>
+    <view class="user-details">
+      <view class="user-main-info">
+        <text class="username">
+          {{userInfo.nickname ? userInfo.nickname : '未设置用户名'}}
+        </text>
+        <!-- 积分等级徽章 -->
+        <view wx:if="{{userInfo.level}}" class="user-level-badge-mini">
+          <text class="badge-name-mini">{{userInfo.level}}</text>
+          <text class="badge-icon-mini">🥇</text>
+        </view>
+        <text wx:else class="user-level">积分等级：未定义</text>
+      </view>
+    </view>
+    <view class="refresh-btn" bindtap="refreshUserInfo">
+      <image src="/assets/refresh.png" style="width:36px;height:36px;margin-right: 30px;" mode="aspectFit"></image>
+    </view>
+  </view>
+
+  <!-- 积分详情卡 -->
+  <view class="point-card">
+    <view class="point-item">
+      <text class="point-label">累计积分</text>
+      <text class="point-value">{{userInfo.total_score}}</text>
+    </view>
+    <view class="point-item">
+      <text class="point-label">当月积分</text>
+      <text class="point-value">{{userInfo.month_score}}</text>
+    </view>
+    <view class="point-item">
+      <text class="point-label">本周积分</text>
+      <text class="point-value">{{userInfo.week_score}}</text>
+    </view>
+  </view>
+
+  <!-- 操作列表 -->
+  <view class="action-list">
+    <view class="action-item" bindtap="goToPointList">
+      <text>积分明细</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="action-item" bindtap="goToAppeal">
+      <text wx:if="{{is_operator}}">申诉处理</text>
+      <text wx:else>积分申诉</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="action-item" bindtap="goToEditProfile">
+      <text>资料修改</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="action-item" bindtap="goToLevelDescription">
+      <text>等级说明</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="action-item" bindtap="goToPointRules">
+      <text>积分规则</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="action-item" bindtap="goToFeedback">
+      <text>建议反馈</text>
+      <text class="arrow">></text>
+    </view>
+  </view>
+</view>

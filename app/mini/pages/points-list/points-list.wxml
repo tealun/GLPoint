@@ -1,0 +1,41 @@
+<view class="container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <text class="header-title">日期</text>
+    <text class="header-title">积分</text>
+    <button class="filter-btn" bindtap="openFilterOptions">筛选</button>
+  </view>
+
+  <!-- 筛选选项弹出层 -->
+  <view class="filter-options" wx:if="{{showFilter}}">
+    <view class="filter-item" data-type="thisWeek" bindtap="filterPoints">本周</view>
+    <view class="filter-item" data-type="lastWeek" bindtap="filterPoints">上周</view>
+    <view class="filter-item" data-type="thisMonth" bindtap="filterPoints">本月</view>
+    <view class="filter-item" data-type="lastMonth" bindtap="filterPoints">上月</view>
+    <view class="filter-item" data-type="threeMonths" bindtap="filterPoints">三个月</view>
+    <view class="filter-item" data-type="halfYear" bindtap="filterPoints">半年</view>
+    <view class="filter-item" data-type="oneYear" bindtap="filterPoints">一年</view>
+    <view class="filter-item" data-type="all" bindtap="filterPoints">全部</view>
+    <button class="close-btn" bindtap="closeFilterOptions">关闭</button>
+  </view>
+
+  <!-- 积分列表 -->
+  <view class="points-list">
+    <block wx:for="{{points}}" wx:key="id">
+      <view class="points-item" bindtap="viewPointDetails" data-id="{{item.id}}">
+        <view style="display:flex;justify-content:space-between;align-items:center;">
+          <text class="date">{{item.date}}</text>
+          <text class="score">{{item.score}} 分</text>
+        </view>
+        <view class="remark-row">
+          <text class="remark-text">{{item.remark}}</text>
+        </view>
+      </view>
+    </block>
+    <!-- 新增：无数据提示 -->
+    <view class="no-data-tip" wx:if="{{points.length === 0}}">
+      <view>当前周期内没有积分记录，</view>
+      <view>请通过“筛选”选择其他周期</view>
+    </view>
+  </view>
+</view>

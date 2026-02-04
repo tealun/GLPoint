@@ -1,0 +1,103 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 顶部用户信息部分 */
+.user-info {
+  background-color: #44BBBB;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  color: white;
+  position: relative;
+}
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 2rpx solid white;
+  margin-right: 20rpx;
+}
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left:20rpx;
+  padding-bottom:20rpx;
+}
+.username {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+.user-level {
+  font-size: 28rpx;
+  margin-top: 10rpx;
+}
+.refresh-btn {
+  margin-left: 20rpx;
+  font-size: 60rpx;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* 积分详情卡样式 */
+.point-card {
+  margin: 30rpx 20rpx 0 20rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(68, 187, 187, 0.08);
+  display: flex;
+  justify-content: space-between;
+  padding: 30rpx 0;
+}
+
+.point-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1rpx solid #f0f0f0;
+}
+
+.point-item:last-child {
+  border-right: none;
+}
+
+.point-label {
+  font-size: 26rpx;
+  color: #888;
+  margin-bottom: 10rpx;
+}
+
+.point-value {
+  font-size: 40rpx;
+  color: #44BBBB;
+  font-weight: bold;
+}
+/* 操作列表 */
+.action-list {
+  margin-top: 20rpx;
+  background-color: white;
+}
+.action-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #eee;
+  font-size: 32rpx;
+  color: #333;
+}
+.action-item:last-child {
+  border-bottom: none;
+}
+.arrow {
+  font-size: 36rpx;
+  color: #999;
+}

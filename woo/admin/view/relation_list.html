@@ -1,0 +1,67 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div style="background: #fff;" class="relation-list-container">
+    {$table | raw}
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    function mytest() {
+        layTable.on('checkbox(basicTable)', function(obj){
+            var pk = tabAttr[currentTabName]['table']['pk'];
+            var dis = tabAttr[currentTabName]['table']['relation_display'];
+            var list = [];
+            if (obj.type != 'all') {
+                list = [obj.data];
+            } else {
+                list = layTable.cache[window[window.currentTabName + 'Render'].config.id];
+            }
+
+            if (obj.checked) {
+                if (!window.relationTemp) {
+                    window.relationTemp = {pks : [], vals:[]};
+                }
+                for (var i in list) {
+                    var id = list[i][pk].toString();
+                    if ($.inArray(id, window.relationTemp.pks) < 0) {
+                        window.relationTemp.pks.push(id);
+                        window.relationTemp.vals.push({
+                            "id" : list[i][pk],
+                            "display" : list[i][dis]
+                        });
+                    }
+                    if (window.relationDelTemp) {
+                        var index = $.inArray(id, window.relationDelTemp.pks);
+                        if (index >= 0) {
+                            window.relationDelTemp.pks.splice(index, 1);
+                        }
+                    }
+                }
+            } else {
+                if (!window.relationDelTemp) {
+                    window.relationDelTemp = {pks : []};
+                }
+                var values = parent.$(parent.relationFrameBtn).parent().find('input').val().split(',');
+                for (var i in list) {
+                    var id = list[i][pk].toString();
+                    var index = $.inArray(id, window.relationTemp.pks);
+                    if (index >= 0) {
+                        window.relationTemp.pks.splice(index,1);
+                        window.relationTemp.vals.splice(index,1);
+                    }
+                    index = $.inArray(id, window.relationDelTemp.pks);
+                    if (index < 0 && $.inArray(id, values) >= 0) {
+                        window.relationDelTemp.pks.push(id);
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+
+{/block}

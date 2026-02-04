@@ -1,0 +1,98 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<style>
+    .icon-tips{ line-height: 26px;padding: 0 10px;}
+    .icon-tips p{ color: #999;}
+    .icon-tips p a{ margin-right: 10px;}
+</style>
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="by-your-self" style="padding: 15px">
+            <div class="icon-tips">
+                <h4>图标使用说明</h4>
+                <p>1、目前后台支持的图标有：layui框架图标、pearadmin模板图标、系统扩展图标、自定义图标。</p>
+                <p>2、layui框架图标、pearadmin模板图标自行查阅第三方文档和遵循第三方协议进行使用。</p>
+                <p>
+                    3、系统扩展图标来自于"iconfont图标库"中4家作者分别是(点击可跳转)：<br>
+                    <a class="woo-theme-color" href="https://www.iconfont.cn/user/detail?spm=a313x.7781069.0.d996e962c&uid=4193520&nid=8N7pZVovdwFv" target="_blank">小假哥</a> (55个图标；系统已支付作者进行授权)；<br>
+                    <a class="woo-theme-color" href="https://www.iconfont.cn/user/detail?spm=a313x.7781069.0.d996e962c&uid=5688188&nid=PBVMujrUCcf7" target="_blank">吃一个菠萝</a> (5个图标；系统已支付作者进行授权)；<br>
+                    <a class="woo-theme-color" href="https://www.iconfont.cn/user/detail?spm=a313x.7781069.0.d996e962c&uid=158352&nid=VkGXObJ00wsL" target="_blank">myicon图标库-可免费商用_不用私信</a> (50个图标，作者允许免费商用；系统已打赏作者)；<br>
+                    <a class="woo-theme-color" href="https://www.iconfont.cn/user/detail?spm=a313x.7781069.0.d996e962c&uid=207078&nid=XqJypKOvb165" target="_blank">ChenCJ</a> (5个图标，作者允许免费商用但需标明出处"不可直接出售图标，不可二改哦"，这里系统已进行标明；系统已打赏作者)。<br>
+                </p>
+                <p>4、系统扩展的115个图标只允许在本系统的后台、中台进行界面装饰使用；其他开发场景如需要使用，需自行联系作者进行授权使用，产生的一切版权纠纷、法律责任和系统无关。
+                </p>
+                <p>5、自定义图标，由开发者自行扩展，请合法合规进行扩展；开发者自行扩展的图标所产生的一切版权纠纷、法律责任和系统无关。</p>
+                <p>6、使用方式：
+                    {literal}
+<pre class="layui-code" lay-encode="true">
+// 静态使用：
+<i class="layui-icon layui-icon-heart-fill"></i>
+<i class="woo-icon woo-icon-fuzhi"></i>
+// 模板动态使用，可通过函数"return_icon_class"自动识别图标前缀并返回：
+<i class="{:return_icon_class('layui-icon-heart-fill')}"></i>
+<i class="{:return_icon_class(动态值)}"></i>
+// js中动态使用，可用通过方法"WOO.returnIconClass"自动识别图标前缀并返回：
+var icon = '<i class="' + WOO.returnIconClass('layui-icon-heart-fill') +'"></i>';
+var icon = '<i class="' + WOO.returnIconClass(动态值) +'"></i>';
+</pre>
+                {/literal}
+                </p>
+            </div>
+            <script>
+                function layuiReady() {
+                    layui.use(['code'], function(){
+                        layui.code({
+                            title : '方法代码',
+                            height : '360px',
+                            encode: true,
+                            skin: 'notepad',
+                            about: false
+                        });
+                    });
+                }
+            </script>
+
+            <div class="woo-icon-container" style="height: auto;">
+                <div class="woo-icon-list" style="display: block;position:static;width: auto;max-height: none;overflow: auto;border: 0;box-shadow: none;">
+                    {if !empty($icons.custom)}
+                    <h4>自定义图标({:count($icons.custom)}个)</h4>
+                    <ul class="grid">
+                        {foreach $icons.custom as $item}
+                        <li data-icon="{$item.icon}" class="{if isset($data.attrs.value) && $data.attrs.value == $item.icon}woo-icon-selected{/if} woo-copy" data-text="{:return_icon_class($item.icon)}">
+                            <div class="woo-icon-show"><i class="{:return_icon_class($item.icon)}"></i></div>
+                            <div class="woo-icon-name" title="{$item.name}">{$item.name}</div>
+                        </li>
+                        {/foreach}
+                    </ul>
+                    {/if}
+                    <h4>UI框架图标({:count($icons.layui)}个)</h4>
+                    <ul class="grid">
+                        {foreach $icons.layui as $item}
+                        <li  data-icon="{$item.icon}" class="{if isset($data.attrs.value) && $data.attrs.value == $item.icon}woo-icon-selected{/if} woo-copy" data-text="{:return_icon_class($item.icon)}">
+                            <div class="woo-icon-show"><i class="{:return_icon_class($item.icon)}"></i></div>
+                            <div class="woo-icon-name" title="{$item.name}">{$item.name}</div>
+                        </li>
+                        {/foreach}
+                    </ul>
+                    <h4>系统扩展图标({:count($icons.woo)}个)</h4>
+                    <ul class="grid">
+                        {foreach $icons.woo as $item}
+                        <li data-icon="{$item.icon}" class="{if isset($data.attrs.value) && $data.attrs.value == $item.icon}woo-icon-selected{/if} woo-copy" data-text="{:return_icon_class($item.icon)}">
+                            <div class="woo-icon-show"><i class="{:return_icon_class($item.icon)}"></i></div>
+                            <div class="woo-icon-name" title="{$item.name}">{$item.name}</div>
+                        </li>
+                        {/foreach}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}
+

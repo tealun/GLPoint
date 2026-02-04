@@ -1,0 +1,45 @@
+.detail-container {
+  background: #fff;
+  padding: 32rpx;
+  border-radius: 16rpx;
+  margin: 32rpx;
+  box-shadow: 0 2rpx 8rpx #f0f1f2;
+}
+.row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  font-size: 30rpx;
+}
+.label {
+  color: #888;
+  min-width: 160rpx;
+}
+.score-radio {
+  display: flex;
+  gap: 40rpx;
+  margin-left: 16rpx;
+}
+.custom-score-input {
+  margin-left: 24rpx;
+  border: 1px solid #eee;
+  border-radius: 8rpx;
+  padding: 8rpx 16rpx;
+  width: 180rpx;
+  font-size: 28rpx;
+}
+.btn-row {
+  display: flex;
+  gap: 32rpx;
+  margin-top: 32rpx;
+}
+.accept-btn {
+  flex: 1;
+  background: #44bbbb;
+  color: #fff;
+}
+.reject-btn {
+  flex: 1;
+  background: #f56c6c;
+  color: #fff;
+}

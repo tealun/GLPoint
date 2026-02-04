@@ -1,0 +1,10 @@
+{if isset($data.attrs.value) && is_array($data.attrs.value)}{assign name="$data.attrs.value" value=":json_encode($data.attrs.value)"/}{/if}
+<input type="hidden"
+       {foreach $data.attrs as $key => $value}
+{$key}="{$value}"
+{/foreach}>
+{if !empty($data.is_holder)}
+<span class="hidden-holder">
+    <input type="text" readonly class="layui-input layui-disabled" value="{$data.attrs.value ?? ''}">
+</span>
+{/if}

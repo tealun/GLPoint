@@ -1,0 +1,6 @@
+{if isset($data.attrs.value) && is_array($data.attrs.value)}{assign name="$data.attrs.value" value=":json_encode($data.attrs.value)"/}{/if}
+<input type="hidden" {foreach $data.attrs as $key => $value}
+{$key}="{$value}"
+{/foreach}>
+<div class="woo-edit-container clearfix"></div>
+<a class="javascript woo-theme-btn is-keyvalue woo-array-edit-btn {$data.custom_class.btn?:'layui-btn'}" rel="woo_array_edit">编辑</a>

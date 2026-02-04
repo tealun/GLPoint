@@ -1,0 +1,88 @@
+{extend name="global"/}
+{block name="content"}
+<div class="steps">
+    <ul class="grid">
+        <li >
+            <span class="step">1</span>检测环境
+        </li>
+        <li >
+            <span class="step">2</span>验证信息
+        </li>
+        <li class="current">
+            <span class="step">3</span>数据安装
+        </li>
+        <li>
+            <span class="step">4</span>完成安装
+        </li>
+    </ul>
+</div>
+
+<div id="insLog">
+    <ul class="list" id="insRslt">
+    </ul>
+</div>
+<div class="bottom-btns" style="color: #36b368;">
+    <i class="layui-icon layui-icon-loading layui-icon layui-anim layui-anim-rotate layui-anim-loop"></i>
+    正在安装，请稍后...期间请不要刷新或关闭浏览器
+</div>
+{/block}
+{block name="script"}
+<script>
+    var insRslt = $('#insRslt');
+    function layuiReady() {
+        install(0);
+    }
+
+    function install(index) {
+        $.ajax({
+            url: "{:url('install')}",
+            type: 'GET',
+            data:{
+                index: index
+            },
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.result == 1) {
+                    insRslt.append('<li><i class="layui-icon layui-icon-ok"></i>'+data.message+'</li>');
+                } else if(data.result == 0) {
+                    insRslt.append('<li><i class="layui-icon layui-icon-close"></i>'+data.message+'<br><pre>'+data.data.sql+'</pre><br><pre>'+data.data.exception+'</pre></li>');
+                } else if(data.result == 2) {
+                    insRslt.append('<li><i class="layui-icon layui-icon-ok"></i>数据库安装完成！</li>');
+                    if (data.data.error) {
+                        layer.alert('本次安装过程中，共' + data.data.error + '个SQL执行失败，可能您在此数据库下已经安装过WOOAdmin系统。确实有疑问，请加入我们QQ群：314833523。');
+                    } else {
+                        $('#insLog').scrollTop(8888888);
+                        setAdmin();
+                    }
+                } else if(data.result == -1) {
+                    insRslt.append('<li><i class="layui-icon layui-icon-close"></i>'+data.message+'<a href="{$root}?s=install" style="color:red;margin-left:10px;">重新安装</a></li>');
+                }
+                $('#insLog').scrollTop(8888888);
+                if (!(data.result == 2 || data.result == -1)) {
+                    install(index + 1)
+                }
+            }
+        })
+    }
+    
+    function setAdmin() {
+        $.ajax({
+            url: "{:url('setAdminUser')}",
+            type: 'GET',
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.result == 'success') {
+                    insRslt.append('<li><i class="layui-icon layui-icon-ok"></i>' + data.message + '</li>');
+                    $('.bottom-btns').html('<i class="layui-icon layui-icon-ok"></i>恭喜您！所有程序安装完成，感谢您的支持.页面即将跳转...');
+                    setTimeout(function () {
+                        window.location = "{:url('step5')}";
+                    }, 1000);
+                } else {
+                    insRslt.append('<li><i class="layui-icon layui-icon-close"></i>'+data.message +'</li>');
+                }
+                $('#insLog').scrollTop(8888888);
+            }
+        })
+    }
+</script>
+{/block}

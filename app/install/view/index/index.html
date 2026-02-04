@@ -1,0 +1,73 @@
+{extend name="global"/}
+{block name="content"}
+<div class="copyright">
+    <p><b>WOOAdmin软件以及基于WOOAdmin的官方应用使用协议</b></p>
+    <p>WOOAdmin版权所有 © https://www.wooadmin.cn</p>
+    <p>感谢您选择WOOAdmin后台管理开发框架, 希望我们的产品能够帮您把应用发展的更快、更好、更强！</p>
+    <p>现将WOOAdmin软件以及基于WOOAdmin的官方应用使用协议，整理如下：</p>
+    <p>1、软件必须经过WOOAdmin官方授权以后方可使用；未经授权擅自使用者，我们有权利根据事态轻重追究相应法律责任。</p>
+    <p>2、授权者不能将WOOAdmin用于开发不符合「国家法律法规」的相关应用和项目；一经发现将无条件取消授权资格，并根据事态轻重上报国家公安机关。</p>
+    <p>3、授权者如果使用WOOAdmin开发的商业项目（如ERP / CRM / CMS / 商城等），需保留我们的源码头注释和出处。</p>
+    <p>4、WOOAdmin所有版本以及基于WOOAdmin的官方应用，授权者只有使用权，没有著作权，二开的源码内容所有权归属于授权者。</p>
+    <p>5、授权者务必尊重知识产权，严格保证不恶意传播产品源码、不得直接对授权的产品本身进行二次转售或倒卖、不得对授权的产品进行简单包装后声称为自己的产品等。否则我们有权利收回产品授权，并根据事态轻重追究相应法律责任。</p>
+    <p>6、我们有义务为授权者提供有效期内的产品下载、更新和维护，一旦过期，授权者无法享有相应权限；终身授权则不受限制。</p>
+    <p>7、https://www.wooadmin.cn 拥有最终解释权。</p>
+    <p><b>WOOAdmin免责声明：</b></p>
+    <p>1、WOOAdmin仅为一款方便开发者构建各类应用管理员后台的基础框架，本身不包含任何非法的功能，欢迎广大授权者进行监督。</p>
+    <p>2、使用WOOAdmin构建的任何项目和应用中包含的信息内容以及导致的任何版权纠纷和法律争议及后果，WOOAdmin官方不承担任何责任。</p>
+    <p>3、您一旦选择安装并使用WOOAdmin，即被视为完全理解并接受本协议的各项条款，在享有上述条款授予的权力的同时，受到相关的约束和限制。</p>
+</div>
+<div class="bottom-btns">
+    <button class="layui-btn layui-btn-disabled" id="goto_test2">阅读中(<span>0</span>)</button>
+    <a href="javascript:;"  class="disagree">不同意协议</a>
+</div>
+{/block}
+{block name="script"}
+<script>
+    function layuiReady() {
+        var step = 1,
+            next_url = "{:iurl('step2')}",
+            time = localStorage.getItem('disagree') ? parseInt(localStorage.getItem('disagree')) : 15;
+        $('#goto_test2').find('span').html(time);
+        var timer = setInterval(function () {
+            time--;
+            $('#goto_test2').find('span').html(time);
+            if (time < 0) {
+                step = 2;
+                $('#goto_test2').removeClass('layui-btn-disabled').addClass().html('同意协议');
+                $('.disagree').show();
+                clearInterval(timer);
+            }
+        }, 1000);
+        $('.disagree').click(function () {
+            layer.msg('感谢支持！程序处理中...', {
+                icon : 5,
+                time: 1000
+            }, function () {
+                localStorage.setItem('disagree', 60);
+                $.get('{:iurl("disagree")}');
+                $('html').remove();
+            })
+
+        })
+        $('#goto_test2').click(function () {
+            if (step == 1) {
+                return false;
+            }
+            if (step == 2) {
+                step = 3;
+                $('#goto_test2').html('下一步>>');
+                $('.disagree').hide();
+                return false;
+            }
+            layer.load({
+                time: 1000
+            });
+            $.get('{:iurl("agree")}', function () {
+                layer.closeAll();
+                location.href = next_url;
+            });
+        })
+    }
+</script>
+{/block}

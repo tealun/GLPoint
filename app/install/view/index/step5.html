@@ -1,0 +1,17 @@
+{extend name="global"/}
+{block name="content"}
+<div class="finish">
+    <div class="success">恭喜您！所有程序安装成功！</div>
+    <div class="success-tips">
+        为了您的项目安全，强烈建议安装完成后立即将项目app目录下的“install”文件夹删除！如果中途要修改数据库相关配置，您可在：“项目名称/config/database.php”中按照说明进行修改。
+    </div>
+</div>
+<div class="bottom-btns">
+    <a href="{$root}" class="layui-btn">访问前台</a><a href="{$root}run" class="layui-btn">访问后台</a>
+</div>
+{/block}
+{block name="script"}
+<script>
+
+</script>
+{/block}

@@ -1,0 +1,13 @@
+<div class="woo-amap-container">
+    <div class="amap-value">
+        {if isset($data.attrs.value) && is_array($data.attrs.value)}{assign name="$data.attrs.value" value=":json_encode($data.attrs.value)"/}{/if}
+        <input type="text"
+               {foreach $data.attrs as $key => $value}
+        {$key}="{$value}"
+        {/foreach}>
+    </div>
+    <div class="amap-search">
+        <input type="text" class="layui-input" placeholder="输入要搜索的地址">
+    </div>
+    <div class="amap-map"></div>
+</div>

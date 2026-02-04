@@ -1,0 +1,10 @@
+{foreach $data->getHiddenItems() as $item}
+    {$item.html| raw}
+{/foreach}
+{foreach $data->getVisibleItems() as $item}
+<tr>
+    <td>{$item.label_tag| raw}</td>
+    <td>{$item.html| raw}</td>
+    <td>{$item.tip| raw}</td>
+</tr>
+{/foreach}

@@ -1,0 +1,49 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+
+        <div class="woo-code">
+            {if $error ?? ''}
+            <div class="admin_message error">
+                <div class="notification">
+                    <span class="icon"></span>{$error}
+                </div>
+            </div>
+            {/if}
+
+            {if $model_exists ?? false}
+            <div class="admin_message warn">
+                <div class="notification">
+                    <span class="icon"></span>模型文件已经存在，请选择替换或自行手动处理代码
+                </div>
+            </div>
+            {/if}
+
+<pre class="layui-code">
+{$content}
+</pre>
+            <div style="text-align: center;padding-top: 15px;">
+                <a href="{:url('createModel', ['id' => $data.id,'force' => $force_code])}" class="layui-btn">替换代码</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function layuiReady() {
+        layui.use('code', function(){
+            layui.code({
+                title : '模型代码',
+                height : (($(window).height() - 275) > 300 ? $(window).height() - 275 : 300)  +'px',
+                encode: true,
+                skin: 'notepad',
+                about: false
+            });
+        });
+    }
+</script>
+{/block}

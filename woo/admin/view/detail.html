@@ -1,0 +1,82 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="woo-detail">
+            <div class="loading" style="text-align: center;padding-top: 50px;"><i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i></div>
+        </div>
+    </div>
+</div>
+{include file="$common_templet_file"/}
+{include file="$woo_templet_file"/}
+<script type="text/html" id="renderData">
+    <table class="layui-table" lay-even>
+        <tbody>
+        {{# for (var i in d.form) { }}
+            {{# if (d.data == undefined || d.data[i] == undefined) { }}
+            {{# continue }}
+            {{# } }}
+            <tr>
+                <th class="woo-detail-field">{{d.form[i].name ? d.form[i].name : i}}</th>
+                <td class="woo-detail-content">
+                    <div class="woo-detail-show">{{-showField(d.form[i], d.data, i)}}</div>
+                </td>
+            </tr>
+        {{# } }}
+        </tbody>
+    </table>
+</script>
+<script>
+    var assignData = {:json_encode($data)};
+    var assignForm = {:json_encode($form)};
+    var assignWithForm = {:json_encode($with_form)};
+
+    //console.log(assignData, assignForm, assignWithForm)
+
+    function showField(col, data, field) {
+        if (!col.detail.templet) {
+            col.detail.templet = '#show';
+        }
+        if (col.detail.templet.charAt(0) == '#' && $(col.detail.templet + 'Templet').length) {
+            col.detail.templet = $(col.detail.templet + 'Templet').html();
+        }
+        data.this = col;
+        try {
+            return layTpl(col.detail.templet).render(data);
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function renderData(data) {
+        return layTpl($('#renderData').html()).render(data)
+    }
+
+    function layuiReady() {
+        layui.use(['laytpl'], function () {
+            window.layTpl = layui.laytpl;
+            $('.woo-detail').find('.loading').remove();
+            $('.woo-detail').append(renderData({"form" : assignForm, "data" : assignData}));
+            for (var i in assignWithForm) {
+                var html = '<div class="detail-title">关联：' + assignWithForm[i].title + '</div>';
+                if (['belongsTo', 'hasOne', 'belongsToThrough', 'hasOneThrough'].indexOf(assignWithForm[i].type) >= 0) {
+                    html += renderData({"form" : assignWithForm[i].form, "data" : assignData[i]});
+                } else {
+                    for (var j = 0; j < assignData[i].length; j++) {
+                        html += renderData({"form" : assignWithForm[i].form, "data" : assignData[i][j]});
+                    }
+                }
+                $('.woo-detail').append(html);
+            }
+        })
+    }
+</script>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+{/block}
+

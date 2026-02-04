@@ -1,0 +1,11 @@
+<view>
+  <block wx:for="{{feedbackList}}" wx:key="id">
+    <view bindtap="goToFeedbackDetail" data-id="{{item.id}}">
+      <text>{{item.time}}</text>
+      <text>{{item.content}}</text>
+      <text>{{item.adopted ? '已采纳' : '未采纳'}}</text>
+      <text>回复数: {{item.replies}}</text>
+      <text>{{item.closed ? '已关闭' : '未关闭'}}</text>
+    </view>
+  </block>
+</view>

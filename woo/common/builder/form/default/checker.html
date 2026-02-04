@@ -1,0 +1,24 @@
+{if !isset($data.is_show) || (isset($data.is_show) && !$data.is_show)}
+<input type="hidden" value="{$data.options.no}" name="{$data.attrs.name?:''}">
+<input type="checkbox"
+    {foreach $data.attrs as $key => $value}
+        {if $key != 'value'}
+        {$key}="{$value}"
+        {/if}
+    {/foreach}
+    value="{$data.options.yes}"
+    {if isset($data.attrs.value) && $data.attrs.value == $data.options.yes}checked{/if}>
+{else /}
+<input type="hidden"
+    {foreach $data.attrs as $key => $value}
+        {if $key != 'value'}
+        {$key}="{$value}"
+        {/if}
+    {/foreach}
+    value="{$data.attrs.value ?? $data.options.no}" name="{$data.attrs.name ?: ''}">
+    {if $data.attrs.value ?? $data.options.no}
+    <div class="layui-unselect layui-form-switch layui-form-onswitch layui-disabled" lay-skin="_switch"><em>{$data['lay-text'][0] ?? 'Y'}</em><i></i></div>
+    {else}
+    <div class="layui-unselect layui-form-switch layui-disabled" lay-skin="_switch"><em>{$data['lay-text'][1] ?? 'N'}</em><i></i></div>
+    {/if}
+{/if}

@@ -1,0 +1,56 @@
+<view class="appeal-detail-page">
+  <block wx:if="{{loading}}">
+    <view class="loading">加载中...</view>
+  </block>
+  <block wx:elif="{{error}}">
+    <view class="error">{{error}}</view>
+  </block>
+  <block wx:else>
+    <!-- 1. 积分记录 -->
+    <view class="section">
+      <view class="section-title">积分记录</view>
+      <view class="section-content">
+        <view>时间：{{record.create_time || '-'}}</view>
+        <view>积分：{{record.score || '-'}}</view>
+        <view>描述：{{record.remark || '-'}}</view>
+      </view>
+    </view>
+    <!-- 2. 申诉内容 -->
+    <view class="section">
+      <view class="section-title">申诉内容</view>
+      <view class="section-content">
+        <view>申诉时间：{{appeal.create_time || '-'}}</view>
+        <view>申诉理由：{{appeal.reason || '-'}}</view>
+      </view>
+    </view>
+    <!-- 3. 处理回复 -->
+    <view class="section">
+      <view class="section-title">处理情况</view>
+      <view class="section-content">
+        <view>处理状态：{{statusText}}</view>
+        <block wx:if="{{showReplyForm}}">
+          <textarea
+            class="reply-input"
+            placeholder="请输入回复内容"
+            value="{{replyInput}}"
+            bindinput="onReplyInput"
+            auto-height
+            maxlength="200"
+          />
+          <view class="reply-btns">
+            <button class="btn accept" type="primary" loading="{{submitting}}" bindtap="onSubmitReply">接受</button>
+            <button class="btn reject" type="warn" loading="{{submitting}}" bindtap="onRejectReply">拒绝</button>
+          </view>
+        </block>
+        <block wx:elif="{{showProcessing}}">
+          <view>正在处理中，请耐心等待...</view>
+        </block>
+        <block wx:else>
+          <view>回复时间：{{reply.update_time || '-'}}</view>
+          <view>回复内容：{{reply.reply || '-'}}</view>
+          <view wx:if="{{reply.reply_user_id}}">回复人ID：{{reply.reply_user_id}}</view>
+        </block>
+      </view>
+    </view>
+  </block>
+</view>

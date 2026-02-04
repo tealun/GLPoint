@@ -1,0 +1,24 @@
+{extend name="$extend_tree"/}
+
+{block name="script"}
+<script type="text/html" id="createBtns">
+    {{# if (d.type == 'menu') { }}
+    <a href="{{layTpl(decodeURI(d.this.url)).render(d)}}" class="{{# if(d.this.class) { }}{{d.this.class}}{{# } }}{{# if(d.this.js_func) { }} javascript{{# } }}" {{# if(d.this.js_func) { }}rel="{{d.this.js_func}}"{{# } }}>
+        {{# if(d.this.icon) { }}<i class="{{d.this.icon.indexOf('layui-icon') >= 0 ? 'layui-icon ' + d.this.icon : 'myfont '+ d.this.icon}}"></i>{{# } }}{{d.this.title}}</a>
+    {{# } }}
+</script>
+
+<script type="text/html" id="createChild">
+    {{# if (d.type != 'button') { }}
+    <a href="{{layTpl(decodeURI(d.this.url)).render(d)}}" class="{{# if(d.this.class) { }}{{d.this.class}}{{# } }}{{# if(d.this.js_func) { }} javascript{{# } }}" {{# if(d.this.js_func) { }}rel="{{d.this.js_func}}"{{# } }}>
+        {{# if(d.this.icon) { }}<i class="{{d.this.icon.indexOf('layui-icon') >= 0 ? 'layui-icon ' + d.this.icon : 'myfont '+ d.this.icon}}"></i>{{# } }}{{d.this.title}}</a>
+    {{# } }}
+</script>
+
+<script>
+    function create_btns() {
+        console.log($(this))
+    }
+
+</script>
+{/block}

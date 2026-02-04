@@ -1,0 +1,66 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="by-your-self" style="padding: 15px">
+
+            <script>
+                function myjsfunc() {
+                    console.log($(this), $(this).attr('href'))// 获取到你点击的对象 和 URL
+                    layer.alert('嗨！小哥哥有什么事吗？')
+                }
+            </script>
+            <pre class="layui-code">
+use woo\common\annotation\Ps;
+use woo\common\annotation\Forbid;
+use woo\common\annotation\Except;
+/**
+* @Except(action={"login","ajaxlogin"}) #指定方法不登录也可以访问 （也可以通过配置文件实现）
+* @Ps(false) # 当前控制器所有请求不验证权限
+* @Ps(name="测试") #定义类名称
+* @Ps(true,except={"a","b"}) # 当前控制器指定方法不需要验证权限
+* @Forbid(true) # 系统默认的CURD等数据操作方法禁止访问，自定义的可以 用于一些如非数据模型控制器
+* @Forbid(only={"a","b"}) # 只有指定方法允许访问，其他不行
+* @Forbid(except={"a","b"}) #指定方法禁止访问，其他的可以
+* @Forbid(nodebug=true) # 仅开发模式下可以访问，部署模式不可以
+*/
+class Demo
+{
+    /**
+    * @Except(method={"get"}) # 当前方法的get请求不登录也可以访问 其他请求方式需要（也可以通过配置文件实现）
+    * @Ps(name="测试") # 定义方法名称
+    * @Ps(false) # 当前方法不需要验证权限
+    * @Ps(as="delete") # 不需要单独设置权限 当前方法的权限和指定方法权限一致
+    * @Ps(true,name="测试",as="delete")
+    * @Forbid(only={"get"}) # 指定请求方式下才可以访问
+    * @Forbid(except={"get"}) #除了指定方式不可以访问，其他都可以
+    * @Forbid(only={"ajax","post"}) # 只有ajax且是post请求才可以访问
+    *@ Forbid(nodebug=true) # 仅开发模式下可以访问，部署模式不可以
+    */
+    public function batchDelete() {}
+}
+            </pre>
+            <script>
+                function layuiReady() {
+                    layui.use('code', function(){
+                        layui.code({
+                            title : '方法代码',
+                            height : '600px',
+                            encode: true,
+                            skin: 'notepad',
+                            about: false
+                        });
+                    });
+                }
+            </script>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}
+

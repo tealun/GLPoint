@@ -1,0 +1,15 @@
+<view>
+  <view>
+    <text>建议内容: {{feedbackDetail.content}}</text>
+    <text>状态: {{feedbackDetail.adopted ? '已采纳' : '未采纳'}} {{feedbackDetail.closed ? '已关闭' : '未关闭'}}</text>
+  </view>
+  <view>
+    <block wx:for="{{replies}}" wx:key="id">
+      <view>
+        <text>回复人: {{item.user}}</text>
+        <text>回复时间: {{item.time}}</text>
+        <text>回复内容: {{item.content}}</text>
+      </view>
+    </block>
+  </view>
+</view>

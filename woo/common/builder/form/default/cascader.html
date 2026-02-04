@@ -1,0 +1,13 @@
+<div class="woo-cascader">
+    <div class="cascader-show layui-input">
+        <div class="show">{$data.attrs.placeholder ?? '请选择≡' . $data.label . '≡'}</div>
+        <i class="layui-edge"></i>
+        <input type="hidden"
+               {foreach $data.attrs as $key => $value}
+        {$key}="{$value}"
+        {/foreach}>
+    </div>
+    <div class="cascader-container">
+    </div>
+    <div type="text/html" class="tree-json" style="display: none">{:json_encode($data.options ?? [])}</div>
+</div>

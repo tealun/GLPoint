@@ -1,0 +1,25 @@
+<view class="page-title">积分申请列表</view>
+<view class="tabs">
+  <view class="tab {{activeTab==0?'active':''}}" data-idx="0" bindtap="onTabChange">申请中</view>
+  <view class="tab {{activeTab==1?'active':''}}" data-idx="1" bindtap="onTabChange">已处理</view>
+</view>
+<view class="list">
+  <block wx:if="{{activeTab==0}}">
+    <block wx:for="{{applyingList}}" wx:key="id">
+      <view class="item" data-id="{{item.id}}" bindtap="onItemTap">
+        <view class="time">{{item.create_time}}</view>
+        <view class="content">{{item.content}}</view>
+      </view>
+    </block>
+    <view wx:if="{{!applyingList.length}}" class="empty">暂无申请中记录</view>
+  </block>
+  <block wx:if="{{activeTab==1}}">
+    <block wx:for="{{processedList}}" wx:key="id">
+      <view class="item" data-id="{{item.id}}" bindtap="onItemTap">
+        <view class="time">{{item.create_time}}</view>
+        <view class="content">{{item.content}}</view>
+      </view>
+    </block>
+    <view wx:if="{{!processedList.length}}" class="empty">暂无已处理记录</view>
+  </block>
+</view>

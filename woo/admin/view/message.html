@@ -1,0 +1,159 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        <div class="admin_message hidden {$data.type}">
+            <div class="notification">
+                <span class="icon"></span>{$data.message}
+            </div>
+            <div class="redirect btn_count_{:count($data.redirect)}">
+                {foreach $data.redirect as $title=>$url}
+                {if $title == 'close'}
+                <a class="javascript  redirect_selection hidden layui-btn layui-btn {if isset($url.class)}{$url.class}{/if}" id="rs_close">{if isset($url.icon)}<i class="layui-icon {$url.icon}"></i>{/if}{$url.title}</a>
+                {else /}
+                <a class="redirect_selection layui-btn {if isset($url.class)}{$url.class}{/if} {if isset($url.rel)}javascript{/if}" {if isset($url.rel)}rel="{$url.rel}"{/if}   href="{$url.url}">{if isset($url.icon)}<i class="layui-icon {$url.icon}"></i>{/if}{$url.title}</a>
+                {/if}
+                {/foreach}
+            </div>
+            {if $data.auto && $data.redirect}
+            <div class="count_down">
+                系统将在<span id="count_down_count">{$data.auto}</span>秒后自动跳转到第一个链接 <a id="cancel_count_down" style="cursor:pointer;">取消自动跳转</a>
+            </div>
+
+            <script>
+                var left_seconds=parseInt('{$data.auto}');
+                function count_down(){
+                    if(left_seconds<0){
+                        if (!$('#rs_close:visible').length) {
+                            var href = "{:url('Index/index')}";
+                            if ($('a.redirect_selection').not('.javascript').eq(0).attr('href')) {
+                                href = $('a.redirect_selection').eq(0).attr('href')
+                            }
+                            window.location.href = href;
+                        } else {
+                            $('#rs_close').trigger('click');
+                        }
+                        return;
+                    }
+                    $('#count_down_count').html(left_seconds--);
+                    count_down.timeout = window.setTimeout(count_down, 1000);
+                }
+                $(document).ready(function(){ count_down(); });
+                $('#cancel_count_down').click(function(){
+                    window.clearTimeout(count_down.timeout);
+                    $(this).parent().remove();
+                })
+            </script>
+            {/if}
+
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    if (window.opener) {
+                        if ({:empty($args.reload) == false ? 'true': 'false'}) {
+                            window.opener.addAlert('{:addslashes($data.message)}', '{$data.type}', 500/*{$data.auto * 1000}*/, 100, '{$data.type}' == 'success' ? 'reload' : '');
+                        } else if (typeof( window.opener.currentTabIndex) != 'undefined') {
+                            window.opener.addAlert('{:addslashes($data.message)}', '{$data.type}', {$data.auto * 1000}, 100);
+                            /*{if !empty($args.callback)}*/
+                            if (window.opener['{$args.callback}']) {
+                                window.opener['{$args.callback}']('{$data.type}', '{:addslashes($data.message)}');
+                            }
+                            /*{/if}*/
+                            /*{if empty($args.norefresh)}*/
+                            window.opener.renderTab(window.opener.currentTabIndex, 'refresh');
+                            /*{/if}*/
+                        } else {
+                            window.opener.addAlert('{:addslashes($data.message)}', '{$data.type}', 1500/*{$data.auto * 1000}*/, 100, '{$data.type}' == 'success' ? 'refresh' : '');
+                            /*{if !empty($args.callback)}*/
+                            if ( window.opener['{$args.callback}']) {
+                                window.opener['{$args.callback}']('{$data.type}', '{:addslashes($data.message)}');
+                            }
+                            /*{/if}*/
+                        }
+                        window.close();
+                        return;
+                    }
+                    if(self != top) {
+                        if (parent.$('.layui-layer-iframe').length >= 1) {
+                            parent.layer.closeAll();
+                            if ({:empty($args.reload) == false ? 'true': 'false'}) {
+                                parent.addAlert('{:addslashes($data.message)}', '{$data.type}', 500/*{$data.auto * 1000}*/, 100, '{$data.type}' == 'success' ? 'reload' : '');
+                            } else if (typeof(parent.currentTabIndex) != 'undefined') {
+                                parent.addAlert('{:addslashes($data.message)}', '{$data.type}', {$data.auto * 1000}, 100);
+                                /*{if !empty($args.callback)}*/
+                                if (parent['{$args.callback}']) {
+                                    parent['{$args.callback}']('{$data.type}', '{:addslashes($data.message)}');
+                                }
+                                /*{/if}*/
+                                /*{if empty($args.norefresh)}*/
+                                parent.renderTab(parent.currentTabIndex, 'refresh');
+                                /*{/if}*/
+                            } else {
+                                parent.addAlert('{:addslashes($data.message)}', '{$data.type}', 1500/*{$data.auto * 1000}*/, 100, '{$data.type}' == 'success' ? 'refresh' : '');
+                                /*{if !empty($args.callback)}*/
+                                if (parent['{$args.callback}']) {
+                                    parent['{$args.callback}']('{$data.type}', '{:addslashes($data.message)}');
+                                }
+                                /*{/if}*/
+                            }
+                        } else if(parent.$('.drawer-frame').length) {
+                            // 不要写0 立即关闭 火狐异常报错
+                            parent.drawerCloseTime = $('body').is('.modify') || $('body').is('.create') ? 10 : 500;
+                            parent.$('.drawer-container').find('.drawer-close').trigger('click');
+                            if ({:empty($args.reload) == false ? 'true': 'false'}) {
+                                parent.addAlert('{:addslashes($data.message)}', '{$data.type}', 500/*{$data.auto * 1000}*/, 100, '{$data.type}' == 'success' ? 'reload' : '');
+                            } else if (typeof(parent.currentTabIndex) != 'undefined') {
+                                parent.addAlert('{:addslashes($data.message)}', '{$data.type}', {$data.auto * 1000}, 100);
+                                /*{if !empty($args.callback)}*/
+                                if (parent['{$args.callback}']) {
+                                    parent['{$args.callback}']('{$data.type}', '{:addslashes($data.message)}');
+                                }
+                                /*{/if}*/
+                                /*{if empty($args.norefresh)}*/
+                                parent.renderTab(parent.currentTabIndex, 'refresh');
+                                /*{/if}*/
+                            } else {
+                                parent.addAlert('{:addslashes($data.message)}', '{$data.type}', 1500/*{$data.auto * 1000}*/, 100, '{$data.type}' == 'success' ? 'refresh' : '');
+                                /*{if !empty($args.callback)}*/
+                                if (parent['{$args.callback}']) {
+                                    parent['{$args.callback}']('{$data.type}', '{:addslashes($data.message)}');
+                                }
+                                /*{/if}*/
+                            }
+                            parent.drawerCloseTime = undefined;
+                        } else {
+                            $('.admin_message').show();
+                            $('#rs_close').css('display','inline-block').click(function(){
+                                //top.$('.layui-tab').find('.layui-tab-title li.layui-this .layui-tab-close').trigger('click');
+                                var id = top.getIframeId(window);
+                                if (top.$('.layui-tab').find('.layui-tab-title>li[lay-id="'+id+'"]').length) {
+                                    top.$('.layui-tab').find('.layui-tab-title>li[lay-id="'+id+'"]').find('.layui-tab-close').trigger('click');
+                                } else {
+                                    top.$('.layui-tab').find('.layui-tab-title>li .layui-tab-close[data-id="'+id+'"]').trigger('click')
+                                }
+                            });
+                        }
+                    } else {
+                        $('.admin_message').show();
+                        $('#rs_close').click(function() {
+                            var href = "{:url('Index/index')}";
+                            if ($('a.redirect_selection').eq(0).attr('href')) {
+                                href = $('a.redirect_selection').eq(0).attr('href')
+                            }
+                            if (typeof(currentTabIndex) != 'undefined') {
+                                renderTab(currentTabIndex, 'refresh');
+                            } else {
+                                window.location.href = href;
+                            }
+                        })
+                    }
+                })
+            </script>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}

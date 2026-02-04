@@ -1,0 +1,67 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="woo-setting woo-form-body">
+            <div class="layui-tab  {:setting('admin_tab_style')}">
+                {if count($tabs) > 1}
+                <ul class="layui-tab-title">
+                    {foreach $tabs as $i => $group}
+                    <li class="{if (isset($params.args.parent_id) && $params.args.parent_id == $group.id) || (!isset($params.args.parent_id) && $i == 0)}layui-this{/if}">{$group.title}</li>
+                    {/foreach}
+                </ul>
+                {/if}
+                <div class="layui-tab-content">
+                    {foreach $tabs as $i => $group}
+                    <div class=" layui-tab-item {if (isset($params.args.parent_id) && $params.args.parent_id == $group.id) || (!isset($params.args.parent_id) && $i == 0)}layui-show{/if}">
+                        <form class="layui-form" action="{:url('', ['parent_id'=> $group.id])}" method="post" enctype="multipart/form-data">
+
+                            {assign name="j" value="0" /}
+                            {foreach $forms[$i]->getVisibleItems() as $key => $item}
+                            {assign name="j" value="$j+1" /}
+                            <div class="setting-row clearfix {if $j % 2 == 1}setting-odd{/if}">
+                                <div class="setting-row-title">{$item.label_tag|raw}</div>
+                                <div class="setting-row-value">
+                                    <div class="setting-input">{$item.html | raw}</div>
+                                    {if $item.tip}<div class="setting-tip">{$item.tip}</div>{/if}
+                                </div>
+                                {if $is_debug}
+                                <div class="setting-row-call {if !$item.is_js_var && $j != 1 || $i != 0}more-top{/if}">
+                                    {if $j == 1 && $i == 0}部署模式下，自动隐藏调用提示<br>{/if}
+                                    模板中：<span class="woo-copy" data-text="setting('{$item.field_name}')">{literal}{:setting('{/literal}{$item.field_name}{literal}')}{/literal}</span><br>
+                                    {if $item.is_js_var}JS调用：<span class="woo-copy">woo_script_vars.setting.{$item.field_name}</span>{/if}
+                                </div>
+                                {/if}
+                            </div>
+                            {/foreach}
+                            <div class="setting-row setting-action clearfix">
+                                <div class="setting-row-title"></div>
+                                <div class="setting-row-value">
+                                    <button class="layui-btn woo-theme-btn layui-btn-radius btn-spacing-2" lay-submit lay-filter="formDemo">立即提交</button>
+                                    <button type="reset" class="layui-btn layui-btn-radius btn-spacing-2 btn-1">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function layuiReady() {
+        layui.use(['element'], function(){
+            var element = layui.element;
+        });
+    }
+
+</script>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}
+

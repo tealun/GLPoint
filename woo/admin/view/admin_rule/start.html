@@ -1,0 +1,147 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <style>
+            .layui-layer-btn{ text-align: center;}
+            .export-content{ border: 1px solid  #e6e6e6;padding: 15px;border-radius: 2px;}
+            .export-content legend{ font-size: 14px;padding: 0 10px;color: #333;}
+            #powerLogging{ border: 1px solid #d2d2d2;font-size: 12px;}
+            #powerLogging .log-list{ height: 200px;overflow: auto;}
+            #powerLogging .log-list li{ padding: 5px 15px;line-height: 24px;border-bottom: 1px dotted #dddddd;}
+            #powerLogging .tip{ height: 40px;line-height: 40px;text-align: center;border-top: 1px solid #d2d2d2;}
+            #powerLogging .tip i{ color: #FF5722;}
+            .power-tree-container{ padding: 15px;}
+            .export-content li.t{ padding-bottom: 15px;}
+            #resetPowerTree:active,#resetControllerPowerTree:active{ position: relative;top: -1px;left: -1px;}
+            @media screen and (max-width: 668px) {
+                .power-tree-container,.export-content{ padding: 10px;}
+
+            }
+
+        </style>
+        <div class="power-tree-container">
+            <fieldset class="export-content">
+                <legend>功能说明</legend>
+                <div>
+                    <ul class="list">
+                        <li class="t">
+                            1、自动生成规则的原理是通过反射机制自动获取控制器注解和方法注解，因此开发人员需要合理的设置注解。注解说明：
+                            <pre class="layui-code" lay-title="PHP">
+namespace app\admin\controller;
+use app\common\controller\Admin;
+use woo\common\annotation\Ps;#需要先引入注解类
+/**
+ * @Ps(true,name="文章") # 第一个参数"value"如果为false，表示整个控制器的所有方法不都需要生成规则；"name"为名称，如果不写默认读取对应模型的名称
+ * @Ps(true,name="文章",except={"a","b"}) # 通过except定义的数组指定哪些方法不加入权限验证
+ */
+class Article extends Admin
+{
+
+    /**
+    * @Ps(true,name="列表")
+    */
+    public function lists(){ }
+    /**
+    * @Ps(true,as="delete") # 通过"as"参数表示权限同指定方法权限一样，只要当前方法就不需要生成规则了
+    */
+    public function batchDelete(){ }
+
+}</pre>
+                        </li>
+                        <li class="t">
+                            2、权限相关的配置都在“wooauth”文件中，允许配置是否开启权限验证、是否允许规则生成等
+                        </li>
+                        <li class="t">
+                            3、权限相关功能介绍请查阅开发手册中权限章节。
+                        </li>
+                    </ul>
+                    <div style="text-align: center;">
+                        <button class="layui-btn woo-theme-btn" id="resetPowerTree">自动生成规则</button>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    layui.use('code', function(){
+        layui.code({
+            title : '方法代码',
+            encode: true,
+            skin: 'notepad',
+            about: false
+        });
+    });
+
+    $('#resetPowerTree').click(function() {
+        layer.confirm('请确认是否自动生成规则？', {
+            icon:3,
+            title:'确认'
+        },function() {
+            var index = layer.open({
+                title:'规则生成进程'
+                ,area: $(window).width() > 768 ? ['500px', 'auto'] : ['90%', 'auto']
+                ,content: '<div id="powerLogging"><ul class="list log-list"></ul><div class="tip"><i class="layui-icon layui-icon-loading layui-icon layui-anim layui-anim-rotate layui-anim-loop"></i>规则生成中，请稍后...</div></div>'
+                ,success: function(layero, index){
+                    showLog('数据开始传输...')
+                    treeInstall(1)
+                }
+            });
+        })
+    })
+
+    function writeCache() {
+        var url = '{:url("writeCache")}';
+        showLog('数据缓存请求开始...')
+        WOO.request.call(this,url,'get',null,
+            {
+                'success':function(msg,data){
+                    showLog(msg)
+                    $('#powerLogging').find('.tip').html('<i class="layui-icon layui-icon-ok"></i> 本次操作已经完成');
+                    setTimeout(function(){
+                        //layer.closeAll()
+                    }, 2000)
+                },
+                'error':function(msg,data){
+                    showLog(msg)
+                    showLog('操作中断，请处理以后重试')
+                }
+            }
+        );
+    }
+
+    function treeInstall(index) {
+        window['allow_many_request'] = true;
+        var url = '{:url("ajaxReset")}';
+        WOO.request.call(this,url+'?index='+index,'get',null,
+            {
+                'success':function(msg,data){
+                    showLog(msg)
+                    if (data.finish) {
+                        writeCache()
+                    } else {
+                        treeInstall(++index)
+                    }
+                },
+                'error':function(msg,data){
+                    showLog(msg)
+                    showLog('规则重置中断，请处理以后重试')
+                }
+            }
+        );
+    }
+
+    function showLog(msg)
+    {
+        $('#powerLogging').find('.log-list').append('<li>'+msg+'</li>').scrollTop(999999)
+    }
+</script>
+{/block}

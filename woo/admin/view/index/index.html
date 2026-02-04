@@ -1,0 +1,398 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+<script>
+    woo_script_vars.woo.layerCallback.layer = function () {
+
+    }
+</script>
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<!-- 布 局 框 架 -->
+<div class="layui-layout layui-layout-admin">
+    <!-- 顶 部 样 式 -->
+    <div class="layui-header">
+        <!-- 菜 单 顶 部 -->
+        <div class="layui-logo">
+            <!-- 图 标 -->
+            <img class="logo"/>
+            <!-- 标 题 -->
+            <span class="title"></span>
+        </div>
+        <!-- 顶 部 左 侧 功 能 -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="collapse  layui-nav-item"><a href="" class="layui-icon layui-icon-shrink-right"></a></li>
+            <li class="refresh layui-nav-item"><a href="" class="layui-icon layui-icon-refresh-1" loading = 600></a></li>
+        </ul>
+        <!-- 多 系 统 菜 单 -->
+        <div id="control" class="layui-layout-control"></div>
+        <!-- 顶 部 右 侧 菜 单 -->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item control-home"><a user-menu-url="{$dashboard}" user-menu-id="0" user-menu-title="控制面板" class="layui-icon layui-icon-home"></a></li>
+            <li class="layui-nav-item layui-hide-xs"><a href="{$root}" target="_blank" class="layui-icon layui-icon-website"></a></li>
+            <li class="layui-nav-item layui-hide-xs"><a href="#" class="fullScreen layui-icon layui-icon-screen-full"></a></li>
+            <li class="layui-nav-item layui-hide-xs"><a class="javascript woo-icon woo-icon-qingchuhuancun" rel="simple_clear" href="{:url('tool/clearCache')}"></a></li>
+            <li class="layui-nav-item setting"><a href="" class="layui-icon layui-icon-theme"></a></li>
+            <li class="layui-nav-item admin-user-info">
+                <a href="javascript:;" class="admin-user">
+                    <span class="admin-user-headpic"><img  src="{:thumb($login.avatar ?: $root . 'static/images/admin/default_headimg.png', 200,200)}" alt=""/></span><span class="admin-user-name">{$login.nickname ?: $login.username}</span>
+                </a>
+                <dl class="layui-nav-child">
+                    <i class="i"></i>
+                    <dd><a user-menu-url="{:url('admin/home')}" user-menu-id="8" user-menu-title="{:admin_rule(8, 'title')}">{:admin_rule(8, 'title')}</a></dd>
+                    <dd><a href="" class="javascript" rel="lockScreen">锁屏(Alt+L)</a></dd>
+                    <dd class="bt"><a href="{:url('admin/logout')}" class="logout javascript" rel="logout"><i class="layui-icon layui-icon-logout" ></i> 注销登录</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+    <!-- 分 栏 区 域 -->
+    <div class="menu-column">
+        <div class="logo-div"><img class="logo"/></div>
+        <div class="menu-column-scroll"></div>
+    </div>
+    <!-- 侧 边 区 域 -->
+    <div class="layui-side layui-bg-black">
+        <!-- 菜 单 顶 部 -->
+        <div class="layui-logo">
+            <!-- 图 标 -->
+            <img class="logo"/>
+            <!-- 标 题 -->
+            <span class="title"></span>
+        </div>
+        <!-- 菜 单 内 容 -->
+        <div class="layui-side-scroll">
+            <div class="side-menu-title column-menu-title"></div>
+            <form class="sider-search" onsubmit="return false;">
+                <input type="text" id="NavSearchInput" name="search" class="search-input sizing" placeholder="搜索菜单" autocomplete="off">
+                <div id="NavSearch"><i class="layui-icon layui-icon-search"></i></div>
+                <ul class="list search-list sizing"></ul>
+            </form>
+            <div id="sideMenu"></div>
+        </div>
+    </div>
+    <!-- 视 图 页 面 -->
+    <div class="layui-body">
+        <!-- 内 容 页 面 -->
+        <div id="{$app_name}content"></div>
+    </div>
+    <!-- 页脚 -->
+    <div class="layui-footer layui-text">
+        <span class="left">
+            {:setting('project_corp_title')}
+        </span>
+        <span class="center"></span>
+        <span class="right">
+            {:setting('project_copyright')}
+        </span>
+    </div>
+    <!-- 遮 盖 层 -->
+    <div class="pear-cover"></div>
+    <!-- 加 载 动 画 -->
+    <div class="loader-main">
+        <!-- 动 画 对 象 -->
+        <div class="loader"></div>
+    </div>
+</div>
+<!-- 移 动 端 便 捷 操 作 -->
+<div class="pear-collapsed-pe collapse">
+    <a href="#" class="layui-icon layui-icon-shrink-right"></a>
+</div>
+<!-- 锁 屏 -->
+<div id="lockScreen" style="display: none;">
+    <div class="init">
+        <div class="relative">
+            <div class="lockTime en-font"></div>
+            <div class="pic"><img  src="{:thumb($login.avatar ?: $root . 'static/images/admin/default_headimg.png', 200,200)}" alt=""/><p class="en-font">{$login.nickname ?: $login.username}</p></div>
+        </div>
+        <div class="wrbox">
+            <input  type="password" id="screenPwd" class="wrin" value="" autocomplete="off" placeholder="请输入密码解锁.."/><br /><button id="closeLock" class="layui-btn woo-theme-btn">立即解锁</button>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    layui.use(['admin', 'dragMove'], function() {
+        var admin = layui.admin;
+        window.pearAdminInstance = admin;
+
+        admin.render({
+            "logo": {
+                "title": "{$admin_info.logo_title}",
+                "image": "{$root}{$admin_info.logo_image}",
+            },
+            "menu": {
+                "data": "{:url('AdminRule/getMenu')}",
+                "method": "GET",
+                "accordion": true,
+                "collapse": false,
+                "control": true,
+                "controlWidth": 500,
+                "select":"0",
+                "async": true,
+                "height" : 'calc(100% - 58px)',
+                "layout" : "column",
+                "colorIcon" : false
+            },
+            "tab": {
+                "enable": true,
+                "keepState": true,
+                "session": true,
+                "preload": true,
+                "drag" : false,
+                "style" : "default",
+                "max": parseInt('{:setting("admin_tab_max", 20)}'),
+                "index": {
+                    "id": "0",
+                    "href": "{$dashboard}",
+                    "title": "控制面板"
+                }
+            },
+            "theme": {
+                "defaultColor": "1",
+                "defaultMenu": "light-theme",
+                "defaultHeader": "light-theme",
+                "allowCustom": true,
+                "banner": true,
+                "darkMode" : false,
+            },
+            "colors": [{
+                "id": "1",
+                "color": "#2d8cf0",
+                "second": "#ecf5ff"
+            },
+                {
+                    "id": "2",
+                    "color": "#36b368",
+                    "second": "#f0f9eb"
+                },
+                {
+                    "id": "3",
+                    "color": "#fb8c00",
+                    "second": "#fff3e0"
+                },
+                {
+                    "id": "4",
+                    "color": "#f56c6c",
+                    "second": "#fef0f0"
+                },
+                {
+                    "id": "5",
+                    "color": "#3963bc",
+                    "second": "#ecf5ff"
+                },
+                {
+                    "id": "6",
+                    "color": "#a233c6",
+                    "second": "#f3e5f5"
+                },
+                {
+                    "id": "7",
+                    "color": "#e84e40",
+                    "second": "#fde0dc"
+                },
+                {
+                    "id": "8",
+                    "color": "#607d8b",
+                    "second": "#eceff1"
+                },
+                {
+                    "id": "9",
+                    "color": "#795548",
+                    "second": "#efebe9"
+                }
+            ],
+            "other": {
+                "keepLoad": "1200",
+                "autoHead": false,
+                "footer": false
+            },
+            "header": {
+                //"message": "/static/woo/business/pear/admin/data/message.json"
+            }
+        });
+    })
+
+
+    if (window.localStorage) {
+        if (localStorage.getItem('lock_screen')) {
+            lockScreen();
+        }
+    }
+
+    function  logout() {
+        var href = $(this).attr('href');
+        layer.confirm('确定要退出登录吗？', {
+            title : '提示',
+            icon : 3,
+        }, function(){
+            window.location.href = href;
+        })
+    }
+
+    $('#NavSearchInput').focus(function () {
+        $(this).parent().removeClass('blur').addClass('focus');
+        if ($('.sider-search').find('.search-list li').length) {
+            $('.sider-search').find('.search-list').show();
+        } else {
+            $('.sider-search').find('.search-list').hide();
+        }
+    }).blur(function () {
+        $(this).parent().removeClass('focus').addClass('blur');
+    }).keyup(function () {
+        var val = $.trim($(this).val()).toLowerCase();
+        if (!val) {
+            $('.sider-search').find('.search-list').hide().empty();
+            return;
+        }
+        var list = [];
+        $('#sideMenu .layui-nav').find('a[menu-type="1"]').each(function () {
+            var href = $(this).attr('menu-url');
+            if (/javascript/i.test(href) || !href) {
+                return;
+            }
+            var text = $(this).attr('menu-title');
+            var pinyin = $(this).data('pinyin').toLowerCase();
+            var jianpin = $(this).data('jianpin').toLowerCase();
+            if (text.indexOf(val) < 0 && pinyin.indexOf(val) < 0 && jianpin.indexOf(val) < 0) {
+                return;
+            }
+            var navid = $(this).attr('menu-id');
+            list.push({
+                title : text,
+                url : href,
+                navid : navid
+            })
+        })
+        if (list.length == 0) {
+            $('.sider-search').find('.search-list').hide().empty();
+        }
+        var html = '';
+        for(var i in list) {
+            html += '<li data-nid="'+list[i].navid+'" data-url="'+list[i].url+'">'+list[i].title+'</li>';
+        }
+        $('.sider-search').find('.search-list').html(html).show();
+    })
+
+    $('.search-list').on('click', 'li', function () {
+        pearAdminInstance.addTab($(this).data('nid'), $(this).text(), $(this).data('url'));
+        $('.sider-search').find('.search-list').hide();
+    })
+
+    $(document).bind("click",function(e){
+        var target = $(e.target);
+        if(target.closest(".sider-search").length == 0){
+            $('.sider-search').find('.search-list').hide();
+        }
+    })
+
+    function simple_clear() {
+        var href = $(this).attr('href');
+        if (!href) {
+            return false;
+        }
+        var index = layer.load({
+            time: 3000
+        })
+        WOO.request.call(this,href,'get',null,{
+            'success':function(msg,data){
+                layer.close(index);
+                addAlert(msg, 'success')
+            },
+            'error':function(msg,data){
+                layer.close(index);
+                addAlert(msg, 'error')
+            }
+        })
+    }
+
+    var lockTimer = null;
+    function newTime(){
+        var now  = new Date();
+        var year = now.getFullYear() ;
+        var month = (now.getMonth()+1) >=10 ? (now.getMonth()+1): '0' + (now.getMonth()+1);
+        var date  = now.getDate() >=10 ? now.getDate(): '0' + now.getDate();
+        var hour = now.getHours() >=10 ? now.getHours(): '0' + now.getHours();
+        var minute = now.getMinutes() >=10 ? now.getMinutes(): '0' + now.getMinutes();
+        var second = now.getSeconds() >=10 ? now.getSeconds(): '0' + now.getSeconds();
+        var datetime = year + '-' + month + '-' + date + ' ' + hour + ':' + minute + ':' + second;
+        $('.lockTime').html(hour + ':' + minute + ':' + second)
+    }
+
+    document.onkeydown = function(event){
+        if (event.keyCode == 76 && event.altKey){
+            lockScreen()
+        }
+    }
+
+    function lockScreen(){
+        newTime()
+        clearInterval(lockTimer);
+        lockTimer = setInterval(newTime,1000);
+        if($('#lockScreen').is(':visible')) return false ;
+        localStorage.setItem('lock_screen', 1);
+        $('#screenPwd').val('');
+        $('#lockScreen').fadeIn(300, function(){
+            $('#closeLock').addClass('shake');
+        })
+    }
+
+    $('#screenPwd').keyup(function(event){
+        if (event.keyCode == 13) {
+            $('#closeLock').trigger('click');
+        }
+    })
+
+    $('#closeLock').click(function(){
+        var url = "{:url('tool/relieveScreen')}";
+        var pwd = $.trim($('#screenPwd').val());
+        if (!pwd) {
+            layer.msg('请先输入密码', {
+                icon : 6
+            });
+            return false;
+        }
+        WOO.request.call(this,url,'post',{
+                pwd : pwd
+            },
+            {
+                'success':function(msg, data){
+                    layer.closeAll();
+                    localStorage.removeItem('lock_screen');
+                    $('#lockScreen').fadeOut(300);
+                    clearInterval(lockTimer);
+                },
+                'error':function(msg, data){
+                    layer.closeAll();
+                    layer.msg(msg, {
+                        icon : 5
+                    });
+                }
+            }
+        );
+    })
+
+    function getIframeId(f) {
+        var frames = document.getElementsByTagName("iframe");
+        for (i=0; i < frames.length; i++){
+            if(frames[i].contentWindow == f){
+                return $(frames[i]).data('id') ? $(frames[i]).data('id') : $(frames[i]).attr('id');
+            }
+        }
+    }
+
+    if (top !== this) {
+        var id = top.getIframeId(this);
+        top.$('.layui-tab').find('.layui-tab-title>li[lay-id="'+id+'"]').find('.layui-tab-close').trigger('click');
+    }
+
+    function testClick() {
+        layer.alert('你是电，你是光，你是唯一的神话！', {
+            title: '事件回调',
+            icon: 6
+        });
+    }
+</script>
+{/block}

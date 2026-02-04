@@ -1,0 +1,47 @@
+<script type="text/html" id="colsSettingTemplet">
+    <div class="layui-table-tool-panel woo-cols-setting">
+        <div>
+            {{# for (var i in d.cols) { }}
+            {{# for (var j in d.cols[i]) { }}
+            {{# if (d.cols[i][j].title) { }}
+            <li>
+                <input type="checkbox" name="{{d.cols[i][j].field}}" data-key="{{d.cols[i][j].key}}" lay-skin="primary" {{# if (!d.cols[i][j].hide) { }}checked{{# }}} title="{{d.cols[i][j].title}}" lay-filter="COLS_SETTING_CHECKBOX">
+            </li>
+            {{# } }}
+            {{# } }}
+            {{# } }}
+        </div>
+    </div>
+</script>
+
+<script>
+    function colsSetting(obj) {
+
+        $('[lay-id="' + obj.config.id + '"]')
+            .find('[lay-event="WOO_COLS_SETTING"]')
+            .append(layTpl($('#colsSettingTemplet').html()).render(obj.config));
+        layForm.render();
+    }
+
+
+
+    function tableSetting(obj) {
+
+    }
+    
+    function addToolsEventListener() {
+        /*自定义工具的监听*/
+        layForm.on('checkbox(COLS_SETTING_CHECKBOX)', function(data){
+            // console.log(data); //得到checkbox原始DOM对象
+            // console.log(data.elem.checked); //是否被选中，true或者false
+            // console.log(data.value); //复选框value值，也可以通过data.elem.value得到
+            // console.log(data.othis); //得到美化后的DOM对象
+            console.log(1,layTable)
+            var keys = $.trim($(data.elem).data('key')).split('-');
+            window[currentTabName + 'Render'].config.cols[keys[1]][keys[2]].hide = !data.elem.checked;
+            console.log(window[currentTabName + 'Render'].renderData);
+            //layTable.hideCol(window[currentTabName + 'Render'].id, !data.elem.checked);
+
+        });
+    }
+</script>

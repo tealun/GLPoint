@@ -1,0 +1,10 @@
+<div class="email-container">
+    <input type="text"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <div class="email-list sizing">
+        <ul class="list">
+        </ul>
+    </div>
+</div>

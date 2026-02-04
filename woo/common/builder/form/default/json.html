@@ -1,0 +1,8 @@
+<div class="woo-json-editor-container">
+    {if isset($data.attrs.value) && is_array($data.attrs.value)}{assign name="$data.attrs.value" value=":json_encode($data.attrs.value)"/}{/if}
+    <input type="hidden" {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <div class="woo-json-editor"></div>
+    <div class="woo-json-editor-loading"><i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i></div>
+</div>

@@ -1,0 +1,67 @@
+<view class="container">
+  <!-- 图表卡片 -->
+  <view class="chart-card">
+    <!-- 图表标题和切换按钮 -->
+    <view class="chart-header">
+      <text class="chart-title">积分趋势</text>
+      <view class="time-selector">
+        <text class="time-btn {{chartType === 'week' ? 'active' : ''}}" data-type="week" bindtap="switchChart">周</text>
+        <text class="time-btn {{chartType === 'month' ? 'active' : ''}}" data-type="month" bindtap="switchChart">月</text>
+        <text class="time-btn {{chartType === 'year' ? 'active' : ''}}" data-type="year" bindtap="switchChart">年</text>
+      </view>
+    </view>
+
+    <!-- 图表区域 -->
+    <view class="chart-area">
+      <scroll-view scroll-x="true" class="chart-scroll" show-scrollbar="{{false}}">
+        <canvas 
+          canvas-id="trendChart" 
+          id="trendChart"
+          style="width:{{chartWidth}}px;height:420rpx;display:block;"
+        ></canvas>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 积分四方格 -->
+  <view class="summary-grid">
+    <view class="grid-item">
+      <text class="number">{{summary.week}}</text>
+      <text class="label">本周积分</text>
+    </view>
+    <view class="grid-item">
+      <text class="number">{{summary.month}}</text>
+      <text class="label">本月积分</text>
+    </view>
+    <view class="grid-item">
+      <text class="number">{{summary.year}}</text>
+      <text class="label">本年积分</text>
+    </view>
+    <view class="grid-item">
+      <text class="number">{{summary.total}}</text>
+      <text class="label">累计积分</text>
+    </view>
+  </view>
+
+  <!-- 积分动态列表 -->
+  <view class="activity-list">
+  <block wx:for="{{records}}" wx:key="index">
+    <view class="activity-item-wrap">
+      <view 
+        class="activity-item" 
+        bindtap="viewPointDetails" 
+        data-id="{{item.id}}"
+      >
+        <view class="time">{{item.created_at}}</view>
+        <view class="change {{item.change >= 0 ? 'increase' : 'decrease'}}">
+          {{item.change >= 0 ? '+' : ''}}{{item.change}}分
+        </view>
+      </view>
+      <!-- 新增：显示remark字段 -->
+      <view wx:if="{{item.remark}}" class="remark-text">{{item.remark}}</view>
+    </view>
+  </block>
+</view>
+  <!-- 更多记录按钮 -->
+  <button class="more-btn" bindtap="viewMoreRecords">更多记录</button>
+</view>

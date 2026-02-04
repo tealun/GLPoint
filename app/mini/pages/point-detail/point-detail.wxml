@@ -1,0 +1,51 @@
+<view class="container">
+  <view class="points-display {{detail.points >= 0 ? 'increase' : 'decrease'}}">
+    <view class="points">{{detail.points >= 0 ? '+' : ''}}{{detail.points}}</view>
+    <view class="points-label">积分变动</view>
+  </view>
+
+  <block wx:if="{{!loading}}">
+    <!-- 详细信息卡片 -->
+    <view class="detail-card">
+      <view class="detail-item">
+        <text class="label">时间</text>
+        <text class="value">{{detail.created_at}}</text>
+      </view>
+
+      <view class="detail-item">
+        <text class="label">接收人</text>
+        <text class="value">{{detail.receiver_name}}</text>
+      </view>
+
+      <view class="detail-item">
+        <text class="label">发放人</text>
+        <text class="value">{{detail.operator_name}}</text>
+      </view>
+
+      <block wx:if="{{detail.rule_category || detail.rule_name}}">
+        <view class="detail-item" wx:if="{{detail.rule_category}}">
+          <text class="label">规则类型</text>
+          <text class="value">{{detail.rule_category || '无'}}</text>
+        </view>
+        <view class="detail-item" wx:if="{{detail.rule_name}}">
+          <text class="label">具体规则</text>
+          <text class="value">{{detail.rule_name || '无'}}</text>
+        </view>
+      </block>
+
+      <view class="detail-item reason">
+        <text class="label">详细说明</text>
+        <text class="value">{{detail.reason || '无'}}</text>
+      </view>
+    </view>
+
+    <!-- 申诉入口 -->
+    <view class="action-area">
+      <button class="appeal-btn" bindtap="goToAppeal">
+        提出申诉
+      </button>
+    </view>
+  </block>
+
+  <view wx:else class="loading">加载中...</view>
+</view>

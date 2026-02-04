@@ -1,0 +1,210 @@
+{extend name="$extend_global"/}
+
+{block name="headscript"}
+<script>
+    if (top !== self) {
+        top.window.location = "{:url('login')}"
+    }
+</script>
+{/block}
+{block name="header"}
+{/block}
+{block name="content"}
+<!--[if IE]>
+<p style="text-align: center;padding-top:100px;">由于后台使用了高级语法，不支持IE浏览器；请使用高版本浏览器进入后台管理（建议浏览器：Firefox、Chrome）</p>
+<p><a href="http://www.firefox.com.cn/">下载Firefox浏览器</a></p>
+<p><a href="http://www.google.cn/chrome/browser//">下载Chrome浏览器</a></p>
+<div style="display:none">
+<![endif]-->
+<style>
+    body{ background: none;}
+    .cover-bg{ position: absolute;left: 0;top: 0;right: 0;bottom: 0;}
+    .cover-bg .bg{ position: absolute;left: 0;width: 52%;top: 0;height: 100%;background:url("{$root}static/woo/images/login-bg.svg") no-repeat 100%;background-size: auto 100%;}
+    .container{ position: absolute;left: 0;top: 0;right: 0;bottom: 0;overflow: hidden;z-index: 99;}
+    .login-left{ position: absolute;left: 15%;top: 50%;width: 35%;margin-top: -142px;}
+    .login-left .thumb{ width: 75%;max-width: 300px;}
+    .login-left h2{ color: #fff; font-weight: 500;margin-top:8%;font-size: 28px;height: 40px;line-height: 40px;}
+    .login-left h4{ color: rgba(255,255,255,0.75);font-size: 16px;font-style: italic;height: 30px;line-height: 30px;margin-top:3%;}
+
+    .login-right{ position: absolute;right: 15%;top: 50%;width: 30%;max-width:400px;margin-top: -165px;}
+    .login-right .word{ font-size: 30px;font-weight: 600;line-height: 34px;margin-bottom: 20px;}
+    .login-right .title{ font-size: 25px;font-weight: 600;line-height: 34px;text-align: center;color: #0960bd;display: none;}
+    .login-right .en-title{ font-size: 16px;font-style: italic;font-weight: 600;line-height: 20px;margin: 15px 0 16px;text-align: center;color: rgba(9,96,189,0.75);display: none;}
+    .login-right .form-item{ position: relative;height: 38px;border: 1px solid #eee;margin-bottom:26px;border-radius:2px;padding-left: 35px;}
+    .login-right .form-item label{ position: absolute;left: 10px;top: 0;height: 38px;line-height: 38px;}
+    .login-right .form-item input{ height: 38px;line-height: 20px;padding: 9px 10px 9px 0;border: 0;width: 100%;font-size: 14px;}
+    .login-right .form-item .vimg{ position: absolute;right: 0;top: 0;width: 110px;height: 38px;cursor: pointer;}
+    .login-right .form-item .vimg img{ width: 100%;height: 100%;display: block;border-radius:0 2px 2px 0;}
+    .login-right .form-item .error-tip{ position: absolute;left: 0;top: 40px;color: #ed6f6f;height: 26px;line-height: 26px;display: none;}
+    .login-right .form-item.focus{ border-color: #0960bd;outline:3px solid rgba(9,96,189, 0.2);}
+    #loginSubmit{ width: 100%;text-align: center;background: #0960bd;color: #fff;font-size: 16px;letter-spacing: 10px;height: 40px;line-height: 40px;border-radius: 2px;border: 0;}
+    #loginSubmit:active{ position: relative;top: -1px;left: -1px}
+    .login-right .form-item.error{ border-color: #ed6f6f;}
+    .login-right .form-item.error .error-tip{ display: block;}
+    .login-right .form-item.focus.error{ outline:3px solid rgba(237,111,111, 0.2);}
+    .login-right .copy{ margin-top: 20px;height: 20px;line-height: 20px;font-size: 14px;}
+    .login-right .copy a{ color:#c2c2c2;}
+    .login-right .copy a:hover{  color:rgba(9,96,189,0.6);}
+    .ready .b{ transform: translate(-100px,0);opacity: 0;}
+    .ready .s{ transform: translate(150px,0);opacity: 0;}
+    .b,.s{ transition: transform .5s ease-in-out, opacity .8s ease-in-out;opacity:1;}
+    .b.b2{ transition-delay: 100ms;}
+    .b.b3{ transition-delay: 200ms;}
+    .s.s2{ transition-delay: 100ms;}
+    .s.s3{ transition-delay: 150ms;}
+    .s.s4{ transition-delay: 200ms;}
+    .s.s5{ transition-delay: 250ms;}
+    .s.s6{ transition-delay: 300ms;}
+
+    @media screen and (max-width: 1200px) {
+        .cover-bg .bg{ background:rgba(41,49,70,1);width: 100%;}
+        .login-left{ display: none;}
+        .login-right{ overflow: hidden; left: 50%;width: 460px;max-width: inherit; margin-left: -230px;margin-top: -210px; background: #fff;padding: 30px;border-radius: 5px;}
+        .login-right .word{ display: none;}
+        .login-right .title{ display: block;}
+        .login-right .en-title{ display: block;}
+        .login-right .copy{ text-align: center;}
+    }
+    @media screen and (max-width: 600px) {
+        .login-right{ width: 92%;left: 4%;margin-left: 0;}
+    }
+</style>
+
+<div class="cover-bg">
+    <div class="bg"></div>
+</div>
+<div class="container ready">
+    <div class="login-left">
+        <div class="thumb b b1"><img src="{:setting('admin_login_bg', $root . 'static/woo/images/login-box-bg.svg', false)}" alt=""></div>
+        <h2 class="b b2">{$admin_info.login_title}</h2>
+        <h4 class="en-font b b3">{$admin_info.login_ex_title ?? 'Management System'}</h4>
+    </div>
+    <div class="login-right sizing">
+        <h2 class="word s s1">登录</h2>
+        <h2 class="title s s1">{$admin_info.login_title}</h2>
+        <h4 class="en-font en-title s s2">Management System</h4>
+        <div class="form-item s s2">
+            <label for="username"><i class="layui-icon layui-icon-username"></i></label>
+            <input type="text" name="username" value="" id="username" class="en-font sizing" placeholder="请输入账号" autocomplete="off">
+            <div class="error-tip">请输入用户名</div>
+        </div>
+        <div class="form-item s s3">
+            <label for="password"><i class="layui-icon layui-icon-password"></i></label>
+            <input type="password" name="password" value="" id="password" class="en-font sizing" placeholder="请输入密码" autocomplete="off">
+            <div class="error-tip">请输入密码</div>
+        </div>
+        <div class="form-item s s4">
+            <label for="captcha"><i class="layui-icon layui-icon-vercode"></i></label>
+            <input type="text" name="captcha" id="captcha" class="en-font sizing" placeholder="输入验证码" autocomplete="off">
+            <span class="vimg">
+                    <img src="{:captcha_src()}" id="captchaimg" onclick="this.src='{:captcha_src()}?'+Math.random()"/>
+                </span>
+            <div class="error-tip">请输入验证码</div>
+        </div>
+        <div class="sub">
+            <input type="submit" class="sizing s s5" id="loginSubmit" value="登录"/>
+        </div>
+        <div class="copy s s6"><a href="{$admin_info.login_copyright_link|default='javascript:;'}" {if $admin_info.login_copyright_link}target="_blank"{/if}>{$admin_info.login_copyright}</a></div>
+    </div>
+</div>
+
+<!--[if lt IE 10]>
+</div>
+<![endif]-->
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    /*{if !empty($error)}*/
+    layer.msg('{$error}');
+    /*{/if}*/
+
+        $('.container').removeClass('ready');
+
+        $('.form-item').find('input').focus(function () {
+            $(this).parent().addClass('focus');
+        }).blur(function () {
+            $(this).parent().removeClass('focus');
+            if ($.trim($(this).val())) {
+                $(this).parent().removeClass('error');
+            } else {
+                $(this).parent().addClass('error');
+            }
+        }).keyup(function () {
+            if ($.trim($(this).val())) {
+                $(this).parent().removeClass('error');
+            } else {
+                $(this).parent().addClass('error');
+            }
+        })
+
+        $('body').keydown(function (e) {
+            if (e.keyCode == 13) {
+                $('#loginSubmit').trigger('click');
+            }
+        })
+
+        $('#loginSubmit').click(function () {
+            var username = $.trim($('#username').val());
+            var password = $.trim($('#password').val());
+            var captcha = $.trim($('#captcha').val());
+            var ischeck = true;
+            if (!username) {
+                $('#username').parent().addClass('error');
+                ischeck = false;
+            }
+            if (!password) {
+                $('#password').parent().addClass('error');
+                ischeck = false;
+            }
+            /*{if !$isDebug}*/
+            if (!captcha) {
+                $('#captcha').parent().addClass('error');
+                ischeck = false;
+            }
+            /*{/if}*/
+
+            if (!ischeck) {
+                addAlert('请按提示输入登录信息', 'warn');
+                return false;
+            }
+            var index = layer.load(2, {
+                time : 2000
+            })
+            var redirect = '{$redirect}';
+
+            var rsa_field_list = '';
+            if (password && window.woo_script_vars.rsa_field && $.inArray('password', window.woo_script_vars.rsa_field) >= 0) {
+                password = WOO.setEncrypt(password);
+                rsa_field_list = 'password';
+            }
+
+            $.post("{:url('Admin/ajaxLogin')}", {
+                username : username,
+                password : password,
+                captcha :captcha,
+                RSA_FIELD_LIST : rsa_field_list
+            }, function (data) {
+                layer.close(index);
+                var json = data;
+                if (json['result'] == 'success') {
+                    layer.alert(json['message'], {
+                        shade: 0,
+                        anim: 2,
+                        offset: '10px',
+                        time: 3000,
+                        title: '成功',
+                        icon: 6
+                    });
+
+                    setTimeout(function () {
+                        location.href = redirect;
+                    }, 800)
+                } else {
+                    $('#captchaimg').trigger('click');
+                    addAlert(json['message'], 'error');
+                }
+            })
+        })
+</script>
+{/block}

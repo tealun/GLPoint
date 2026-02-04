@@ -1,0 +1,139 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="woo-page-sort">
+            <ul class="list">
+                {foreach $data.list as $item}
+                <li  class="clearfix" data-id="{$item[$pk]}">
+                    {foreach $fields as $field => $info}
+                    <span class="woo-field"><label>{$info.name}：</label>{$item[$field]}</span>
+                    {/foreach}
+                </li>
+                {/foreach}
+            </ul>
+        </div>
+        <div class="woo-page">
+            {$data.render | raw}
+        </div>
+
+    </div>
+</div>
+<script>
+    var globalData = {:json_encode($data)};
+    var pk = '{$pk}';
+    var posthref = "{:url('updateSort')}";
+
+    function woo_table_sort() {
+        var sortData = get_sort_data();
+        var offset = $(this).offset();
+        if (sortData.length <= 0) {
+            layer.alert('当前没有数据位置发生改变，无需提交[您可直接拖拽列表进行数据排序，或点击“返回”]', {
+                icon : 3,
+                offset :$(window).width() > 768 ? [offset.top  - $(window).scrollTop() + 'px', offset.left + 63 + 'px'] : 'auto'
+            })
+            return false;
+        }
+        var message = "当前有[<span style=\"color:#FF5722;\">"+ sortData.length +"</span>]条数据位置发生变化，请确认是否提交更新？";
+        layer.confirm(message, {
+            title : '确认',
+            icon : 3,
+            offset :$(window).width() > 768 ? [offset.top  - $(window).scrollTop() + 'px', offset.left + 63 + 'px'] : 'auto'
+        }, function(){
+            post_sort(sortData);
+        })
+    }
+
+    function post_sort(sortData) {
+        layer.closeAll();
+        var index = layer.load(3, {
+            time : 3000
+        });
+        WOO.request.call(this, posthref, 'post', {
+            "data" : sortData
+        }, {
+            success: function (msg, data) {
+                layer.close(index);
+                layer.alert(msg, {
+                    icon : 1,
+                    btn: ['返回','确定'],
+                    btn2: function (index, layero) {
+                        location.reload();
+                    }
+                }, function (index, layero) {
+                    location.href = $('.woo-header-many .action').find('a:eq(0)').attr('href');
+                });
+            },
+            error : function (msg,data) {
+                layer.close(index);
+                addAlert(msg, 'error');
+            }
+        })
+    }
+
+
+    function get_sort_data()
+    {
+        var sortData = [];
+        $('.woo-page-sort').find('li').each(function () {
+            var id = $(this).data('id');
+            var index = $(this).index();
+            var oid =  globalData.list[index][pk];
+            if (id != oid) {
+                sortData.push({
+                    "from" : id,
+                    "to"   : oid
+                })
+            }
+        })
+        return sortData;
+    }
+
+    $('body').on('click', '.woo-page a', function () {
+        var sortData = get_sort_data();
+        var href = $(this).attr('href');
+        if (sortData.length > 0) {
+            layer.confirm('当前列表顺序有变动，建议提交以后再进行翻页', {
+                title : '确认',
+                icon : 3,
+                btn: ['提交', '翻页', '取消']
+            }, function(index, layero) {
+                post_sort(sortData);
+            }, function (index, layero) {
+                location.href = href;
+            })
+            return false;
+        }
+        return true;
+    })
+
+    function toggle_odd() {
+        $('.woo-page-sort').find('li').each(function () {
+            var index = $(this).index();
+            if (index % 2 == 0) {
+                $(this).addClass('sort-odd');
+            } else {
+                $(this).removeClass('sort-odd');
+            }
+        })
+    }
+    toggle_odd();
+    function layuiReady() {
+        new Sortable($('.woo-page-sort').find('ul')[0], {
+            animation: 150,
+            ghostClass: 'blue-background-class',
+            onUpdate : function (evt) {
+                toggle_odd();
+            }
+        });
+    }
+
+</script>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}{/block}
+

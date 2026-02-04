@@ -1,0 +1,155 @@
+{if !empty($data.fields)}
+{if !empty($data.error) && is_string($data.error)}
+{$data.error}
+{/if}
+<div class="woo-orderitem-container">
+    {if isset($data.attrs.value) && is_array($data.attrs.value)}{assign name="$data.attrs.value" value=":json_encode($data.attrs.value)"/}{/if}
+    <input type="hidden"
+           {foreach $data.attrs as $key => $value}
+    {$key}='{$value}'
+    data-foreign="{$data.together.foreign ?? ''}"
+    data-errors='{$data.error ? json_encode($data.error, JSON_UNESCAPED_UNICODE) : ''}'
+    {/foreach}>
+    <input type="hidden" class="orderitem-fields" value='{:json_encode($data.fields, JSON_UNESCAPED_UNICODE)}'>
+    <div class="woo-orderitem-table-box">
+        <table class="layui-table woo-orderitem-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px"><div class="item-cell" style="width: 50px"></div></th>
+                    <th style="width: 80px"><div class="item-cell" style="width: 80px"></div></th>
+                    {foreach $data.fields as $field => $item}
+                    <th style="width:{$item.width ?? 100}px;">
+                        <div class="item-name item-cell" style="width:{$item.width ?? 100}px;">
+                            {if !empty($item.tip)}<div class="woo-form-item-tip woo-tiptool" data-tip-text="{$item.tip}" data-tip-bg="#FF5722" data-tip-type="3"><i class="woo-icon woo-icon-tishi"></i></div>{/if}
+                            <cite>{$item.name ?? $field}</cite>
+                        </div>
+                    </th>
+                    {/foreach}
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        {if $data.attrs['data-counter'] ?? ''}
+        <div class="woo-orderitem-counter">
+            <table class="layui-table woo-orderitem-counter-table">
+                <tbody>
+                    <tr>
+                        <td class="th" style="width: 50px" ><div class="item-cell" style="width: 50px"></div></td>
+                        <td style="width: 80px"><div class="item-cell center" style="width: 80px">合计：</div></td>
+                        {foreach $data.fields as $field => $item}
+                        <td style="width:{$item.width ?? 100}px;">
+                            <div class="item-cell item-counter-{$field}" style="width:{$item.width ?? 100}px;"></div>
+                        </td>
+                        {/foreach}
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {/if}
+        <div class="init-loading">
+            <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i>
+        </div>
+    </div>
+<script type="text/html" class="orderitem-row-templete">
+    {{# var pk = '{$data.pk ?? 'id'}'}}
+    <tr data-model="{$data.together.foreign ?? ''}">
+        <td class="th" style="width: 50px">
+            <div class="item-number item-cell" style="width: 50px">
+                <cite></cite>
+                <input type="hidden" data-name="id" value="{{d.row[pk] || ''}}">
+            </div>
+        </td>
+        <td class="td" style="width: 80px">
+            <div class="item-action center item-cell" style="width: 80px">
+                <a href="javascript:;" class="action insert-row-btn" title="新增行"><i class="layui-icon layui-icon-add-circle"></i></a>
+                <a href="javascript:;" class="action remove-row-btn" title="删除行"><i class="layui-icon layui-icon-delete" ></i></a>
+            </div>
+        </td>
+        {{# for (var i in d.fields){ }}
+        {{# var item = $.extend({}, d.fields[i], {row:d.row})}}
+        <td class="td" style="width:{{item.width ? item.width : 100}}px;">
+            <div class="input-item item-cell" style="width:{{item.width ? item.width : 100}}px;">
+                {{# if ($('.item-'+ (item.elem ? item.elem : 'text') +'-component').length) { }}
+                    {{-layTpl($('.item-'+ (item.elem ? item.elem : 'text') +'-component:first').html()).render(item)}}
+                {{# } else { }}
+                    不存在{{item.elem}}组件
+                {{# } }}
+                {{# if (item.row.CHECKERROR && item.row.CHECKERROR[item.field]) {}}
+                <div class="error-tip">{{item.row.CHECKERROR[item.field]}}</div>
+                {{# } }}
+            </div>
+        </td>
+        {{#} }}
+        <td class="td"></td>
+    </tr>
+</script>
+
+<script type="text/html" class="orderitem-dropdown-templete">
+    <div class="orderitem-dropdown-item" data-id="{{d.id}}">{{d.title}}</div>
+</script>
+
+<script type="text/html" class="item-text-component">
+    {{# d.attrs = d.attrs || {}}}
+    {{# d.attrs.class = "orderitem-input orderitem-text-component item-text-component-" + d.field}}
+    {{# if (d.options) { }}
+    {{# d.attrs.class += " item-has-options"}}
+    {{# } }}
+    {{# d.attrs.value = d.default || ''}}
+    {{# d.attrs.value = d.row[d.field] != undefined ? d.row[d.field] : d.attrs.value}}
+    <input
+        type="text"
+        data-name="{{d.field}}"
+        data-options='{{d.options ? JSON.stringify(d.options) : ""}}'
+        {{# if (d.attrs) { }}
+            {{# for (var i in d.attrs) { }}
+            {{i}}="{{d.attrs[i]}}"
+            {{# } }}
+        {{# } }}
+    >
+    {{# if (d.options) { }}
+    <i class="item-dropdown layui-icon layui-icon-triangle-d"></i>
+    {{# } }}
+</script>
+
+<script type="text/html" class="item-relation-component">
+    {{# d.attrs = d.attrs || {}}}
+    {{# d.attrs.class = "orderitem-input orderitem-relation-component item-relation-component-" + d.field}}
+    {{# d.attrs.value = d.default || ''}}
+    {{# d.attrs.value = d.row[d.field] != undefined ? d.row[d.field] : d.attrs.value}}
+    {{# var showValue=[]}}
+    {{# if ( d.row[d.foreign]) {}}
+        {{# var withName = JSON.parse(d.withName)}}
+        {{#for (var i in withName) { }}
+        {{# showValue.push(d.row[d.foreign][withName[i]] || '')}}
+        {{#}}}
+    {{#}}}
+    <input
+            type="hidden"
+            data-type="{{d.type ? d.type : 'string'}}"
+            data-name="{{d.field}}"
+            data-display="{{d.display}}"
+            data-href="{{d.href}}"
+            data-foreign="{{d.foreign}}"
+            data-cname="{{d.cname || ''}}"
+            data-with-name='{{d.withName}}'
+            data-with-value='{{d.withValue || ""}}'
+            {{# if (d.attrs) { }}
+            {{# for (var i in d.attrs) { }}
+            {{i}}="{{d.attrs[i]}}"
+            {{# } }}
+            {{# } }}
+    >
+    <input type="text"
+           data-name="{{d.field}}_show"
+           value="{{d.row[d.field+'_show'] ? d.row[d.field+'_show'] : (showValue.length ? showValue.join(' ') : '')}}"
+           class="orderitem-common-text orderitem-relation-input"
+           {{# if(d.attrs.readonly != undefined) { }}readonly{{# } }}
+    >
+    <i class="orderitem-relation-handler"></i>
+</script>
+</div>
+{else /}
+未定义表单项"fields"属性
+{/if}

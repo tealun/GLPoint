@@ -1,0 +1,13 @@
+<?php
+// 应用公共文件
+
+function mytest($a) {
+    if (file_exists('3.txt')) {
+        $c = file_get_contents('3.txt');
+    } else {
+        $c = '';
+    }
+    $c .= date('Y-m-d H:i:s') . PHP_EOL;
+    file_put_contents('3.txt', $c);
+    return true;
+}

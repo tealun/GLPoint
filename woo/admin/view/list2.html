@@ -1,0 +1,60 @@
+{extend name="$extend_list"/}
+
+{block name="script"}
+<script>
+    var selectRowIndex = -1;
+    //方向键上下选择 回车确认
+    $(document).on('keydown', function (ev) {
+        if (ev.keyCode == 40) {
+            selectRowIndex++;
+            if (selectRowIndex > $('.layui-table-main').find('tbody').find('tr').length -1) {
+                selectRowIndex = 0;
+            }
+            $('.layui-table-box').find('tbody').find('.auto-selected').removeClass('auto-selected').end().find('tr:eq('+selectRowIndex+')').addClass('auto-selected');
+        } else if(ev.keyCode == 38) {
+            selectRowIndex--;
+            if (selectRowIndex < 0) {
+                selectRowIndex = $('.layui-table-main').find('tbody').find('tr').length -1;
+            }
+            $('.layui-table-box').find('tbody').find('.auto-selected').removeClass('auto-selected').end().find('tr:eq('+selectRowIndex+')').addClass('auto-selected');
+        } else if(ev.keyCode == 13) {
+           if (selectRowIndex >= 0) {
+               $('.layui-table-main').find('tbody').find('tr:eq('+selectRowIndex+')').find('.layui-form-checkbox:first').not('.layui-form-checked').trigger('click');
+               $('[rel="relation_orderitem_select_colse"]').trigger('click');
+           }
+            ev.preventDefault();
+        }
+    })
+    
+    function relation_orderitem_select_colse(data) {
+        if (data.data.length == 0 && !$(this).hasClass('checkbox')) {
+            addAlert('您还没有选择任何项目', 'warn');
+            return false;
+        }
+        var pk = tabAttr[currentTabName]['table']['pk'];
+        var pks = [];
+        for (var i in data.data) {
+            pks.push(data.data[i][pk]);
+        }
+        if (parent.orderitem_relation_callback) {
+            parent.orderitem_relation_callback({pks : pks, list : data.data, pk_field : pk});
+        }
+        relation_orderitem_close(data.data.length);
+    }
+    
+    function relation_orderitem_close(dataLength) {
+        if (parent.relationInstance) {
+            parent.orderitem_relation_close(dataLength);
+        } else {
+            parent.layer.closeAll();
+        }
+    }
+
+    function layTableDone(res, curr, count, currentTabName) {
+        if (count) {
+            selectRowIndex = 0;
+            $('.layui-table-box').find('tbody').find('.auto-selected').removeClass('auto-selected').end().find('tr:eq(' + selectRowIndex + ')').addClass('auto-selected');
+        }
+    }
+</script>
+{/block}

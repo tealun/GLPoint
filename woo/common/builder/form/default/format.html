@@ -1,0 +1,27 @@
+{if !empty($data.prefix) || !empty($data.suffix)}<div class="layui-input-group">{/if}
+    {if !empty($data['prefix-icon']) || !empty($data['suffix-icon']) || isset($data['attrs']['lay-affix'])}<div class="layui-input-wrap">{/if}
+        {if !empty($data.prefix)}
+        <div class="layui-input-prefix layui-input-split">
+            {$data.prefix | raw}
+        </div>
+        {/if}
+        {if !empty($data['prefix-icon'])}
+        <div class="layui-input-prefix">
+            <i class="{:return_icon_class($data['prefix-icon'])}"></i>
+        </div>
+        {/if}
+
+        <div class="layui-input woo-input-format-show woo-copy">{$data.format ?? ($data.attrs.value ?? '')}</div>
+
+        {if !empty($data.suffix)}
+        <div class="layui-input-suffix layui-input-split">
+            {$data.suffix | raw}
+        </div>
+        {/if}
+        {if !empty($data['suffix-icon'])}
+        <div class="layui-input-suffix">
+            <i class="{:return_icon_class($data['suffix-icon'])}"></i>
+        </div>
+        {/if}
+        {if !empty($data['prefix-icon']) || !empty($data['suffix-icon'])  || isset($data['attrs']['lay-affix'])}</div>{/if}
+    {if !empty($data.prefix) || !empty($data.suffix)}</div>{/if}

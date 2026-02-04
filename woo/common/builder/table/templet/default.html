@@ -1,0 +1,240 @@
+{// 调用其他模板 如：call.text   call.其他模板名称}
+<script type="text/html" id="callTemplet">
+    {{# if (d.this.sub) { }}
+    {{# if (document.getElementById(d.this.sub + 'Templet')) { }}
+    {{-layTpl(document.getElementById(d.this.sub + 'Templet').innerHTML).render(d)}}
+    {{# } else { }}
+    模板{{d.this.sub + 'Templet'}}不存在
+    {{# } }}
+    {{#  } }}
+</script>
+{// 合并字段显示在一列中 支持度可能有限 特殊合并可以采用自定义模板完成}
+<script type="text/html" id="mergeTemplet">
+    {{# if (d.this.merge_fields) { }}
+    {{# for (var i in d.this.merge_fields) { }}
+    {{# if (d.this.merge_fields[i].templet) { }}
+    {{# var newd = $.extend({}, d, {this : d.this.merge_fields[i]})}}
+    {{# if (newd.this.templet.indexOf('#') === 0) { }}
+    {{# if (document.getElementById(newd.this.templet.substr(1) + 'Templet')) { }}
+    {{-layTpl(document.getElementById(newd.this.templet.substr(1) + 'Templet').innerHTML).render(newd)}}
+    {{# } else { }}
+    模板{{newd.this.templet.substr(1) + 'Templet'}}不存在
+    {{# } }}
+    {{# } else { }}
+    {{-layTpl(newd.this.templet).render(newd)}}
+    {{# } }}
+    {{# } else { }}
+    {{d[d.this.merge_fields[i].field] != undefined ? d[d.this.merge_fields[i].field] : ''}}
+    {{# } }}
+    {{# if (i < d.this.merge_fields.length - 1) { }}
+    {{typeof(d.this.delimiter) == 'undefined' ? '/' : d.this.delimiter}}
+    {{# } }}
+    {{# } }}
+    {{# } }}
+</script>
+<script type="text/html" id="showTemplet">
+    {{# if (!d.this.sub) { }}
+    {{d[d.this.field]}}
+    {{#  } else { }}
+    {{# if (d[d.this.field]) { }}
+    <span class="layui-badge layui-bg-{{d.this.sub && d.this.sub != 'blue' ? d.this.sub : 'blue woo-theme-background'}} woo-copy">{{d[d.this.field]}}</span>
+    {{# } }}
+    {{# } }}
+</script>
+<script type="text/html" id="themeTemplet">
+    <span class="woo-theme-color">{{d[d.this.field]}}</span>
+</script>
+<script type="text/html" id="textTemplet">
+    {{WOO.strap_tags(d[d.this.field])}}
+</script>
+<script type="text/html" id="htmlTemplet">
+    {{-d[d.this.field]}}
+</script>
+<script type="text/html" id="showAndExportTemplet">
+    {{d[d.this.field] + "\t"}}
+</script>
+<script type="text/html" id="passwordTemplet">
+    ●●●●●●
+</script>
+<script type="text/html" id="relationTemplet">
+    {{# if (d.this.relation) { }}
+    {{# if (d[d.this.relation.model]) { }}
+    {{# if (WOO.inArray(d.this.relation.type, ['hasOne', 'belongsTo', 'belongsToThrough', 'hasOneThrough']) >= 0) { }}
+    {{d[d.this.relation.model][d.this.relation.field] != undefined ? d[d.this.relation.model][d.this.relation.field] : d[d.this.field]}}
+    {{# } else if (WOO.inArray(d.this.relation.type, ['belongsToMany']) >= 0) { }}
+    {{# for (var i in d[d.this.relation.model]) { }}
+    <span class="layui-badge layui-bg-{{d.this.sub ? d.this.sub : 'blue woo-theme-background'}}">
+                    {{d[d.this.relation.model][i][d.this.relation.field]}}
+                    </span>
+    {{# } }}
+    {{# } }}
+    {{#  } else { }}
+    {{d[d.this.field] ? d[d.this.field] : ''}}
+    {{# } }}
+    {{# } }}
+</script>
+<script type="text/html" id="optionsTemplet">
+    {{#  if (d[d.this.field] || d[d.this.field] === 0) { }}
+    {{# var keys = !WOO.isJsonValidate(d[d.this.field]) ? d[d.this.field].toString().split(',') : JSON.parse(d[d.this.field])}}
+    {{# for (var i in keys) { }}
+    {{#  if (keys[i] && d.this.options) { }}
+    {{# if (d.this.sub) { }}
+    <span class="layui-badge layui-bg-{{d.this.sub}}">{{d.this.options[keys[i]] ? d.this.options[keys[i]] : keys[i]}}</span>
+    {{#  } else { }}
+    {{d.this.options[keys[i]] ? d.this.options[keys[i]] : keys[i]}}
+    {{#  } }}
+    {{#  } else { }}
+    {{# if (d.this.sub) { }}
+    <span class="layui-badge layui-bg-{{d.this.sub}}">{{keys[i] ? keys[i] : ''}}</span>
+    {{#  } else { }}
+    {{keys[i] ? keys[i] : ''}}
+    {{#  } }}
+    {{#  } }}
+    {{# } }}
+    {{#  } }}
+</script>
+<script type="text/html" id="datetimeTemplet">
+    <span class="date-list-item datetime">{{WOO.dateFormat('Y-m-d H:i:s', d[d.this.field], 1) + "\t"}}</span>
+</script>
+<script type="text/html" id="dateTemplet">
+    <span class="date-list-item date">{{WOO.dateFormat('Y-m-d', d[d.this.field], 1) + "\t"}}</span>
+</script>
+<script type="text/html" id="timeTemplet">
+    <span class="date-list-item time">{{WOO.dateFormat('H:i:s', d[d.this.field], 1) + "\t"}}</span>
+</script>
+<script type="text/html" id="yearTemplet">
+    {{WOO.dateFormat('Y', d[d.this.field], 1)}}
+</script>
+<script type="text/html" id="monthTemplet">
+    {{WOO.dateFormat('Y-m', d[d.this.field], 1) + "\t"}}
+</script>
+<script type="text/html" id="dateFormatTemplet">
+    {{WOO.dateFormat(d.this.format ? d.this.format : 'Y-m-d', d[d.this.field], 1) + "\t"}}
+</script>
+<script type="text/html" id="counterTemplet">
+    {{# var href = '{:strval(url('COUNTERHOLDER/index', ['parent_id' => 'COUNTERPARENTHOLDER']))}'}}
+    {{# var counter = d.this.counter ? d.this.counter : d.this.field.substr(0, d.this.field.length-6)}}
+    <a href="{{href.replace('COUNTERHOLDER', counter).replace('COUNTERPARENTHOLDER', d[d.this.pk])}}" class="woo-list-counter">
+        <i class="layui-icon layui-icon-link"></i>
+        {{d[d.this.field]}}</a>
+</script>
+<script type="text/html" id="checkerTemplet">
+    {{# if (d.this.sub != 'text') { }}
+    {{# if (!d.this.detail) { }}
+    <input type="checkbox" lay-filter="checker" class="{{# if (d.this.sub=="open"){ }} is-open {{# }}}" data-name="{{d.this.field}}" data-id="{{d[d.this.pk]}}"  lay-skin="switch" title="{{d.this['lay-text'] ? d.this['lay-text'] : 'Y|N'}}" {{# if(d.this.sub=="show" || (d.this.sub=="open" && d[d.this.field] == (d.this.options.yes ? d.this.options.yes : 1)))  { }}disabled{{# } }} data-yes="{{d.this.options.yes ? d.this.options.yes : 1}}" data-no="{{d.this.options.no ? d.this.options.no : 0}}"  value="{{d[d.this.field]}}" {{#if (d[d.this.field] == d.this.options.yes){ }}checked{{# } }} />
+    {{# } else { }}
+    {{#if (d[d.this.field] == d.this.options.yes){ }}
+    <i class="layui-icon layui-icon-ok"></i>
+    {{# } else { }}
+    <i class="layui-icon layui-icon-close"></i>
+    {{# } }}
+    {{# } }}
+    {{# } else { }}
+    {{# var text = d.this['lay-text'] ? d.this['lay-text'] : 'Y|N'}}
+    {{#if (d[d.this.field] == d.this.options.yes){ }}
+    {{text.split('|')[0]}}
+    {{# } else { }}
+    {{text.split('|')[1]}}
+    {{# } }}
+    {{# } }}
+</script>
+<script type="text/html" id="fileTemplet">
+    <div class="woo-list-file clearfix">
+        {{# var files = d[d.this.field] }}
+        {{# if (files) { }}
+        {{# if (WOO.isJsonValidate(files)) { }}
+        {{# files = JSON.parse(files) }}
+        {{# } else { }}
+        {{# files = [files] }}
+        {{# } }}
+        {{# if (files) { }}
+        {{# for (var i in files) { }}
+        {{# var ext = files[i].split('.').pop().toLowerCase()}}
+        {{# if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(ext) >= 0) { }}
+        <a href="{{files[i]}}" target="_blank" class="coverBg simpleSlide" data-src="{{files[i]}}" style="background-image: url('{{WOO.thumb(files[i], 50, 50)}}')"></a>
+        {{# } else { }}
+        <a href="{{files[i]}}" target="_blank" class="coverBg" data-src="{{woo_script_vars.wwwroot + 'static/woo/images/fileicon/' + ext + '.png'}}" style="background-image: url('{{woo_script_vars.wwwroot + 'static/woo/images/fileicon/' + ext + '.png'}}')"></a>
+        {{# } }}
+        {{# } }}
+        {{# } }}
+        {{# } else { }}
+        无
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="avatarTemplet">
+    <div class="woo-list-file clearfix">
+        {{# var file = d[d.this.field] }}
+        {{# if (file) { }}
+        <a href="{{file}}" target="_blank" class="coverBg simpleSlide" data-src="{{file}}" style="background-image: url('{{WOO.thumb(file, 50, 50)}}')"></a>
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="usernameTemplet">
+    <div class="woo-list-username">
+        <div class="avatar">
+            <img  src="{{WOO.thumb(d.avatar ? d.avatar :woo_script_vars.wwwroot  + 'static/images/admin/default_headimg.png', 50, 50)}}">
+        </div>
+        <cite class="woo-theme-color woo-copy">{{d[d.this.field] ? d[d.this.field] : ''}}</cite>
+    </div>
+</script>
+
+<script type="text/html" id="filesizeTemplet">
+    <span class="layui-badge layui-bg-blue woo-theme-background">{{WOO.returnSize(d[d.this.field])}}</span>
+</script>
+<script type="text/html" id="iconTemplet">
+    <i class="{{WOO.returnIconClass(d[d.this.field])}}"></i>
+</script>
+<script type="text/html" id="urlTemplet">
+    {{# if (d[d.this.field]) { }}
+    <a href="{{WOO.url(d[d.this.field])}}" class="new_tab woo-templet-url" data-title="链接"><i class="layui-icon layui-icon-link"></i>{{WOO.url(d[d.this.field])}}</a>
+    {{#  } }}
+</script>
+<script type="text/html" id="uaTemplet">
+    {{WOO.getUa(d[d.this.field])}}
+</script>
+<script type="text/html" id="objectTemplet">
+    {{# if (d[d.this.field]) { }}
+    {{# var obj = JSON.parse(d[d.this.field]) }}
+    {{# for (var i in obj) { }}
+    {{i}}:{{obj[i]}}
+    {{#  } }}
+    {{#  } }}
+</script>
+<script type="text/html" id="mobileSortHandlerTemplet">
+    <div class="sort-row-handler"><i class="woo-icon woo-icon-jiantou-shangxiaqiehuan"></i></div>
+</script>
+<script type="text/html" id="layTableCheckboxTemplet">
+    <input type="checkbox" data-index="{{d.LAY_INDEX}}" value="{{d[tabAttr[currentTabName]['table']['pk']]}}" name="layTableCheckbox"  lay-filter="layTableChoose1" lay-skin="primary">
+</script>
+<script type="text/html" id="layTableAllChooseTemplet">
+    <input type="checkbox" name="layTableAllCheckbox" lay-skin="primary" lay-filter="layTableAllChoose1">
+</script>
+<script type="text/html" id="customFieldSortTemplet">
+    <div class="custom-field-sort" data-field="{{d.field}}">
+        {{d.title}}
+        <span class="layui-table-sort layui-inline" lay-sort="{{ customFieldSort.field==d.field ? customFieldSort.type : '' }}">
+            <i class="layui-edge layui-table-sort-asc" title="升序"></i>
+            <i class="layui-edge layui-table-sort-desc" title="降序"></i>
+        </span>
+    </div>
+</script>
+<script type="text/html" id="defaultCounterTemplet">
+    <div class="layui-row layui-col-space10">
+        {{# for (var i in d) { }}
+        <div class="{{d[i].grid}}">
+            {{# if (document.getElementById(d[i].templet)) { }}
+            {{-layTpl(document.getElementById(d[i].templet).innerHTML).render(d[i])}}
+            {{# } else { }}
+            模板{{d[i].templet}}不存在
+            {{# } }}
+        </div>
+        {{# } }}
+    </div>
+</script>
+<script type="text/html" id="defaultCounterItem">
+    <div class="counter-default-item">
+        <div class="item-title woo-theme-color">{{d.title}}：</div>
+        <div class="item-value">{{d.value}}</div>
+    </div>
+</script>

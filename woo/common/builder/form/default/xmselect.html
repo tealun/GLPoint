@@ -1,0 +1,22 @@
+<div
+    {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <div style="display: none;">
+        <select lay-ignore>
+            {if isset($data.options)}
+            {foreach $data.options as $value => $title}
+            {if !is_array($title)}
+            <option value="{$value}">{$title | raw}</option>
+            {else/}
+            <optgroup label="{$value}">
+                {foreach $title as $value1 => $title1}
+                <option value="{$value1}">{$title1 | raw}</option>
+                {/foreach}
+            </optgroup>
+            {/if}
+            {/foreach}
+            {/if}
+        </select>
+    </div>
+</div>

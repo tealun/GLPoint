@@ -1,0 +1,11 @@
+<!--
+  空状态组件
+  用法: <empty-state type="no-data" text="暂无数据" />
+-->
+<view class="empty-state" wx:if="{{show}}">
+  <image class="empty-icon" src="{{iconSrc}}" mode="aspectFit" />
+  <text class="empty-text">{{text}}</text>
+  <view class="empty-action" wx:if="{{buttonText}}" bindtap="onButtonTap">
+    <text>{{buttonText}}</text>
+  </view>
+</view>

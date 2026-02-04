@@ -1,0 +1,20 @@
+{if isset($data.options)}
+    {foreach $data.options as $value => $title}
+    <input type="radio"
+        {foreach $data.attrs as $key => $attr}
+        {if $key != 'value'}
+            {if $key!='id'}
+            {$key}="{$attr}"
+            {else/}
+            {$key}="{$attr}_{$value}"
+            {/if}
+        {/if}
+        {/foreach}
+
+        value="{$value}"
+
+        {if !empty($data.is_title)}{:is_bool($data.is_title) ? 'title' : $data.is_title}="{$title}"{/if}
+
+        {if isset($data.attrs.value) && $data.attrs.value==$value}checked{/if}>{if empty($data.is_title)}<label {if !empty($data.attrs.id)}for="{$data.attrs.id}_{$value}"{/if}>{$title}</label>{/if}
+    {/foreach}
+{/if}

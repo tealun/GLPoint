@@ -1,0 +1,164 @@
+.container {
+  padding: 20rpx;
+  background: #f5f5f5;
+}
+
+/* 图表卡片 */
+.chart-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 图表头部 */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.chart-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 时间段切换按钮 */
+.time-selector {
+  display: flex;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+  padding: 4rpx;
+}
+
+.time-btn {
+  font-size: 26rpx;
+  color: #666;
+  padding: 8rpx 20rpx;
+  border-radius: 6rpx;
+  transition: all 0.3s;
+}
+
+.time-btn.active {
+  background: #44bbbb;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* 图表区域 */
+.chart-area {
+  margin-top: 20rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.chart-scroll {
+  width: 100%;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+/* 积分四方格 */
+.summary-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+.grid-item {
+  width: 50%;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.grid-item:nth-child(2n) {
+  border-right: none;
+}
+.grid-item:nth-child(2n-1) {
+  border-right: 1rpx solid #f0f0f0;
+}
+.number {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #44bbbb;
+}
+.label {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+/* 积分动态列表 */
+.activity-list {
+  margin-top: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+.activity-item-wrap {
+  border-bottom: 1rpx solid #f0f0f0;
+  padding-bottom: 0rpx;
+  margin-bottom: 0rpx;
+  /* 新增：用于remark左侧对齐 */
+  padding-left: 0;
+}
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25rpx 0 0 0; /* 只保留顶部内边距，底部为0 */
+}
+.time {
+  font-size: 28rpx;
+  color: #666;
+  flex: 1; /* 左侧时间占据剩余空间 */
+  display: flex;
+  align-items: center; /* 确保时间文字居中 */
+}
+.change {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #44bbbb;
+  display: flex;
+  align-items: center; /* 确保数字文字居中 */
+}
+.change.increase {
+  color: #44bbbb;
+}
+.change.decrease {
+  color: red;
+}
+/* 更多记录按钮 */
+.more-btn {
+  margin-top: 20rpx;
+  background-color: #44BBBB;
+  color: white;
+  font-size: 32rpx;
+  font-weight: bold;
+  padding: 20rpx;
+  text-align: center;
+  border-radius: 10rpx;
+}
+.remark-text {
+  font-size: 26rpx;
+  color: #888;
+  margin-left: 0; /* 左对齐 */
+  margin-bottom: 18rpx; /* 增加底部间距 */
+  margin-top: 8rpx;     /* 增加顶部间距 */
+  word-break: break-all;
+  padding-left: 0;      /* 左对齐 */
+  padding-bottom: 25rpx; /* 保证remark与底部线有间距 */
+  /* 新增：与内容左对齐 */
+}

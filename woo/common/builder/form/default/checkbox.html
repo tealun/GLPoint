@@ -1,0 +1,22 @@
+<input name="{:substr($data.attrs.name, 0, -2)}" value="" type="hidden">
+{if !empty($data.attrs.value) && is_json($data.attrs.value)}{assign name="$data.attrs.value" value=":json_decode($data.attrs.value)"/}{/if}
+{if isset($data.options)}
+    {foreach $data.options as $value => $title}
+    <input type="checkbox"
+    {foreach $data.attrs as $key => $attr}
+        {if $key != 'value'}
+            {if $key!='id'}
+                {$key}="{$attr}"
+            {else/}
+                {$key}="{$attr}_{$value}"
+            {/if}
+        {/if}
+    {/foreach}
+
+    value="{$value}"
+
+    {if !empty($data.is_title)}{:is_bool($data.is_title) ? 'title' : $data.is_title}="{$title}"{/if}
+
+    {if isset($data.attrs.value) && in_array($value, (array) $data.attrs.value)}checked{/if}>{if empty($data.is_title)}<label {if !empty($data.attrs.id)}for="{$data.attrs.id}_{$value}"{/if}>{$title}</label>{/if}
+    {/foreach}
+{/if}

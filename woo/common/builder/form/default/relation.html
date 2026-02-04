@@ -1,0 +1,15 @@
+<div class="woo-relation-container woo-relation-{$data.field_name} clearfix">
+    {if isset($data.attrs.value) && is_array($data.attrs.value)}{assign name="$data.attrs.value" value=":json_encode($data.attrs.value)"/}{/if}
+    <input type="hidden"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <span class="woo-relation-show fl">
+        {if !empty($data.display)}
+        {$data.display | raw}
+        {else /}
+        <span class="not-select">未选择</span>
+        {/if}
+    </span>
+    <a data-href="{:url($data['relation_controller'] . '/' . $data['relation_action'], ['field' => $data.field_name, 'value' => 'VALUEHOLDER', 'id' => $values[$data['current_model_pk'] ?? 'id'] ?? null ])}" class="layui-btn woo-theme-btn javascript fl" rel="loadRelationFrame">选择</a>
+</div>

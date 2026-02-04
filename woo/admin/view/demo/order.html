@@ -1,0 +1,181 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <style>
+            .my-form{
+                padding: 15px;
+            }
+            .my-form-item{
+                display: flex;
+            }
+            .my-form-lable{
+                line-height: 38px;
+                min-width: 65px;
+            }
+            .my-form-html{
+                flex-grow: 1;
+            }
+            .my-form .layui-form-select,.my-form .layui-input{
+                max-width: 300px;
+            }
+            .my-from-row6{
+                line-height: 38px;
+                padding-left: 5px;
+                color: #999;
+            }
+            .my-from-row7{
+                margin-top: 12px;
+                text-align: center;
+            }
+            @media screen and (max-width: 668px) {
+                .my-form-item{
+                    display: block;
+                }
+                .my-form .layui-form-select,.my-form .layui-input{
+                    max-width: none;
+                }
+                .my-from-row3,.my-from-row4{
+                    margin-top: 10px;
+                }
+            }
+        </style>
+        <div class="my-form">
+            <form method="post" class="layui-form">
+                <!--获取到所有不可见表单项；比如hidden crsf等；直接输出就可以了 他们不占空间-->
+                {foreach $form->getHiddenItems() as $item}
+                    {$item.html| raw}
+                {/foreach}
+                <!--获取到所有可见表单项，你可以直接循环；我们这里要完全自由控制位置和顺序不想循环就拿一个变量来接受-->
+                {assign name="form_items" value="$form->getVisibleItems()"/}
+                <div class="layui-row my-form-row layui-col-space10  my-from-row1">
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.admin_id.label}：</div>
+                            <div class="my-form-html">{$form_items.admin_id.html | raw}</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.admin_group_id.label}：</div>
+                            <div class="my-form-html">{$form_items.admin_group_id.html | raw}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row my-form-row layui-col-space10  my-from-row2">
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.user_id.label}：</div>
+                            <div class="my-form-html">{$form_items.user_id.html | raw}</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.b.label}：</div>
+                            <div class="my-form-html">{$form_items.b.html | raw}</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.a.label}：</div>
+                            <div class="my-form-html">{$form_items.a.html | raw}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row my-form-row layui-col-space10  my-from-row3">
+                    <div class="layui-col-md12">
+                        <div class="my-form-item">
+                            <div class="my-form-html">{$form_items.detail.html | raw}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row my-form-row layui-col-space10  my-from-row4">
+                    <div class="layui-col-md12">
+                        <div class="my-form-item">
+                            <div class="my-form-html">{$form_items.c.html | raw}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row my-form-row layui-col-space10  my-from-row5">
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.d.label}：</div>
+                            <div class="my-form-html">{$form_items.d.html | raw}</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.e.label}：</div>
+                            <div class="my-form-html">{$form_items.e.html | raw}</div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md3">
+                        <div class="my-form-item">
+                            <div class="my-form-lable">{$form_items.f.label}：</div>
+                            <div class="my-form-html">{$form_items.f.html | raw}</div>
+                        </div>
+                    </div>
+                </div>
+                <div  class="layui-row my-form-row layui-col-space10  my-from-row6">
+                    制单人：{$login.nickname | default=$login.username}
+                </div>
+                <div  class="layui-row my-form-row layui-col-space10  my-from-row7">
+                    <button class="layui-btn woo-theme-btn layui-btn-radius btn-spacing-2" lay-submit="" lay-filter="wooFormSubmit">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary layui-btn-radius btn-spacing-2">重置</button>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+
+<script>
+    // 该事件中 layui对象才准备好 完全自定义页面用layuiReady 继承form用 mytest函数
+    function layuiReady() {
+        layui.use(['form', 'element'], function () {
+            var element = layui.element;
+            var layForm = layui.form;
+
+            var isFormLoading = false;
+            layForm.on('submit(wooFormSubmit)', function(data) {
+                if (isFormLoading) {
+                    addAlert('提交太快，休息下吧！');
+                    return false;
+                }
+                isFormLoading = true;
+                // orderitem表单： 由于表单的特殊性，表单提交之前必须调用生成提交的数据 否则不会提交数据后台
+                // 没有完全自定义表单结构 继承form的表单不用写 底层已经写了
+                if (window.OrderItemInstance) {
+                    for (var i in window.OrderItemInstance)  {
+                        var orderItemReturn = window.OrderItemInstance[i].beforeSubmit();
+                        if (!orderItemReturn) {
+                            isFormLoading = false;
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            });
+        })
+    }
+
+    function aaaaa(data) {
+        console.log(data);
+        $('#id_d').val(data.sum);
+        return data.sum;
+    }
+    function bbbbb(data) {
+        $('#id_e').val(data.sum);
+        return data.sum;
+    }
+</script>
+{/block}
+

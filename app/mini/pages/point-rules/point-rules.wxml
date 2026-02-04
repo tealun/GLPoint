@@ -1,0 +1,55 @@
+<view class="container">
+  <view class="header">
+    <text class="title">积分规则说明</text>
+  </view>
+
+  <scroll-view
+    wx:if="{{!loading}}"
+    class="rules-content"
+    scroll-y="true"
+    scroll-with-animation="true"
+    scroll-into-view="{{scrollIntoView}}"
+    style="max-height: 80vh;"
+  >
+    <block wx:for="{{categories}}" wx:key="id">
+      <view class="category-block" id="category-{{item.id}}">
+        <view class="category-title-article"
+          data-id="{{item.id}}"
+          bindtap="onToggleCategory"
+        >
+          {{item.category_name}}
+          <text style="float:right;font-size:28rpx;">
+            {{expandedCategoryId === item.id ? '▲' : '▼'}}
+          </text>
+        </view>
+        <view wx:if="{{expandedCategoryId === item.id}}">
+          <block wx:for="{{subCategories}}" wx:for-item="sub" wx:key="id">
+            <view wx:if="{{sub.parent_id === item.id}}">
+              <view class="subcategory-title-article">{{sub.category_name}}</view>
+              <view class="subcategory-desc">{{sub.description}}</view>
+              <view class="rules-table">
+                <view class="rules-table-header">
+                  <text class="col-index">序号</text>
+                  <text class="col-rule">规则</text>
+                  <text class="col-score">积分</text>
+                </view>
+                <block wx:for="{{rulesMap[sub.id] || []}}" wx:for-item="rule" wx:key="id">
+                  <view class="rules-table-row">
+                    <text class="col-index">{{index + 1}}</text>
+                    <view class="col-rule">
+                      <text>{{rule.rule_name}}</text>
+                      <view class="rule-desc" wx:if="{{rule.description}}">{{rule.description}}</view>
+                    </view>
+                    <text class="col-score">{{rule.score}}</text>
+                  </view>
+                </block>
+                <view wx:if="{{!(rulesMap[sub.id] && rulesMap[sub.id].length)}}" class="no-rules">暂无规则</view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+  <view class="loading" wx:else>加载中...</view>
+</view>

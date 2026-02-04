@@ -1,0 +1,551 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © MoreyDu
+
+//@version=6
+strategy("基准线超趋策略", shorttitle="基准线策略", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=30)
+
+// ==================== 策略参数 ====================
+// 是否启用做多
+enable_long = input.bool(true, "启用做多", group="交易设置")
+// 是否启用做空
+enable_short = input.bool(true, "启用做空", group="交易设置")
+// 基准线左侧搜索范围
+left_search_bars = input.int(3, "基准线左侧搜索K线数", minval=1, maxval=10, group="交易设置", tooltip="寻找左一线时向左搜索的K线数量")
+// 基准线右侧信号区间
+right_signal_bars = input.int(3, "基准线右侧信号区间", minval=1, maxval=10, group="交易设置", tooltip="基准线右侧多少条K线内可以触发入场信号")
+
+
+// 极简过滤参数 - 只保留最基本的反转确认
+volume_confirmation = input.bool(true, "成交量确认", group="信号确认", tooltip="突破时成交量需要放大")
+volume_multiplier = input.float(1.3, "成交量倍数", minval=1.1, maxval=2.0, group="信号确认", tooltip="突破时成交量相对平均成交量的倍数")
+
+candle_strength = input.bool(true, "K线实体确认", group="信号确认", tooltip="突破K线需要有较强实体")
+min_candle_body = input.float(40.0, "最小K线实体(%)", minval=20.0, maxval=80.0, group="信号确认", tooltip="K线实体占整根K线的最小百分比")
+
+// 超级趋势过滤
+enable_supertrend = input.bool(true, "启用超级趋势过滤", group="信号确认", tooltip="使用超级趋势指标过滤假信号")
+supertrend_period = input.int(10, "超级趋势周期", minval=1, maxval=50, group="信号确认")
+supertrend_multiplier = input.float(3.0, "超级趋势倍数", minval=0.5, maxval=10.0, step=0.1, group="信号确认")
+
+// 最大加仓次数
+max_add_positions = input.int(2, "最大加仓次数", minval=0, maxval=5, group="风险管理")
+// 止损百分比
+stop_loss_pct = input.float(2.0, "止损百分比 (%)", minval=0.1, maxval=10.0, group="风险管理")
+
+// ==================== 全局变量 ====================
+var float long_baseline_low = na        // 多单基准线最低点
+var int long_baseline_bar = na          // 多单基准线K线位置
+var float long_baseline_high = na       // 多单基准线最高点
+var float short_baseline_high = na      // 空单基准线最高点
+var int short_baseline_bar = na         // 空单基准线K线位置
+var float short_baseline_low = na       // 空单基准线最低点
+var int long_add_count = 0              // 多单加仓次数
+var int short_add_count = 0             // 空单加仓次数
+var bool long_signal_pending = false    // 多单信号等待状态
+var bool short_signal_pending = false   // 空单信号等待状态
+
+// ==================== 信号确认 ====================
+
+// 计算成交量均值（用于基准线K线确认）
+avg_volume = ta.sma(volume, 20)
+
+// 计算超级趋势指标
+[supertrend, direction] = ta.supertrend(supertrend_multiplier, supertrend_period)
+
+// 超级趋势方向确认函数
+supertrend_confirmation(is_long) =>
+    if not enable_supertrend
+        true  // 如果未启用超级趋势过滤，直接返回true
+    else
+        if is_long
+            // 多单：价格需要在超级趋势上方且趋势向上
+            close > supertrend and direction < 0
+        else
+            // 空单：价格需要在超级趋势下方且趋势向下
+            close < supertrend and direction > 0
+
+// 优化的超级趋势入场确认函数
+supertrend_entry_confirmation(is_long, basic_signal) =>
+    if not enable_supertrend
+        [true, false]  // [可以入场, 需要等待]
+    else
+        if is_long
+            // 多单逻辑
+            price_above_st = close > supertrend
+            trend_up = direction < 0
+            
+            if basic_signal
+                if price_above_st and trend_up
+                    [true, false]   // 直接入场
+                else if not price_above_st and not trend_up
+                    [false, true]   // 等待趋势转向
+                else
+                    [false, false]  // 信号无效
+            else
+                [false, false]
+        else
+            // 空单逻辑
+            price_below_st = close < supertrend
+            trend_down = direction > 0
+            
+            if basic_signal
+                if price_below_st and trend_down
+                    [true, false]   // 直接入场
+                else if not price_below_st and not trend_down
+                    [false, true]   // 等待趋势转向
+                else
+                    [false, false]  // 信号无效
+            else
+                [false, false]
+
+// 基于基准线的信号确认函数
+baseline_signal_confirmation(baseline_bar_index, is_long) =>
+    // 1. 成交量确认（可选）- 判断基准线K线的成交量
+    baseline_volume = 0.0
+    if not na(baseline_bar_index)
+        offset = bar_index - baseline_bar_index
+        // 确保偏移量在有效范围内
+        if offset >= 0 and offset <= 10000
+            baseline_volume := volume[offset]
+    volume_ok = not volume_confirmation or (baseline_volume > avg_volume * volume_multiplier)
+    
+    // 2. K线实体强度确认（可选）- 判断当前突破K线
+    candle_range = high - low
+    candle_body = math.abs(close - open)
+    body_strength = candle_range > 0 ? (candle_body / candle_range * 100) : 0
+    candle_ok = not candle_strength or (body_strength >= min_candle_body)
+    
+    // 3. 超级趋势确认
+    supertrend_ok = supertrend_confirmation(is_long)
+    
+    volume_ok and candle_ok and supertrend_ok
+
+// ==================== 多单逻辑 ====================
+
+// 寻找左侧3条K线中的最低点作为潜在基准线
+find_long_baseline() =>
+    float potential_low = na
+    int potential_bar = na
+    float potential_high = na
+    
+    // 检查左侧3条K线，确保有足够的历史数据且不超过限制
+    if bar_index >= 3
+        for i = 1 to 3
+            if i <= 10000 and not na(low[i]) and (na(potential_low) or low[i] < potential_low)
+                potential_low := low[i]
+                potential_bar := bar_index - i
+                potential_high := high[i]
+    
+    // 只有当找到更低的基准线时才更新
+    should_update = not na(potential_low) and (na(long_baseline_low) or potential_low < long_baseline_low)
+    [potential_low, potential_bar, potential_high, should_update]
+
+// 寻找左一线（多单）
+find_long_left_line() =>
+    float left_line_high = na
+    bool found = false
+    
+    if not na(long_baseline_bar) and not na(long_baseline_low) and not na(long_baseline_high)
+        // 在基准线左侧指定条K线内寻找符合条件的K线
+        baseline_offset = bar_index - long_baseline_bar
+        
+        // 确保搜索范围有效且不超过历史数据限制
+        if baseline_offset > 0 and baseline_offset <= 9997
+            start_search = math.max(1, baseline_offset + 1)
+            end_search = math.min(baseline_offset + left_search_bars, math.min(bar_index - 1, 10000))
+            
+            for i = start_search to end_search
+                if i >= 1 and i <= 10000 and bar_index - i >= 0
+                    search_low = low[i]
+                    search_high = high[i]
+                    
+                    // 条件：低点在基准线高低点之间，高点 > 基准线高点
+                    if not na(search_low) and not na(search_high) and 
+                       search_low > long_baseline_low and search_low < long_baseline_high and 
+                       search_high > long_baseline_high
+                        left_line_high := search_high
+                        found := true
+                        break
+    
+    [left_line_high, found]
+
+// 多单入场条件
+long_entry_condition() =>
+    // 首先检查是否在基准线右侧指定条K线内
+    baseline_offset = not na(long_baseline_bar) ? bar_index - long_baseline_bar : na
+    in_signal_zone = not na(baseline_offset) and baseline_offset >= 0 and baseline_offset <= right_signal_bars
+    
+    // 初始化返回值
+    entry_signal = false
+    left_high = float(na)
+    left_found = false
+    should_wait = false
+    
+    if in_signal_zone
+        [temp_left_high, temp_left_found] = find_long_left_line()
+        left_high := temp_left_high
+        left_found := temp_left_found
+        
+        // 条件1：当前收盘价 > 基准线最低点
+        condition1 = not na(long_baseline_low) and close > long_baseline_low
+        
+        // 条件2：当前收盘价 > 左一线高点
+        condition2 = left_found and not na(left_high) and close > left_high
+        
+        // 基本入场条件（不包含超级趋势）
+        basic_signal = condition1 and condition2
+        
+        // 基本信号确认（成交量和K线实体）
+        baseline_volume = 0.0
+        if not na(long_baseline_bar)
+            offset = bar_index - long_baseline_bar
+            if offset >= 0 and offset <= 10000
+                baseline_volume := volume[offset]
+        volume_ok = not volume_confirmation or (baseline_volume > avg_volume * volume_multiplier)
+        
+        candle_range = high - low
+        candle_body = math.abs(close - open)
+        body_strength = candle_range > 0 ? (candle_body / candle_range * 100) : 0
+        candle_ok = not candle_strength or (body_strength >= min_candle_body)
+        
+        basic_confirmed = basic_signal and volume_ok and candle_ok
+        
+        // 获取超级趋势入场确认
+        [can_enter, temp_should_wait] = supertrend_entry_confirmation(true, basic_confirmed)
+        should_wait := temp_should_wait
+        
+        // 直接入场的信号
+        if can_enter
+            entry_signal := true
+    
+    [entry_signal, left_high, left_found, should_wait]
+
+// ==================== 空单逻辑 ====================
+
+// 寻找左侧3条K线中的最高点作为潜在基准线
+find_short_baseline() =>
+    float potential_high = na
+    int potential_bar = na
+    float potential_low = na
+    
+    // 检查左侧3条K线，确保有足够的历史数据且不超过限制
+    if bar_index >= 3
+        for i = 1 to 3
+            if i <= 10000 and not na(high[i]) and (na(potential_high) or high[i] > potential_high)
+                potential_high := high[i]
+                potential_bar := bar_index - i
+                potential_low := low[i]
+    
+    // 只有当找到更高的基准线时才更新
+    should_update = not na(potential_high) and (na(short_baseline_high) or potential_high > short_baseline_high)
+    [potential_high, potential_bar, potential_low, should_update]
+
+// 寻找左一线（空单）
+find_short_left_line() =>
+    float left_line_low = na
+    bool found = false
+    
+    if not na(short_baseline_bar) and not na(short_baseline_low) and not na(short_baseline_high)
+        // 在基准线左侧指定条K线内寻找符合条件的K线
+        baseline_offset = bar_index - short_baseline_bar
+        
+        // 确保搜索范围有效且不超过历史数据限制
+        if baseline_offset > 0 and baseline_offset <= 9997
+            start_search = math.max(1, baseline_offset + 1)
+            end_search = math.min(baseline_offset + left_search_bars, math.min(bar_index - 1, 10000))
+            
+            for i = start_search to end_search
+                if i >= 1 and i <= 10000 and bar_index - i >= 0
+                    search_low = low[i]
+                    search_high = high[i]
+                    
+                    // 条件：高点在基准线高低点之间，低点 < 基准线低点
+                    if not na(search_low) and not na(search_high) and 
+                       search_high > short_baseline_low and search_high < short_baseline_high and 
+                       search_low < short_baseline_low
+                        left_line_low := search_low
+                        found := true
+                        break
+    
+    [left_line_low, found]
+
+// 空单入场条件
+short_entry_condition() =>
+    // 首先检查是否在基准线右侧指定条K线内
+    baseline_offset = not na(short_baseline_bar) ? bar_index - short_baseline_bar : na
+    in_signal_zone = not na(baseline_offset) and baseline_offset >= 0 and baseline_offset <= right_signal_bars
+    
+    // 初始化返回值
+    entry_signal = false
+    left_low = float(na)
+    left_found = false
+    should_wait = false
+    
+    if in_signal_zone
+        [temp_left_low, temp_left_found] = find_short_left_line()
+        left_low := temp_left_low
+        left_found := temp_left_found
+        
+        // 条件1：当前收盘价 < 基准线最高点
+        condition1 = not na(short_baseline_high) and close < short_baseline_high
+        
+        // 条件2：当前收盘价 < 左一线低点
+        condition2 = left_found and not na(left_low) and close < left_low
+        
+        // 基本入场条件（不包含超级趋势）
+        basic_signal = condition1 and condition2
+        
+        // 基本信号确认（成交量和K线实体）
+        baseline_volume = 0.0
+        if not na(short_baseline_bar)
+            offset = bar_index - short_baseline_bar
+            if offset >= 0 and offset <= 10000
+                baseline_volume := volume[offset]
+        volume_ok = not volume_confirmation or (baseline_volume > avg_volume * volume_multiplier)
+        
+        candle_range = high - low
+        candle_body = math.abs(close - open)
+        body_strength = candle_range > 0 ? (candle_body / candle_range * 100) : 0
+        candle_ok = not candle_strength or (body_strength >= min_candle_body)
+        
+        basic_confirmed = basic_signal and volume_ok and candle_ok
+        
+        // 获取超级趋势入场确认
+        [can_enter, temp_should_wait] = supertrend_entry_confirmation(false, basic_confirmed)
+        should_wait := temp_should_wait
+        
+        // 直接入场的信号
+        if can_enter
+            entry_signal := true
+    
+    [entry_signal, left_low, left_found, should_wait]
+
+// ==================== 交易执行 ====================
+
+// 检查并更新多单基准线
+[potential_long_low, potential_long_bar, potential_long_high, long_should_update] = find_long_baseline()
+if long_should_update
+    long_baseline_low := potential_long_low
+    long_baseline_bar := potential_long_bar
+    long_baseline_high := potential_long_high
+    long_add_count := 0  // 重置加仓次数
+    long_signal_pending := false  // 重置等待状态
+
+// 检查并更新空单基准线
+[potential_short_high, potential_short_bar, potential_short_low, short_should_update] = find_short_baseline()
+if short_should_update
+    short_baseline_high := potential_short_high
+    short_baseline_bar := potential_short_bar
+    short_baseline_low := potential_short_low
+    short_add_count := 0  // 重置加仓次数
+    short_signal_pending := false  // 重置等待状态
+
+// 获取交易信号
+[long_entry_direct, long_left_high, long_left_found, long_should_wait] = long_entry_condition()
+[short_entry_direct, short_left_low, short_left_found, short_should_wait] = short_entry_condition()
+
+// 更新等待状态
+if long_should_wait
+    long_signal_pending := true
+
+if short_should_wait
+    short_signal_pending := true
+
+// 检查等待中的信号是否可以触发
+long_entry_from_wait = false
+if long_signal_pending and enable_supertrend
+    trend_turned_up = direction < 0 and direction[1] >= 0  // 趋势刚转为向上
+    if trend_turned_up and close > supertrend
+        long_entry_from_wait := true
+        long_signal_pending := false
+
+short_entry_from_wait = false
+if short_signal_pending and enable_supertrend
+    trend_turned_down = direction > 0 and direction[1] <= 0  // 趋势刚转为向下
+    if trend_turned_down and close < supertrend
+        short_entry_from_wait := true
+        short_signal_pending := false
+
+// 最终入场信号
+long_entry = long_entry_direct or long_entry_from_wait
+short_entry = short_entry_direct or short_entry_from_wait
+
+// 如果产生了直接入场信号，清除等待状态
+if long_entry_direct
+    long_signal_pending := false
+
+if short_entry_direct
+    short_signal_pending := false
+
+// 计算加仓信号（只在新基准线时考虑加仓）
+long_add = long_should_update and long_add_count < max_add_positions and strategy.position_size > 0
+short_add = short_should_update and short_add_count < max_add_positions and strategy.position_size < 0
+
+// ==================== 平仓和基准线清除逻辑 ====================
+
+// 多单入场信号出现时：清除空单基准线并平空单
+if enable_long and long_entry and strategy.position_size <= 0
+    // 清除空单基准线（反向）
+    short_baseline_high := na
+    short_baseline_bar := na
+    short_baseline_low := na
+    short_add_count := 0
+    short_signal_pending := false  // 清除空单等待状态
+    strategy.close("Short")  // 平空单
+    strategy.entry("Long", strategy.long, comment="多单入场")
+
+// 空单入场信号出现时：清除多单基准线并平多单
+if enable_short and short_entry and strategy.position_size >= 0
+    // 清除多单基准线（反向）
+    long_baseline_low := na
+    long_baseline_bar := na
+    long_baseline_high := na
+    long_add_count := 0
+    long_signal_pending := false  // 清除多单等待状态
+    strategy.close("Long")   // 平多单
+    strategy.entry("Short", strategy.short, comment="空单入场")
+
+// 多单加仓（只在新基准线时）
+if enable_long and long_add
+    long_add_count += 1
+    strategy.entry("Long", strategy.long, comment="多单加仓" + str.tostring(long_add_count))
+
+// 空单加仓（只在新基准线时）
+if enable_short and short_add
+    short_add_count += 1
+    strategy.entry("Short", strategy.short, comment="空单加仓" + str.tostring(short_add_count))
+
+// ==================== 止损逻辑 ====================
+
+// 多单止损检测和处理
+var bool long_stop_triggered = false
+if strategy.position_size > 0 and not na(strategy.position_avg_price)
+    stop_loss_price = strategy.position_avg_price * (1 - stop_loss_pct / 100)
+    
+    // 检测是否触发止损
+    long_stop_triggered := low <= stop_loss_price
+    
+    // 执行止损
+    strategy.exit("Long Stop", "Long", stop=stop_loss_price, comment="多单止损")
+    
+    // 如果止损触发，清除多单相关标记
+    if long_stop_triggered
+        long_baseline_low := na
+        long_baseline_bar := na
+        long_baseline_high := na
+        long_add_count := 0
+        long_signal_pending := false
+
+// 空单止损检测和处理
+var bool short_stop_triggered = false
+if strategy.position_size < 0 and not na(strategy.position_avg_price)
+    stop_loss_price = strategy.position_avg_price * (1 + stop_loss_pct / 100)
+    
+    // 检测是否触发止损
+    short_stop_triggered := high >= stop_loss_price
+    
+    // 执行止损
+    strategy.exit("Short Stop", "Short", stop=stop_loss_price, comment="空单止损")
+    
+    // 如果止损触发，清除空单相关标记
+    if short_stop_triggered
+        short_baseline_high := na
+        short_baseline_bar := na
+        short_baseline_low := na
+        short_add_count := 0
+        short_signal_pending := false
+
+// ==================== 无持仓状态重置 ====================
+
+// 当没有持仓时，重置止损触发标记
+if strategy.position_size == 0
+    long_stop_triggered := false
+    short_stop_triggered := false
+
+// 绘制等待信号
+plotshape(long_signal_pending, title="多单等待", location=location.belowbar, color=color.yellow, style=shape.diamond, size=size.tiny)
+plotshape(short_signal_pending, title="空单等待", location=location.abovebar, color=color.yellow, style=shape.diamond, size=size.tiny)
+
+// ==================== 图表显示 ====================
+
+// 绘制多单基准线
+plot(long_baseline_low, title="多单基准线", color=color.green, linewidth=2, style=plot.style_line)
+
+// 绘制空单基准线
+plot(short_baseline_high, title="空单基准线", color=color.red, linewidth=2, style=plot.style_line)
+
+// 绘制超级趋势
+plot(enable_supertrend ? supertrend : na, title="超级趋势", color=direction < 0 ? color.green : color.red, linewidth=2)
+
+// 绘制入场信号
+plotshape(long_entry, title="多单入场", location=location.belowbar, color=color.green, style=shape.triangleup, size=size.small)
+plotshape(short_entry, title="空单入场", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.small)
+
+// 绘制加仓信号
+plotshape(long_add, title="多单加仓", location=location.belowbar, color=color.lime, style=shape.circle, size=size.tiny)
+plotshape(short_add, title="空单加仓", location=location.abovebar, color=color.orange, style=shape.circle, size=size.tiny)
+
+// 绘制止损信号
+plotshape(long_stop_triggered, title="多单止损", location=location.abovebar, color=color.red, style=shape.xcross, size=size.small)
+plotshape(short_stop_triggered, title="空单止损", location=location.belowbar, color=color.red, style=shape.xcross, size=size.small)
+
+// ==================== 信息面板 ====================
+
+// 显示当前状态信息
+if barstate.islast
+    var table info_table = table.new(position.top_right, 2, enable_supertrend ? 12 : 9, bgcolor=color.white, border_width=1)
+    table.cell(info_table, 0, 0, "项目", text_color=color.black, bgcolor=color.gray)
+    table.cell(info_table, 1, 0, "数值", text_color=color.black, bgcolor=color.gray)
+    table.cell(info_table, 0, 1, "多单基准线", text_color=color.black)
+    table.cell(info_table, 1, 1, na(long_baseline_low) ? "未设置" : str.tostring(long_baseline_low, "#.####"), text_color=color.black)
+    table.cell(info_table, 0, 2, "空单基准线", text_color=color.black)
+    table.cell(info_table, 1, 2, na(short_baseline_high) ? "未设置" : str.tostring(short_baseline_high, "#.####"), text_color=color.black)
+    table.cell(info_table, 0, 3, "多单加仓次数", text_color=color.black)
+    table.cell(info_table, 1, 3, str.tostring(long_add_count), text_color=color.black)
+    table.cell(info_table, 0, 4, "空单加仓次数", text_color=color.black)
+    table.cell(info_table, 1, 4, str.tostring(short_add_count), text_color=color.black)
+    table.cell(info_table, 0, 5, "当前仓位", text_color=color.black)
+    table.cell(info_table, 1, 5, strategy.position_size > 0 ? "多单" : strategy.position_size < 0 ? "空单" : "空仓", text_color=color.black)
+    
+    // 显示止损价格
+    current_stop_loss = float(na)
+    if strategy.position_size > 0 and not na(strategy.position_avg_price)
+        current_stop_loss := strategy.position_avg_price * (1 - stop_loss_pct / 100)
+    else if strategy.position_size < 0 and not na(strategy.position_avg_price)
+        current_stop_loss := strategy.position_avg_price * (1 + stop_loss_pct / 100)
+    
+    table.cell(info_table, 0, 6, "止损价格", text_color=color.black)
+    table.cell(info_table, 1, 6, na(current_stop_loss) ? "无持仓" : str.tostring(current_stop_loss, "#.####"), text_color=color.black)
+    table.cell(info_table, 0, 7, "持仓均价", text_color=color.black)
+    table.cell(info_table, 1, 7, na(strategy.position_avg_price) ? "无持仓" : str.tostring(strategy.position_avg_price, "#.####"), text_color=color.black)
+    
+    table.cell(info_table, 0, 8, "基准线成交量", text_color=color.black)
+    // 显示当前有效基准线的成交量状态
+    current_baseline_volume = float(na)
+    if not na(long_baseline_bar)
+        offset = bar_index - long_baseline_bar
+        if offset >= 0 and offset <= 10000
+            current_baseline_volume := volume[offset]
+    else if not na(short_baseline_bar)
+        offset = bar_index - short_baseline_bar
+        if offset >= 0 and offset <= 10000
+            current_baseline_volume := volume[offset]
+    
+    baseline_vol_status = not na(current_baseline_volume) and current_baseline_volume > avg_volume * volume_multiplier ? "✓ 放量" : "- 正常"
+    table.cell(info_table, 1, 8, baseline_vol_status, text_color=color.black)
+    
+    // 显示超级趋势状态
+    if enable_supertrend
+        table.cell(info_table, 0, 9, "超级趋势", text_color=color.black)
+        st_trend = direction < 0 ? "上升趋势" : "下降趋势"
+        st_position = close > supertrend ? "价格在上方" : "价格在下方"
+        table.cell(info_table, 1, 9, st_trend + " | " + st_position, text_color=color.black)
+        
+        // 显示信号等待状态
+        table.cell(info_table, 0, 10, "多单等待状态", text_color=color.black)
+        long_wait_status = long_signal_pending ? "⏳ 等待趋势转向" : "- 无等待"
+        table.cell(info_table, 1, 10, long_wait_status, text_color=color.black)
+        
+        table.cell(info_table, 0, 11, "空单等待状态", text_color=color.black)
+        short_wait_status = short_signal_pending ? "⏳ 等待趋势转向" : "- 无等待"
+        table.cell(info_table, 1, 11, short_wait_status, text_color=color.black)

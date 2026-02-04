@@ -1,0 +1,59 @@
+{
+    "pages": [
+        "pages/home/home",
+        "pages/ranking/ranking",
+        "pages/operation/operation",
+        "pages/my/my",
+        "pages/edit-profile/edit-profile",
+        "pages/level-description/level-description",
+        "pages/point-rules/point-rules",
+        "pages/feedback/feedback",
+        "pages/points-list/points-list",
+        "pages/point-detail/point-detail",
+        "pages/appeal/appeal",
+        "pages/appeal-list/appeal-list",
+        "pages/appeal-detail/appeal-detail",
+        "pages/my-feedback/my-feedback",
+        "pages/feedback-detail/feedback-detail",
+        "pages/point-requires/point-requires",
+        "pages/point-require-detail/point-require-detail"
+    ],
+    "window": {
+        "navigationBarTitleText": "侠客积分",
+        "navigationBarBackgroundColor": "#ffffff",
+        "navigationBarTextStyle": "black"
+    },
+    "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#44bbbb",
+        "backgroundColor": "#ffffff",
+        "borderStyle": "black",
+        "list": [
+            {
+                "pagePath": "pages/home/home",
+                "text": "首页",
+                "iconPath": "resources/icons/home.png",
+                "selectedIconPath": "resources/icons/home_selected.png"
+            },
+            {
+                "pagePath": "pages/ranking/ranking",
+                "text": "排名",
+                "iconPath": "resources/icons/ranking.png",
+                "selectedIconPath": "resources/icons/ranking_selected.png"
+            },
+            {
+                "pagePath": "pages/operation/operation",
+                "text": "操作",
+                "iconPath": "resources/icons/award.png",
+                "selectedIconPath": "resources/icons/award_selected.png"
+            },
+            {
+                "pagePath": "pages/my/my",
+                "text": "我的",
+                "iconPath": "resources/icons/my.png",
+                "selectedIconPath": "resources/icons/my_selected.png"
+            }
+        ]
+    },
+    "lazyCodeLoading": "requiredComponents"
+}

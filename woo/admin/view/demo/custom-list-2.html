@@ -1,0 +1,33 @@
+{extend name="$extend_list"/}
+
+{block name="script"}
+<script type="text/html" id="customOrderHeader">
+    <style>
+        .layui-custom-table{ overflow: visible;}
+    </style>
+</script>
+<script type="text/html" id="customOrderBody">
+
+    <div class="custom-project-list layui-row layui-col-space15">
+        {{# for (var i in d.list) { }}
+        <div class="list-item layui-col-md3 layui-col-sm6 layui-col-xs12">
+            <div class="thumb">
+                <a href="">
+                    <img src="{{woo_script_vars .absroot}}static/woo/images/loadingbg.jpg" alt="">
+                </a>
+                <div class="check">{{-checkboxRender(d.list[i])}}</div>
+            </div>
+            <div class="title">测试标题</div>
+            <div class="summary">测试简介内容测试简介内容测试简测试简介内容测试简介内容测试简介内容测试简介内容测试简介内容测试简介内容测试简介内容测试简介内容介内容测试简介内容测试简介内容测试简介内容测试简介内容测试简介内容</div>
+            <div class="btns">
+                {{-d.cols.item_toolbar.templet(d.list[i])}}
+            </div>
+        </div>
+        {{# } }}
+    </div>
+</script>
+
+<script type="text/html" id="customOrderFooter">
+
+</script>
+{/block}

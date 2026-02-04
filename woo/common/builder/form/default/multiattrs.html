@@ -1,0 +1,98 @@
+{if !empty($data.fields)}
+{assign name="max_row" value="$data.multiattrs.max ?? 0" /}
+<div class="woo-multiattr-container" data-max="{$data.multiattrs.max ?? 0}" data-delete-callback="{$data.multiattrs.delete_callback ?? ''}" data-clear-callback="{$data.multiattrs.clear_callback ?? ''}" data-insert-callback="{$data.multiattrs.insert_callback ?? ''}">
+    {if empty($data.multiattrs.cancel_delete) || empty($data.multiattrs.cancel_clear)}
+    <div style="padding-bottom: 15px;">
+        {if empty($data.multiattrs.cancel_create)}
+        <a class="layui-btn woo-theme-btn javascript" rel="multiattrs_insert_row">新增</a>
+        {/if}
+        {if empty($data.multiattrs.cancel_clear)}
+        <a class="layui-btn layui-btn-danger javascript multiattrs_clear" rel="multiattrs_clear">清空</a>
+        {/if}
+    </div>
+    {/if}
+    <input type="hidden" value="" name="{$data.attrs.name?:''}">
+    <div class="woo-multiattr-table-init">
+        <table class="layui-table woo-multiattr-table">
+            <colgroup>
+                {if $max_row != 1 && empty($data.multiattrs.cancel_move)}<col width="20">{/if}
+                {foreach $data.fields as $field => $item}
+                <col {if isset($item.width)}width="{$item.width}"{/if}>
+                {/foreach}
+                {if empty($data.multiattrs.cancel_delete) || empty($data.multiattrs.cancel_insert)}
+                <col width="150">
+                {/if}
+            </colgroup>
+            <thead>
+            <tr>
+                {if $max_row != 1 && empty($data.multiattrs.cancel_move)}<th></th>{/if}
+                {foreach $data.fields as $field => $item}
+                <th>
+                    {$item.label}
+                    {if !empty($item.tip)}<div class="woo-form-item-tip woo-tiptool" data-tip-text="{$item.tip}" data-tip-bg="#FF5722" data-tip-type="3"><i class="woo-icon woo-icon-tishi"></i></div>{/if}</th>
+                {/foreach}
+                {if empty($data.multiattrs.cancel_delete) || empty($data.multiattrs.cancel_insert)}
+                <th>操作</th>
+                {/if}
+            </tr>
+            </thead>
+            <tbody>
+            {if !empty($data.attrs.value)}
+            {if is_string($data.attrs.value) && is_json($data.attrs.value)}
+            {assign name="$data.attrs.value" value=":json_decode($data.attrs.value,true)"/}
+            {/if}
+            {if is_array($data.attrs.value)}
+            {assign name="for_index" value="0" /}
+            {foreach $data.attrs.value as $row}
+            <tr>
+                {if $max_row != 1 && empty($data.multiattrs.cancel_move)}<td align="center"><div class="move-row"><i class="woo-icon woo-icon-jiantou-shangxiaqiehuan"></i></div></td>{/if}
+                {foreach $data.fields as $field => $item}
+                <td>
+                    {if isset($row[$field])}
+                    {assign name="$item.attrs.value" value="$row[$field]"/}
+                    {:str_replace('PLACEINDEX', $for_index,\\woo\\common\\builder\\Form::renderHtml($item))}
+                    {else /}
+                    {:str_replace('PLACEINDEX', $for_index, $item.html)}
+                    {/if}
+                </td>
+                {/foreach}
+                {if empty($data.multiattrs.cancel_delete) || empty($data.multiattrs.cancel_insert)}
+                <td class="nowrap" align="center">
+                    {if empty($data.multiattrs.cancel_delete)}
+                    <a class="layui-btn layui-btn-sm btn-25 javascript tooltip" data-tip-text="删除" rel="multiattrs_delete_row"><i class="layui-icon layui-icon-reduce-circle"></i></a>
+                    {/if}
+                    {if empty($data.multiattrs.cancel_insert)}
+                    <a class="layui-btn btn-22 layui-btn-sm javascript tooltip" data-tip-text="插入" rel="multiattrs_insert_row"><i class="layui-icon layui-icon-add-circle"></i></a>
+                    {/if}
+                </td>
+                {/if}
+            </tr>
+            {assign name="for_index" value="$for_index+1" /}
+            {/foreach}
+            {/if}
+            {/if}
+            </tbody>
+        </table>
+    </div>
+    <script type="text/html" class="multiattrs_demo">
+        <tr>
+            {if $max_row != 1 && empty($data.multiattrs.cancel_move)}<td align="center"><div class="move-row"><i class="woo-icon woo-icon-jiantou-shangxiaqiehuan"></i></div></td>{/if}
+            {foreach $data.fields as $field => $item}
+            <td>{:str_replace('PLACEINDEX', 0, $item.html)}</td>
+            {/foreach}
+            {if empty($data.multiattrs.cancel_delete) || empty($data.multiattrs.cancel_insert)}
+            <td class="nowrap" align="center">
+                {if empty($data.multiattrs.cancel_delete)}
+                <a class="layui-btn layui-btn-sm btn-25 javascript tooltip" data-tip-text="删除" rel="multiattrs_delete_row"><i class="layui-icon layui-icon-reduce-circle"></i></a>
+                {/if}
+                {if empty($data.multiattrs.cancel_insert)}
+                <a class="layui-btn btn-22 layui-btn-sm javascript tooltip" data-tip-text="插入" rel="multiattrs_insert_row"><i class="layui-icon layui-icon-add-circle"></i></a>
+                {/if}
+            </td>
+            {/if}
+        </tr>
+    </script>
+</div>
+{else /}
+未定义表单项"fields"属性
+{/if}

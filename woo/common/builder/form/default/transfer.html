@@ -1,0 +1,8 @@
+<div class="woo-transfer">
+    <div class="woo-transfer-container"></div>
+    <input type="hidden"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    <script type="text/html" class="tree-json">{:json_encode($data.options ?? [])}</script>
+</div>

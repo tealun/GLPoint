@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{block name="title"}{if !empty($meta.title)}{:implode(' - ', $meta.title)}{else}系统安装向导{/if}{/block}</title>
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+    <meta name="renderer" content="webkit"/>
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="format-detection" content="telephone=no, email=no"/>
+    {block name="keywords"}<meta name="keywords" content="{if !empty($meta.keywords)}{:implode(',', $meta.keywords)}{/if}"/>{/block}
+    {block name="description"}<meta name="description" content="{if !empty($meta.description)}{:implode(',', $meta.description)}{/if}"/>{/block}
+    <link rel="shortcut icon" href="{$root}favicon.ico"/>
+    {block name="css"}{$woo_static_links.css | raw}{/block}
+    <script>
+        var woo_script_vars = {$woo_script_vars | raw};
+    </script>
+    {block name="js"}{$woo_static_links.js | raw}{/block}
+    {block name="headscript"}{/block}
+</head>
+<body>
+{block name="header"}
+<div class="wrap" id="install">
+    <div class="header">
+        <span>V{:\\woo\\common\\controller\\Controller::version()}</span>
+        <h2  class="reset">软件安装向导</h2>
+    </div>
+    <div class="container">
+{/block}
+{block name="content"}{/block}
+{block name="footer"}
+    </div>
+</div>
+
+<div class="footer wrap">
+    <div class="link">
+        {foreach $foot_link as $item}
+        <a href="{$item.link}" target="_blank">{$item.title}</a><em>|</em>
+        {/foreach}
+    </div>
+</div>
+ {/block}
+{block name="deferjs"}{$woo_static_links.deferjs | raw}{/block}
+<script>
+    layui.use(['layer', 'form'], function () {
+        layer = layui.layer;
+        layForm = layui.form;
+        if (window.layuiReady) {
+            window.layuiReady();
+        }
+    })
+</script>
+{block name="script"}{/block}
+</body>
+</html>

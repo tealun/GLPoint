@@ -1,0 +1,17 @@
+<div class="woo-child-form">
+    {if isset($data['forms'][0])}
+    {foreach $data['forms'] as $form}
+    <div class="woo-child-form-row">
+        <table class="layui-table">
+            <tr>
+                {foreach $form->getVisibleItems() as $item}
+                <td>
+                    {$item.html | raw}
+                </td>
+                {/foreach}
+            </tr>
+        </table>
+    </div>
+    {/foreach}
+    {/if}
+</div>

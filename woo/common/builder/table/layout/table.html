@@ -1,0 +1,1688 @@
+<div class="woo-table">
+    <div class="woo-table-body">
+        <div class="layui-tab {:setting('admin_tab_style')}" lay-filter="tab">
+            {if count($data->getTabHeader()) > 1}
+            <ul class="layui-tab-title">
+                {assign name="i" value="0" /}
+                {foreach $data->getTabHeader() as $item}
+                <li class="{if $i == ($defaultTabIndex ?? 0)}layui-this{/if}">{$item.title}</li>
+                {assign name="i" value="$i+1" /}
+                {/foreach}
+            </ul>
+            {/if}
+            <div class="layui-tab-content">
+                {assign name="i" value="0" /}
+                {foreach $data->getTabHeader() as $item}
+                <div class="layui-tab-item {if $i == ($defaultTabIndex ?? 0)}layui-show{/if}">
+                    <div id="{$item.name}Container" class="woo-table-container  clearfix" >
+                        <div class="woo-table-siderbar">
+                            <div class="woo-table-siderbarpadding">
+                            </div>
+                        </div>
+                        <div class="woo-table-content">
+                            <div id="{$item.name}Counter" class="woo-counter"></div>
+                            <div id="{$item.name}Filter" class="woo-filter"></div>
+                            <div id="{$item.name}CustomBox" class="woo-custom-box">
+                                <!--预留容器。可以自行操作，插入内容-->
+                            </div>
+                            {if empty($item.custom)}
+                            <table class="layui-hide" id="{$item.name}Table"  lay-filter="{$item.name}Table"></table>
+                            <script type="text/html" id="{$item.name}ToolBar">
+                                <div id="{$item.name}ToolBarInfo" class="clearfix"></div>
+                            </script>
+                            {else}
+                            <div class="custom-container" id="{$item.name}CustomContainer">
+                                <div class="layui-form layui-border-box layui-table-view">
+                                    <div class="layui-table-tool">
+                                        <div class="layui-table-tool-temp">
+                                            <div id="{$item.name}ToolBarInfo" class="clearfix"></div>
+                                        </div>
+                                        <div class="layui-table-tool-self">
+                                            <div class="layui-inline custom-export" title="导出" lay-event="LAYTABLE_EXPORT"><i class="layui-icon layui-icon-export"></i></div><div class="layui-inline custom-refresh" title="刷新" lay-event="WOO_REFRESH"><i class="layui-icon layui-icon-refresh"></i></div>
+                                        </div>
+                                        {if $is_mobile}
+                                        <div class="layui-table-tool-more"><i class="layui-icon layui-icon-set"></i></div>
+                                        {/if}
+                                    </div>
+                                    <div id="{$item.name}CustomTable" class="layui-custom-table"></div>
+                                    <div id="{$item.name}CustomPage" class="layui-table-page layui-custom-page"></div>
+                                </div>
+                            </div>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+                {assign name="i" value="$i+1" /}
+                {/foreach}
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file="$common_templet_file"/}
+{include file="$woo_templet_file"/}
+{include file="$woo_filter_templet_file"}
+{include file="$woo_tools_templet_file"}
+
+<script>
+    $('body').on('click', '.wooSearchBtn', function () {
+        var filter = $(this).closest('.woo-filter');
+        if (filter.hasClass('woo-open')) {
+            filter.removeClass('woo-open');
+            $(this).find('cite').html('展开搜索');
+        } else {
+            filter.addClass('woo-open');
+            $(this).find('cite').html('关闭搜索');
+        }
+    })
+
+    $('body').on('click', '.woo-filter-reset', function () {
+        $(this).closest('form')[0].reset();
+        renderTab(currentTabIndex, true);
+        return false;
+    })
+
+    var tabHeader = {:json_encode($data->getTabHeader())};
+    var currentTabName = tabHeader[0].name;
+    var tabAttr = {:json_encode($data->getTabAttr())};
+    var globalData = [];
+    var filterFieldsList = {};
+    var isCheckOk = false;
+
+    if (!tabAttr.error) {
+        var jj = 0;
+        for (var tab in tabAttr) {
+            parseTabAttr(tab, jj);
+            jj++;
+        }
+    }
+    function parseTabAttr(tabName, jj) {
+        var tab = tabName || currentTabName;
+        if (!tabAttr[tab]) {
+            return false;
+        }
+        if (!tabAttr[tab].table) {
+            return false;
+        }
+        if ((typeof(tabAttr[tab].table.url) == 'undefined' || !tabAttr[tab].table.url) && !tabAttr[tab].table.data) {
+            tabAttr[tab].table.url = location.href;
+        }
+
+        for (var i in tabAttr[tab].table.cols) {
+            for(var j in tabAttr[tab].table.cols[i]) {
+                if (!tabAttr[tab].table.cols[i][j].templet && tabHeader[jj] && tabHeader[jj].custom) {
+                    tabAttr[tab].table.cols[i][j].templet = '#show';
+                }
+                if (tabAttr[tab].table.cols[i][j].templet) {
+                    tabAttr[tab].table.cols[i][j].original = tabAttr[tab].table.cols[i][j].templet;
+                    tabAttr[tab].table.cols[i][j].templet = function (d) {
+                        if (this.original) {
+                            var templet = this.original,
+                                html = templet,
+                                sub = '',
+                                ret = '',
+                                funcName = '';
+                            if (templet.indexOf('#') === 0){
+                                if (templet.indexOf('.') > 0) {
+                                    sub = templet.substr(templet.indexOf('.') + 1, templet.length - 1 - templet.indexOf('.'));
+                                    templet = templet.substr(0, templet.indexOf('.')) + 'Templet';
+                                } else {
+                                    templet += 'Templet';
+                                }
+                                if ($(templet).length) {
+                                    html = $(templet).html();
+                                } else {
+                                    return '模板' + templet + '不存在';
+                                }
+                            } else if(templet.indexOf('js:') === 0) {
+                                templet = templet.substr(3);
+                                if (templet.indexOf('.') === -1) {
+                                    funcName = templet;
+                                } else {
+                                    sub = templet.substr(templet.indexOf('.') + 1);
+                                    funcName = templet.substr(0, templet.indexOf('.'));
+                                }
+                            }
+                            if (!this.sub || sub) {
+                                this.sub = sub;
+                            }
+                            this.pk = tabAttr[tab].table.pk;
+                            d.this = JSON.parse(JSON.stringify(this));
+                            if (!funcName) {
+                                ret = layTpl(html).render(d);
+                            } else {
+                                if (window[funcName]) {
+                                    ret = window[funcName](d);
+                                } else {
+                                    return "模板：" + funcName + "不存在";
+                                }
+                            }
+                            return ret;
+                        } else {
+                            return d[this.field] ? d[this.field] : '';
+                        }
+                    }
+                }
+                if (tabAttr[tab].table.cols[i][j].exportTemplet) {
+                    tabAttr[tab].table.cols[i][j].originExportTemplet = tabAttr[tab].table.cols[i][j].exportTemplet;
+                    tabAttr[tab].table.cols[i][j].exportTemplet = function (d, obj) {
+                        this.pk = tabAttr[tab].table.pk;
+                        var t = this.t? "\t" : "";
+                        d.othis = JSON.parse(JSON.stringify(this));
+                        if (window[this.originExportTemplet]) {
+                            return window[this.originExportTemplet](d, obj, this.field ? this.field : '') + t;
+                        } else {
+                            return (d[this.field] ? d[this.field] : '') + t;
+                        }
+                    }
+                } else {
+                    tabAttr[tab].table.cols[i][j].exportTemplet = function (d, obj) {
+                        var t = this.t? "\t" : "";
+                        return (obj.td(this.field)[0] ? $.trim(obj.td(this.field)[0].textContent): (d[this.field] ? d[this.field]: '')) + t;
+                    }
+                }
+            }
+        }
+        if (tabAttr[tab].table.done) {
+            tabAttr[tab].table.originalDone = tabAttr[tab].table.done;
+        }
+        tabAttr[tab].table.done = function (res, curr, count) {
+            renderToolBar();
+            listSort();
+            // 20210922新增头部统计渲染
+            if (res.counter) {
+                if (!$('#' + currentTabName + 'CounterTemplet').length) {
+                    var html = $('#defaultCounterTemplet').html();// 默认头部统计模板
+                } else {
+                    // 可以自定义一个id为basicCounterTemplet的自定义头部统计模板
+                    var html = $('#' + currentTabName + 'CounterTemplet').html();
+                }
+                html = layTpl(html).render(res.counter);
+                $('#' + currentTabName + 'Counter').html(html).append('<a href="javascript:;" class="action-remove"><i class="layui-icon layui-icon-close-fill"></i></a>').fadeIn(200);
+            } else {
+                $('#' + currentTabName + 'Counter').remove();
+            }
+
+            $('[lay-id="' + currentTabName + 'Table"]')
+                .find('.layui-table-page')[count ? 'show': 'hide']()
+                .end()
+                .find('[lay-event="LAYTABLE_EXPORT"]')[count ? 'show': 'hide']();
+            /*20230118 头部固定以后 右侧线*/
+            // $('[lay-id="' + currentTabName + 'Table"]').find('.layui-table-box').append('<div class="layui-right-line"></div>');
+
+            if (curr == 1) {
+                $('[lay-id="' + currentTabName + 'Table"]').find('.layui-table-tool-self').children().each(function () {
+                    if ($(this).attr('title'))  {
+                        $(this).children('i').addClass('tooltip').attr('data-tip-text', $(this).attr('title')).end().attr('title', '');
+                    }
+                })
+            }
+
+            // 20211030新增记录当前方法页码 -- 搜索不会记录
+            if (!tabAttr[currentTabName].table.isFilter && woo_script_vars.setting.table_is_store_page) {
+                WOO.setCache('LAST_PAGE_' + currentTabName + '_' + window.location.pathname, curr);
+            }
+
+            var autoCheckedIds = [];
+            if (res.autoCheckedIds) {
+                autoCheckedIds = res.autoCheckedIds;
+            }
+            if (window.relationTemp) {
+                for (var i in window.relationTemp.pks) {
+                    if ($.inArray(window.relationTemp.pks[i], autoCheckedIds) < 0) {
+                        autoCheckedIds.push(window.relationTemp.pks[i]);
+                    }
+                }
+            }
+            if (autoCheckedIds.length && window.relationDelTemp) {
+                for (var i in window.relationDelTemp.pks) {
+                    var index = $.inArray(window.relationDelTemp.pks[i], autoCheckedIds);
+                    if (index >= 0) {
+                        autoCheckedIds.splice(index, 1);
+                    }
+                }
+            }
+            if (autoCheckedIds.length) {
+                var pk = tabAttr[currentTabName].table.pk;
+                var auto_checked_index = [];
+                for (var i in res.data) {
+                    if (res.data[i][pk] && $.inArray(res.data[i][pk].toString(), autoCheckedIds) >= 0) {
+                        auto_checked_index.push(i);
+                    }
+                }
+                for (var i in auto_checked_index) {
+                    $('[lay-id="' + currentTabName + 'Table"] .layui-table-body tbody tr[data-index="'+auto_checked_index[i]+'"] [data-field="item_checkbox"]').find('.layui-form-checkbox,.layui-form-radio').trigger('click');
+                }
+            }
+
+            if (!tabAttr[currentTabName].table.defaultToolbar.length && !tabAttr[currentTabName].table.toolbarlist.length) {
+                $('[lay-id="' + currentTabName + 'Table"] .layui-table-tool').hide();
+            }
+            if (!tabAttr[currentTabName].table.height) {
+                $('[lay-id="' + currentTabName + 'Table"]').addClass('is-auto-height');
+            }
+
+            /* {if $is_mobile}*/
+            if (!$('[lay-id="' + currentTabName + 'Table"] .layui-table-tool').find('.layui-table-tool-more').length) {
+                $('[lay-id="' + currentTabName + 'Table"] .layui-table-tool')
+                    .append('<div class="layui-table-tool-more"><i class="layui-icon layui-icon-set"></i></div>')
+            }
+            /* {/if}*/
+            $('[lay-id="' + currentTabName + 'Table"] .layui-table-main [data-field="' +  tabAttr[currentTabName].table.displayField +'"]').addClass(tabAttr[currentTabName].table.displayClassName)
+
+
+            if (window.layTableDone) {
+                window.layTableDone(res, curr, count, currentTabName)
+            }
+            if (tabAttr[currentTabName].table.originalDone && window[tabAttr[currentTabName].table.originalDone]) {
+                window[tabAttr[currentTabName].table.originalDone](res, curr, count);
+            }
+        }
+        if (tabAttr[tab].table.parseData) {
+            tabAttr[tab].table.originalParseData = tabAttr[tab].table.parseData;
+        }
+        if (tabAttr[tab].table.data) {
+            globalData = {data : tabAttr[tab].table.data};
+        }
+        tabAttr[tab].table.parseData = function (res) {
+            if (typeof(res) == 'undefined') {
+                addAlert('接口错误，未能响应到数据', 'error');
+                return false;
+            }
+            if (res.result && res.result == 'error') {
+                if (typeof(res.message != 'object')) {
+                    res.message = [res.message];
+                }
+                for (var k in res.message) {
+                    addAlert(res.message[k], 'error');
+                }
+                return false;
+            }
+            globalData = res;
+            if (tabAttr[currentTabName].table.originalParseData && window[tabAttr[currentTabName].table.originalParseData]) {
+                return window[tabAttr[currentTabName].table.originalParseData](res);
+            }
+        }
+
+        if (tabAttr[tab].table.treetable) {
+            if (tabAttr[tab].table.tree.callback.beforeExpand) {
+                tabAttr[tab].table.tree.callback.originalBeforeExpand = tabAttr[tab].table.tree.callback.beforeExpand;
+            }
+            tabAttr[tab].table.tree.callback.beforeExpand = function (tableId, trData, expandFlag) {
+                if (tabAttr[currentTabName].table.tree.callback.originalBeforeExpand && window[tabAttr[currentTabName].table.tree.callback.originalBeforeExpand]) {
+                    window[tabAttr[currentTabName].table.tree.callback.originalBeforeExpand](tableId, trData, expandFlag);
+                }
+            }
+
+            if (tabAttr[tab].table.tree.callback.onExpand) {
+                tabAttr[tab].table.tree.callback.originalOnExpand = tabAttr[tab].table.tree.callback.onExpand;
+            }
+            tabAttr[tab].table.tree.callback.onExpand = function (tableId, trData, expandFlag) {
+                $('[lay-id="' + currentTabName + 'Table"] .layui-table-main [data-field="' +  tabAttr[currentTabName].table.displayField +'"]').addClass(tabAttr[currentTabName].table.displayClassName)
+                if (tabAttr[currentTabName].table.tree.callback.originalOnExpand && window[tabAttr[currentTabName].table.tree.callback.originalOnExpand]) {
+                    window[tabAttr[currentTabName].table.tree.callback.originalOnExpand](tableId, trData, expandFlag);
+                }
+            }
+        }
+
+        if (window.beforeRender) {
+            //  特殊需求需要自行处理 tabAttr，定义beforeRender回调 你返回处理好的tabAttr给我
+            tabAttr[tab] = beforeRender(tab, tabAttr[tab]);
+        }
+    }
+    /*if ($is_debug) {*/
+    console.log(tabAttr);
+    /*}*/
+
+    function renderItemToolBar(d) {
+        if (d.this.item_toolbar_list.length == 0) {
+            return '';
+        }
+        var html = '<div class="table-item-toolbar" data-index="'+ d.LAY_INDEX +'">';
+        for (var i in d.this.item_toolbar_list) {
+            html += getToolBarHtml(d.this.item_toolbar_list[i], d, true);
+        }
+        html += '</div>'
+        return html;
+    }
+
+    function renderToolBar(tabName) {
+        tabName = tabName || currentTabName;
+        if (!tabAttr[tabName].table.toolbarlist) {
+            return false;
+        }
+        var tab = tabAttr[tabName];
+        if (!tab.table.toolbar) {
+            return false;
+        }
+        var list = tab.table.toolbarlist;
+        $(tab.table.toolbar + 'Info').empty();
+        if (tab.siderbar != null) {
+            $(tab.table.toolbar + 'Info').append(getToolBarHtml({
+                title : '',
+                icon : 'layui-icon-shrink-right',
+                templet : false,
+                'js_func' : 'toggle_siderbar',
+                'class' : 'btn-9'
+            }));
+        }
+
+        for (var i in list) {
+            $(tab.table.toolbar + 'Info').append(getToolBarHtml(list[i]));
+        }
+    }
+
+    function toggle_siderbar() {
+        if ($(this).hasClass('is-close')) {
+            $(this).closest('.woo-table-container').removeClass('close-siderbar');
+            $(this).removeClass('is-close').find('i').removeClass('layui-icon-spread-left').addClass('layui-icon-shrink-right');
+        } else {
+            $(this).closest('.woo-table-container').addClass('close-siderbar');
+            $(this).addClass('is-close').find('i').removeClass('layui-icon-shrink-right').addClass('layui-icon-spread-left');
+        }
+    }
+
+    function getToolBarHtml(tool, item, is_list) {
+        is_list = is_list || false;
+        var table = tabAttr[currentTabName].table;
+
+        var where = true;
+        if (item && tool.where) {
+            try {
+                eval('where = ' + layTpl(tool.where).render(item) + ';');
+            } catch (e) {
+                console.log('按钮自定义条件错误：', e);
+            }
+        }
+        item = item || {};
+        item = $.extend({}, item, {"tool" : tool});
+
+        var dom = $('<span class="woo-tool-span"></span>');
+        if (where === false) {
+            if (tool.where_type == 'disabled') {
+                dom.addClass('tool-disabled');
+            } else {
+                return '';
+            }
+        }
+        if (tool.hover && where !== false) {
+            dom.addClass('tooltip').attr('data-tip-text', layTpl(tool.hover).render(item)).attr('data-tip-type', 3);
+        }
+        if (tool.check) {
+            dom.addClass('is-check tool-disabled');
+        }
+        if (tool.sort !== undefined) {
+            dom.attr('data-tool-sort', tool.sort);
+        }
+        var delimiter = '';
+        if (!tool.templet) {
+            var link = $('<a class="layui-btn layui-btn-sm"></a>');
+            if (is_list && (table.itemToolbarStyle == 'text' || table.itemToolbarStyle == 'text_icon')) {
+                dom.addClass('woo-tool-text-span');
+                link = $('<a class="woo-tool-text"></a>');
+                link.addClass(table.itemToolbarTextClassName);
+                delimiter = $('<i class="woo-tool-text-delimiter"></i>');
+            }
+            dom.append(link)
+
+            if (!tool.icon && !tool.title) {
+                return '';
+            }
+            if (tool['lay-event']) {
+                dom.find('a').attr('lay-event', tool['lay-event']);
+            }
+            if (tool.icon) {
+                dom.children().append('<i class="'+ WOO.returnIconClass(layTpl(tool.icon).render(item)) +'"></i>');
+            }
+            if (tool.title) {
+                dom.children().append('<cite>'+ layTpl(tool.title).render(item) +'</cite>');
+            }
+            if (!tool.title && tool.hover) {
+                dom.find('a').attr('data-title', tool.hover);
+            }
+        } else {
+            if (tool.templet.indexOf('#') === 0) {
+                if ($(tool.templet).length <= 0) {
+                    return '';
+                }
+                var temp = layTpl($(tool.templet).html()).render(item);
+            } else {
+                var temp = layTpl(tool.templet).render(item);
+            }
+            if (is_list && (table.itemToolbarStyle == 'text' || table.itemToolbarStyle == 'text_icon')) {
+                dom.addClass('woo-tool-text-span');
+                temp = $(temp).addClass('woo-tool-text').addClass(table.itemToolbarTextClassName).removeClass('layui-btn layui-btn-sm');
+                delimiter = $('<i class="woo-tool-text-delimiter"></i>');
+            }
+            dom.append(temp);
+        }
+
+        if (tool.class) {
+            if(tool.class.indexOf('is-blank') >= 0) {
+                dom.children().attr('target', '_blank');
+            }
+            dom.children().addClass(layTpl(tool.class).render(item));
+        }
+        if (tool.url) {
+            if (item) {
+                // 支持模板语法
+                tool.url = layTpl(decodeURI(tool.url)).render(item);
+            }
+            tool.url = WOO.url(tool.url);
+            dom.children().attr('href', tool.url);
+        }
+        if (tool.attrs && typeof tool.attrs == 'object') {
+            for (var attr in tool.attrs) {
+                dom.children().attr(attr, tool.attrs[attr]);
+            }
+        }
+        if (tool.js_func) {
+            dom.children().addClass('tabletool');
+            dom.children().attr('rel', tool.js_func);
+        }
+        if (tool.tip) {
+            dom.children().attr('data-tip', layTpl(tool.tip).render(item));
+        }
+        if (tool.children && tool.children.length && tool.children.length > 0) {
+            var children = dom.append('<div class="woo-btn-child"><ul class="list"></ul></div>').find('ul');
+            for (i in tool.children)  {
+                if (typeof(tool.children[i].name) != 'undefined') {
+                    children.append($('<li></li>').append(getToolBarHtml(tool.children[i], item)));
+                }
+            }
+            dom.find(':first').append('<i class="woo-icon woo-icon-gengduo woo-tool-more"></i>');
+        }
+        return $('<div></div>').append(dom).append(delimiter).html();
+    }
+
+    function renderFilter(tabName) {
+        tabName = tabName || currentTabName;
+        if (!tabAttr[tabName].filter) {
+            return false;
+        }
+        var tab = tabAttr[tabName];
+        var list = tab.filter;
+        if (list.length == 0) {
+            return false;
+        }
+        if (tab.table.filter_model && tab.table.filter_model == 'remove') {
+            return false;
+        }
+
+        var html = layTpl($('#filterContainer').html()).render(list);
+
+        $('#' + tabName + 'Filter').append(html).show();
+        if (tab.table.filter_model) {
+            if (tab.table.filter_model == 'show') {
+                $('#' + tabName + 'Filter').find('.wooSearchBtn').trigger('click');
+            } else if(tab.table.filter_model == 'onlyshow') {
+                $('#' + tabName + 'Filter').find('.wooSearchBtn').trigger('click').end().find('.woo-search-top').remove();
+            }
+        }
+
+        WOO.renderElement();
+
+        layForm.on('submit(filter)', function(data){
+            filterFieldsList[currentTabName] = data.field;
+            tabAttr[currentTabName].table.isFilter = true;
+            WOO.deleteCache('LAST_PAGE_' + currentTabName + '_' + window.location.pathname);
+            window[currentTabName + 'Render'].reload({
+                where: data.field
+                ,page: {
+                    curr: 1
+                }
+            }, true);
+            return false;
+        });
+    }
+
+    function clear_sider() {
+        var foreign = $(this).data('foreign');
+        laytree.reload(currentTabName + foreign + 'Siderbar');
+        $(this).closest('.woo-siderbar-list').find('.woo-siderbar-selected').removeClass('woo-siderbar-selected');
+        siderbarChange(foreign, '')
+    }
+
+    var siderSelected = [];
+    function siderSelectedPush(value) {
+        if ($.inArray(siderSelected, value) < 0) {
+            siderSelected.push(value);
+        }
+    }
+    function setSiderSelected(obj) {
+        siderSelectedPush(obj.id);
+        if (!obj.children || obj.children.length == 0) {
+            return;
+        }
+        for (var i in obj.children) {
+            setSiderSelected(obj.children[i]);
+        }
+    }
+
+    function siderbarChange(foreign, args) {
+        var foreignKey = tabAttr[currentTabName].siderbar[foreign].foreignKey;
+        tabAttr[currentTabName].table.isFilter = true;
+        WOO.deleteCache('LAST_PAGE_'+ currentTabName + '_' + window.location.pathname);
+        window[currentTabName + 'Render'].reload({
+            where: {
+                [foreignKey] : args
+            }
+            ,page: $.extend({},tabAttr[currentTabName].table.page, {curr: 1})
+        }, true);
+    }
+
+    function renderSiderbar(tabName) {
+        tabName = tabName || currentTabName;
+        if (!tabAttr[tabName].siderbar) {
+            return false;
+        }
+        var tab = tabAttr[tabName];
+        var siderbars = tab.siderbar;
+        $('#'+tabName+'Container .woo-table-siderbarpadding').append('<a href="javascript:;" class="action-remove"><i class="layui-icon layui-icon-close-fill"></i></a>');
+        for (var i in siderbars) {
+            var siderbar = siderbars[i];
+            var renderName = tabName + i + 'Siderbar';
+
+            $('#'+tabName+'Container .woo-table-siderbarpadding').append(
+                '<div class="woo-siderbar-list '+renderName + 'In'+'">\n' +
+                '    <div class="woo-siderbar-title"><a class="javascript" rel="clear_sider" data-foreign="'+i+'" title="清除"><i class="layui-icon layui-icon-delete"></i></a></div>\n' +
+                '    <div id="'+renderName+'"></div>\n' +
+                '</div>');
+
+            siderbar.oncheck = function (obj) {
+                if (!tabAttr[currentTabName].siderbar[this.foreign].oncheckBySelf) {
+                    var checkData = laytree.getChecked(tabName + this.foreign + 'Siderbar');
+                    siderSelected = [];
+                    if (checkData.length != 0) {
+                        for (var j in checkData) {
+                            setSiderSelected(checkData[j]);
+                        }
+                    }
+                    siderbarChange(this.foreign, siderSelected.join(','));
+                }
+                if (tabAttr[currentTabName].siderbar[this.foreign].oncheck && window[tabAttr[currentTabName].siderbar[this.foreign].oncheck]) {
+                    window[tabAttr[currentTabName].siderbar[this.foreign].oncheck](obj);
+                }
+            }
+            siderbar.click = function(obj) {
+                if (!tabAttr[currentTabName].siderbar[this.foreign].clickBySelf) {
+                    if ($(obj.elem[0]).find('.layui-form-checkbox').length == 1) {
+                        $(obj.elem[0]).find('.layui-form-checkbox').trigger('click');
+                    } else if ($(obj.elem[0]).find('.layui-form-checkbox').length == 0) {
+                        $(obj.elem[0]).closest('.woo-siderbar-list').find('.woo-siderbar-selected').removeClass('woo-siderbar-selected').end().end().addClass('woo-siderbar-selected')
+                        siderbarChange(this.foreign, obj.data.id);
+                    }
+                }
+                if (tabAttr[currentTabName].siderbar[this.foreign].click && window[tabAttr[currentTabName].siderbar[this.foreign].click]) {
+                    window[tabAttr[currentTabName].siderbar[this.foreign].click](obj);
+                }
+            }
+            window[renderName] = laytree.render(siderbar);
+            $('#' + tabName + 'Container').addClass('woo-has-siderbar');
+            if (tabAttr[currentTabName].siderbar[i].title) {
+                $('.' +renderName + 'In').find('.woo-siderbar-title').append(tabAttr[currentTabName].siderbar[i].title)
+            }
+        }
+    }
+
+    function checkboxRender(d) {
+        return layTpl($('#layTableCheckboxTemplet').html()).render(d);
+    }
+    function checkboxChooseRender() {
+        return layTpl($('#layTableAllChooseTemplet').html()).render({});
+    }
+    function customFieldSortRender(field, title) {
+        return layTpl($('#customFieldSortTemplet').html()).render({field:field, title:title});
+    }
+
+    var customFieldSort = {field:'', type:''}
+
+    $('body').on('click', '.custom-field-sort .layui-table-sort-asc', function (e) {
+        var field = $(this).closest('.custom-field-sort').data('field');
+        if (customFieldSort.field == field && customFieldSort.type == 'asc') {
+            return e.stopPropagation();
+        }
+        customFieldSort.field = field;
+        customFieldSort.type = 'asc';
+        customFieldSortReload();
+        e.stopPropagation();
+    }).on('click', '.custom-field-sort .layui-table-sort-desc', function (e) {
+        var field = $(this).closest('.custom-field-sort').data('field');
+        if (customFieldSort.field == field && customFieldSort.type == 'desc') {
+            return e.stopPropagation();
+        }
+        customFieldSort.field = field;
+        customFieldSort.type = 'desc';
+        customFieldSortReload();
+        e.stopPropagation();
+    }).on('click', '.custom-field-sort', function () {
+        var field = $(this).data('field');
+        if (customFieldSort.field == field) {
+            if (customFieldSort.type == 'asc') {
+                customFieldSort.type = 'desc';
+            } else if(customFieldSort.type == 'desc') {
+                customFieldSort.type = '';
+            } else {
+                customFieldSort.type = 'asc';
+            }
+        } else {
+            customFieldSort.field = field;
+            customFieldSort.type = 'asc';
+        }
+        customFieldSortReload();
+    })
+
+    function customFieldSortReload() {
+        window[currentTabName + 'Render'].reload({
+            where: {
+                sort_field: customFieldSort.field
+                ,sort_type: customFieldSort.type
+            }
+        });
+    }
+
+    function customRenderTab(params, first) {
+        var header = tabHeader[window.currentTabIndex];
+        if (!header) {
+            return false;
+        }
+        params = params || {};
+        params = $.extend({}, {
+            page:1,
+            limit:tabAttr[header['name']].table.limit,
+            tabname : header.name
+        }, params);
+        window['LAST_REQUEST_PARAMS'] = params;
+
+        var loadindex = layer.load(2, {
+            time : 2000
+        })
+
+        WOO.request(header.url,'get',params,
+            {
+                'success':function(msg, data, run, rslt){
+                    layer.close(loadindex);
+                    globalData = rslt;
+                    var selector = '#' + header.name + 'CustomBody';
+                    if (typeof header.custom == 'object') {
+                        selector = header.custom.selector ? '#' + header.custom.selector : selector;
+                    } else {
+                        header.custom = {};
+                    }
+                    if (!$(selector).length) {
+                        return addAlert('自定义模板行容器['+selector+']不存在', 'error');
+                    }
+
+                    $('#' + header.name + 'CustomTable').html('').addClass(header.custom.class ? header.custom.class : '');
+                    var cols = {};
+                    for (var i in  tabAttr[header['name']].table.cols[0]) {
+                        if (tabAttr[header['name']].table.cols[0][i].field) {
+                            cols[tabAttr[header['name']].table.cols[0][i].field] = tabAttr[header['name']].table.cols[0][i];
+                        }
+                    }
+                    // 自定义前置部分
+                    if (header.custom.headerSelector) {
+                        $('#' + header.name + 'CustomTable').append(layTpl($('#' + header.custom.headerSelector).html()).render({
+                            'list' : data,
+                            'cols' : cols
+                        }))
+                    }
+                    if (data.length > 0) {
+                        for (var i in data) {
+                            data[i]['LAY_INDEX'] = i;
+                            data[i]['LAY_NUM'] = i + 1;
+                        }
+                        $('#' + header.name + 'CustomTable').append(layTpl($(selector).html()).render({
+                            'list' : data,
+                            'cols' : cols
+                        }))
+                    } else {
+                        $('#' + header.name + 'CustomTable').append('<div class="layui-none">' + tabAttr[header['name']].table.text.none +'</div>')
+                    }
+                    layTable.cache[window[window.currentTabName + 'Render'].config.id] = data;
+                    // 自定义后置部分
+                    if (header.custom.footerSelector) {
+                        $('#' + header.name + 'CustomTable').append(layTpl($('#' + header.custom.footerSelector).html()).render({
+                            'list' : data,
+                            'cols' : cols
+                        }))
+                    }
+                    layForm.render();
+
+                    // 20210922新增头部统计渲染
+                    if (rslt.counter) {
+                        if (!$('#' + currentTabName + 'CounterTemplet').length) {
+                            var html = $('#defaultCounterTemplet').html();// 默认头部统计模板
+                        } else {
+                            // 可以自定义一个id为basicCounterTemplet的自定义头部统计模板
+                            var html = $('#' + currentTabName + 'CounterTemplet').html();
+                        }
+                        html = layTpl(html).render(rslt.counter);
+                        $('#' + currentTabName + 'Counter').html(html).append('<a href="javascript:;" class="action-remove"><i class="layui-icon layui-icon-close-fill"></i></a>').fadeIn(200);
+                    } else {
+                        $('#' + currentTabName + 'Counter').remove();
+                    }
+
+                    // 20211030新增记录当前方法页码 -- 搜索不会记录
+                    if (!tabAttr[currentTabName].table.isFilter && woo_script_vars.setting.table_is_store_page) {
+                        WOO.setCache('LAST_PAGE_' + currentTabName + '_' + window.location.pathname, params.page);
+                    }
+
+                    layPage.render({
+                        elem: header.name + 'CustomPage',
+                        count: rslt.count,
+                        groups: 3,
+                        prev: '<i class="layui-icon layui-icon-left"></i>',
+                        next: '<i class="layui-icon layui-icon-right"></i>',
+                        layout: ['prev', 'page', 'next', 'skip', 'count', 'limit'],
+                        limit: params.limit,
+                        limits: tabAttr[header['name']].table.limits,
+                        curr:params.page,
+                        jump: function (obj, first) {
+                            if (!first) {
+                                window[currentTabName + 'Render'].reload({
+                                    page : {
+                                        curr : obj.curr,
+                                        limit : obj.limit
+                                    }
+                                })
+                            }
+                        }
+                    });
+                },
+                'error':function(msg, data){
+                    layer.close(loadindex);
+                    addAlert(msg, 'error');
+                }
+            });
+    }
+
+    function renderTab(index, force) {
+        force = force || false;
+        if (typeof(index) == 'undefined' && typeof(window.currentTabIndex) == 'number') {
+            index = window.currentTabIndex;
+        }
+        var header = tabHeader[index];
+        if (!header) {
+            return false;
+        }
+        window.currentTabName = header['name'];
+        window.currentTabIndex = index;
+        var attrs = tabAttr[header['name']];
+        var renderName = header['name'] + 'Render';
+
+        if (header['custom']) {
+            if (!window[renderName]) {
+                window[renderName] = {
+                    config :  attrs.table,
+                    reload: function (x) {
+                        x = x || {};
+                        var params = window['LAST_REQUEST_PARAMS'];
+                        if (x.page && x.page.curr) {
+                            params.page = x.page.curr;
+                        }
+                        if (x.page && x.page.limit) {
+                            params.limit = x.page.limit;
+                        }
+                        params = $.extend({}, params, x.where ? x.where: {});
+                        customRenderTab(params);
+                    },
+                    checkStatus : function(id) {
+                        id = id || this.config.id;
+                        var pk = this.config.pk;
+                        var data = [];
+                        for (var i in layTable.cache[id]) {
+                            var pkvalue = layTable.cache[id][i][pk];
+                            if ($('[name="layTableCheckbox"][value="'+pkvalue+'"]').length && $('[name="layTableCheckbox"][value="'+pkvalue+'"]').is(':checked')) {
+                                data.push(layTable.cache[id][i]);
+                            }
+                        }
+                        return {
+                            data : data,
+                            isAll : data.length === layTable.cache[id].length
+                        }
+                    }
+                };
+                renderFilter();
+                renderSiderbar();
+                renderToolBar();
+            }
+
+            var paramsx = {};
+            if (woo_script_vars.setting.table_is_store_page) {
+                var pageCache = WOO.getCache('LAST_PAGE_' + currentTabName + '_' + window.location.pathname);
+                if (parseInt(pageCache)) {
+                    paramsx.page = parseInt(pageCache);
+                }
+            }
+            customRenderTab(paramsx, true);
+            if (force === true) {
+                renderToolBar();
+                if (attrs.siderbar) {
+                    for (let i in attrs.siderbar) {
+                        laytree.reload(currentTabName + i + 'Siderbar');
+                    }
+                }
+            }
+            return false;
+        }
+
+        if (!window[renderName]) {
+            if (woo_script_vars.setting.table_is_store_page) {
+                var pageCache = WOO.getCache('LAST_PAGE_' + currentTabName + '_' + window.location.pathname);
+                if (parseInt(pageCache)) {
+                    attrs.table.page = {
+                        curr : parseInt(pageCache)
+                    };
+                }
+            }
+            if (!attrs.table.treetable) {
+                window[renderName] = layTable.render(attrs.table);
+                renderFilter();
+                renderSiderbar();
+            } else {
+                //attrs.table.renderName = renderName;
+                window[renderName] = layTreeTable.render(attrs.table);
+            }
+
+            layTable.on('sort('+ attrs.table.id +')', function(obj){
+                window[currentTabName + 'Render'].reload({
+                    initSort: obj
+                    ,where: {
+                        sort_field: obj.field
+                        ,sort_type: obj.type
+                    }
+                }, true);
+            });
+            layTable.on('toolbar('+ attrs.table.id +')', function (obj) {
+                if (obj.event == 'WOO_REFRESH') {
+                    renderTab(currentTabIndex, 'refresh');
+                } else if (obj.event == 'WOO_COLS_SETTING') {
+                    colsSetting(obj)
+
+                } else if (obj.event == 'WOO_TABLE_SETTING') {
+                    tableSetting(obj)
+                }else {
+                    var e = obj.event;
+                    if (window[e + 'Callback']) {
+                        window[e + 'Callback'](obj);
+                    }
+                }
+            });
+            layTable.on('row('+ attrs.table.id +')', function(obj) {
+                if (tabAttr[currentTabName].table.row && window[tabAttr[currentTabName].table.row]) {
+                    window[tabAttr[currentTabName].table.row](obj);
+                    return false;
+                }
+            });
+            layTable.on('checkbox('+ attrs.table.id +')', function (obj) {
+                var objRows = window[window.currentTabName + 'Render'];
+                checkStatus =  window[window.currentTabName + 'Render'].checkStatus ?
+                    window[window.currentTabName + 'Render'].checkStatus():
+                    layTable.checkStatus(objRows.config.id);
+
+                if (checkStatus.data && checkStatus.data.length) {
+                    isCheckOk = true;
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').removeClass('tool-disabled');
+                } else {
+                    isCheckOk = false;
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').addClass('tool-disabled');
+                }
+            });
+
+            layTable.on('radio('+ attrs.table.id +')', function (obj) {
+                var objRows = window[window.currentTabName + 'Render'];
+                checkStatus =  window[window.currentTabName + 'Render'].checkStatus ?
+                    window[window.currentTabName + 'Render'].checkStatus():
+                    layTable.checkStatus(objRows.config.id);
+
+                if (checkStatus.data && checkStatus.data.length) {
+                    isCheckOk = true;
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').removeClass('tool-disabled');
+                } else {
+                    isCheckOk = false;
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').addClass('tool-disabled');
+                }
+            });
+
+
+        } else {
+            if (force === true) {
+                attrs.table.page.curr  = 1;
+                window[renderName] = layTable.render(attrs.table);
+                tabAttr[currentTabName].table.isFilter = false;
+                if (attrs.siderbar) {
+                    for (let i in attrs.siderbar) {
+                        laytree.reload(currentTabName + i + 'Siderbar');
+                    }
+                }
+            } else if(force === 'refresh') {
+                if (!tabAttr[currentTabName].table.data) {
+                    window[renderName].reload();
+                } else {
+                    setTimeout(function () {
+                        location.reload();
+                    }, 800);
+                }
+                // if (attrs.siderbar) {
+                //     for (let i in attrs.siderbar) {
+                //         laytree.reload(currentTabName + i + 'Siderbar');
+                //     }
+                // }
+            }
+        }
+    }
+
+    function mergeObject(oldobj, addobj, delobj) {
+        addobj = addobj || {};
+        delobj = delobj || [];
+        oldobj = $.extend({}, oldobj, addobj);
+        for (var i in delobj) {
+            if (oldobj[i]) {
+                delete  oldobj[i];
+            }
+            if (oldobj[delobj[i]]) {
+                delete  oldobj[delobj[i]];
+            }
+        }
+        return oldobj;
+    }
+
+    /*用于列表项工具按钮：提示->发送请求->刷新列表*/
+    function woo_item_tool(data, href, tip) {
+        href = href || $(this).attr('href');
+        tip = tip || $(this).data('tip') ||'请确认是否执行该操作？';
+        var offset = $(this).offset();
+        layer.confirm(tip,{
+            title : '确认',
+            icon : 3,
+            area: ['292px', '170px'],
+            offset : (function () {
+                if ($(window).width() <= 768) {
+                    return 'auto';
+                }
+                var t = Math.max(offset.top - 118 - $(window).scrollTop(), 0);
+                var l = offset.left - 185 + 292 < $(window).width() ?offset.left - 185 : $(window).width() - 292;
+                return [t + 'px', l + 'px'];
+            })()
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'get', null, {
+                success: function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    renderTab(currentTabIndex, 'refresh');
+                },
+                error : function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+
+    /*用于列表头部工具：获取列表选中数据->提示->发送请求(携带选中数据id)->刷新列表*/
+    function woo_tool(data, href, tip) {
+        href = href || $(this).attr('href');
+        tip = tip || $(this).data('tip') ||'请确认是否执行该操作？';
+        if (data.data.length == 0) {
+            addAlert('您还没有选择任何项目', 'warn');
+            return false ;
+        }
+        if (!tabAttr[currentTabName].table.pk) {
+            addAlert('当前数据表格主键字段未知，暂时不能执行该批量操作', 'error');
+            return false ;
+        }
+        var pk = tabAttr[currentTabName].table.pk;
+
+        var ids = [];
+        for (var i in data.data) {
+            if (data.data[i][pk]) {
+                ids.push(data.data[i][pk]);
+            }
+        }
+        var offset = $(this).offset();
+        layer.confirm(tip + '一共[<span style="color:#FF5722;">'+ ids.length +'</span>]条数据',{
+            title : '确认',
+            icon : 3,
+            offset : $(window).width() > 768 ? [offset.top - $(window).scrollTop() + 'px', (offset.left + 63) + 'px'] : 'auto'
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'post', {
+                "selected_id" : ids
+            }, {
+                success: function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    renderTab(currentTabIndex, 'refresh');
+                },
+                error : function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+
+    /*用于列表头部工具：提示->发送请求->刷新列表*/
+    function woo_tool_simple() {
+        var href = $(this).attr('href');
+        var tip = $(this).data('tip') ||'请确认是否执行该操作？';
+        if (!href) {
+            return false;
+        }
+        layer.confirm(tip, {
+            title : '确认',
+            icon : 3
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'get', null, {
+                success: function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    renderTab(currentTabIndex, 'refresh');
+                },
+                error : function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+
+    function clear_data() {
+        var href = $(this).attr('href');
+        var offset = $(this).offset();
+        layer.confirm('操作不可逆！请确认是否清空数据？',{
+            title : '确认',
+            icon : 3,
+            offset : $(window).width() > 768 ? [offset.top - $(window).scrollTop() + 'px', (offset.left + 63) + 'px'] : 'auto'
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'post', {}, {
+                success: function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    renderTab(currentTabIndex, 'refresh');
+                },
+                error : function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+
+    function  listSort() {
+        if (globalData.data && globalData.data.length && window[window.currentTabName + 'Render'] && window[window.currentTabName + 'Render'].config.sortable) {
+            var layid = window[window.currentTabName + 'Render'].config.id;
+            $('[lay-id="'+layid+'"]').find('.layui-table-main .layui-table tbody tr').each(function () {
+                $(this).attr('data-id', globalData.data[$(this).index()][window[window.currentTabName + 'Render'].config.pk])
+            })
+            if ($('[lay-id="'+layid+'"] .layui-table-main .layui-table tbody').hasClass('is-sortable-bind')) {
+                return;
+            }
+
+            if (typeof(Sortable) != 'undefined') {
+                /*{if !$is_mobile}*/
+                new Sortable($('[lay-id="'+layid+'"] .layui-table-main .layui-table tbody')[0], {
+                    animation: 150,
+                    ghostClass: 'blue-background-class',
+                    onEnd : function (evt) {
+                        var data = getSortData();
+                        if (data.length) {
+                            $('[rel="woo_table_sort"]').removeClass('tool-disabled-show')
+                        } else  {
+                            $('[rel="woo_table_sort"]').addClass('tool-disabled-show')
+                        }
+                        var oldIndex = evt.oldIndex;
+                        var newIndex = evt.newIndex;
+                        var layid = window[window.currentTabName + 'Render'].config.id;
+                        if (newIndex > oldIndex) {
+                            $('[lay-id="'+layid+'"]').find('.layui-table-fixed').each(function () {
+                                $(this).find('tbody').find('tr:eq('+ oldIndex +')').insertAfter($(this).find('tbody').find('tr:eq('+ newIndex +')'))
+                            })
+                        } else {
+                            $('[lay-id="'+layid+'"]').find('.layui-table-fixed').each(function () {
+                                $(this).find('tbody').find('tr:eq('+ oldIndex +')').insertBefore($(this).find('tbody').find('tr:eq('+ newIndex +')'))
+                            })
+                        }
+                    }
+                });
+                /*{else}*/
+                new Sortable($('[lay-id="'+layid+'"] .layui-table-main .layui-table tbody')[0], {
+                    animation: 150,
+                    handle : ".sort-row-handler",
+                    ghostClass: 'blue-background-class',
+                    onEnd : function (evt) {
+                        var data = getSortData();
+                        if (data.length) {
+                            $('[rel="woo_table_sort"]').removeClass('tool-disabled-show')
+                        } else  {
+                            $('[rel="woo_table_sort"]').addClass('tool-disabled-show')
+                        }
+                        var oldIndex = evt.oldIndex;
+                        var newIndex = evt.newIndex;
+                        var layid = window[window.currentTabName + 'Render'].config.id;
+                        if (newIndex > oldIndex) {
+                            $('[lay-id="'+layid+'"]').find('.layui-table-fixed').each(function () {
+                                $(this).find('tbody').find('tr:eq('+ oldIndex +')').insertAfter($(this).find('tbody').find('tr:eq('+ newIndex +')'))
+                            })
+                        } else {
+                            $('[lay-id="'+layid+'"]').find('.layui-table-fixed').each(function () {
+                                $(this).find('tbody').find('tr:eq('+ oldIndex +')').insertBefore($(this).find('tbody').find('tr:eq('+ newIndex +')'))
+                            })
+                        }
+                    }
+                });
+                /*{/if}*/
+                $('[lay-id="'+layid+'"] .layui-table-main .layui-table tbody').addClass('is-sortable-bind')
+            } else {
+                $('[rel="woo_table_sort"]').remove();
+            }
+        }
+    }
+
+    function woo_table_resort() {
+        var href = $(this).attr('href');
+        var offset = $(this).offset();
+        layer.confirm('请确认是否重置排序？', {
+            title : '确认',
+            icon : 3,
+            offset :$(window).width() > 768 ? [offset.top  - $(window).scrollTop() + 'px', offset.left + 63 + 'px'] : 'auto'
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'get', null, {
+                success: function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    renderTab(currentTabIndex, 'refresh');
+                },
+                error : function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+
+    function getSortData() {
+        var layid = window[window.currentTabName + 'Render'].config.id;
+        var sortData = [];
+        $('[lay-id="'+layid+'"]').find('.layui-table-main .layui-table tbody tr').each(function () {
+            var id = $(this).data('id');
+            var index = $(this).index();
+            var oid =  globalData.data[index][window[window.currentTabName + 'Render'].config.pk];
+            if (id != oid) {
+                sortData.push({
+                    "from" : id,
+                    "to"   : oid
+                })
+            }
+        })
+        return sortData;
+    }
+
+    function woo_table_sort() {
+        var href = $(this).attr('href');
+        var sortData = getSortData();
+        var offset = $(this).offset();
+
+        if (sortData.length <= 0) {
+            layer.alert('当前没有数据位置发生改变，无需提交[您可直接拖拽列表进行数据排序]', {
+                icon : 3,
+                offset : $(window).width() > 768 ? [offset.top  - $(window).scrollTop() + 'px', offset.left + 63 + 'px'] : 'auto'
+            })
+            return false;
+        }
+        var message = "";
+        if (globalData.isSort) {
+            message = "当前有自定义排序方式["+globalData.isSort+"]，建议本次操作不提交，清空自定义排序以后进行操作；";
+        }
+        message += "当前有[<span style=\"color:#FF5722;\">"+ sortData.length +"</span>]条数据位置发生变化，请确认是否提交更新？";
+
+        layer.confirm(message, {
+            title : '确认',
+            icon : 3,
+            offset : $(window).width() > 768 ?  [offset.top  - $(window).scrollTop() + 'px', offset.left + 63 + 'px'] : 'auto'
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 3000
+            });
+            WOO.request.call(this, href, 'post', {
+                "data" : sortData
+            }, {
+                success: function (msg, data) {
+                    layer.close(index);
+                    addAlert(msg, 'success');
+                    renderTab(currentTabIndex, 'refresh');
+                },
+                error : function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+
+    function woo_delete(data) {
+        woo_item_tool.call(this, data, '', $(this).data('tip') ? $(this).data('tip'): '该操作不可逆，请确认是否删除？');
+    }
+
+    function woo_restore(data) {
+        woo_item_tool.call(this, data, '', $(this).data('tip') ? $(this).data('tip'): '请确认是否恢复该数据？');
+    }
+
+    function woo_batch_delete(data) {
+        woo_tool.call(this, data, '', $(this).data('tip') ? $(this).data('tip'): '请确认是否批量删除选中数据？');
+    }
+
+    function woo_batch_switch(data) {
+        woo_tool.call(this, data, '', $(this).data('tip') ? $(this).data('tip'): '请确认是否批量设置选中数据？');
+    }
+
+    function woo_batch_restore(data) {
+        woo_tool.call(this, data, '', $(this).data('tip') ? $(this).data('tip'): '请确认是否批量恢复选中数据？');
+    }
+
+    function relation_select(data) {
+        if (data.data.length == 0 && !$(this).hasClass('checkbox')) {
+            addAlert('您还没有选择任何项目', 'warn');
+            return false;
+        }
+        var args = {
+            'field' : tabAttr[currentTabName]['table']['relation_field']
+        };
+        var pk = tabAttr[currentTabName]['table']['pk'];
+        var dis = tabAttr[currentTabName]['table']['relation_display'];
+        var vals = [];
+        var pks = [];
+        for (var i in layTable.cache[window[window.currentTabName + 'Render'].config.id]) {
+            pks.push(layTable.cache[window[window.currentTabName + 'Render'].config.id][i][pk].toString());
+        }
+
+        for (var i in data.data) {
+            var id = data.data[i][pk].toString();
+            var isPush = true;
+            if (window.relationTemp && $.inArray(id, window.relationTemp.pks) >= 0) {
+                isPush = false;
+            }
+            if (isPush) {
+                vals.push({
+                    "id" : id,
+                    "display" : data.data[i][dis]
+                })
+            }
+        }
+
+        if (window.relationTemp) {
+            pks = pks.concat(window.relationTemp.pks);
+            vals = vals.concat(window.relationTemp.vals);
+            window.relationTemp = undefined;
+        }
+        if (window.relationDelTemp) {
+            pks = pks.concat(window.relationDelTemp.pks);
+            window.relationDelTemp = undefined;
+        }
+        args.data = vals;
+        args.pks = pks;
+        parent.WOO.changeRelationValue(args);
+    }
+
+    function get_relation_data(page) {
+        var keyword = $(this).attr('data-keyword');
+        var display = $(this).data('display');
+        var model = $(this).data('model');
+        var page = page || 1;
+        var url = "{:url('getRelationFilter', ['model' => 'MODEL','field' => 'FIELD', 'keyword' => 'KEYWORD', 'page' => 'PAGE'])}"
+            .replace('FIELD', display).replace('MODEL', model).replace('KEYWORD', keyword).replace('PAGE', page);
+
+        WOO.request.call(this, url, 'GET', null, {
+            success: function (msg, data) {
+                data.width = $(this).closest('.layui-form-item').width() - 1;
+                $(this).attr('data-page', data.page.current_page);
+                $(this).attr('data-last', data.page.last_page);
+                var render = $(this).data('render') || 'relationFilterRender';
+                var html = layTpl($('#' + render).html()).render(data);
+                $(this).parent().find('.relation-filter-container').remove().end().append(html);
+                if (data.list.length == 1 && data.page.current_page == 1) {
+                    $(this).parent().find('.relation-filter-container').find('.relation-filter-list li:first').trigger('click');
+                }
+            },
+            error : function (msg,data) {
+                addAlert(msg, 'error');
+            }
+        })
+    }
+
+    function treetable_toggle() {
+        if ($(this).hasClass('is-expand')) {
+            $(this).removeClass('is-expand').find('cite').html('展开').end().find('i').removeClass('layui-icon-folder-open').addClass('layui-icon-folder');
+            layTreeTable.expandAll($(this).closest('[lay-id]').attr('lay-id'), false);
+        } else {
+            $(this).addClass('is-expand').find('cite').html('折叠').end().find('i').removeClass('layui-icon-folder').addClass('layui-icon-folder-open');
+            layTreeTable.expandAll($(this).closest('[lay-id]').attr('lay-id'), true);
+            $('[lay-id="' + currentTabName + 'Table"] .layui-table-main [data-field="' +  tabAttr[currentTabName].table.displayField +'"]').addClass(tabAttr[currentTabName].table.displayClassName);
+        }
+    }
+
+    function layuiReady() {
+        layui.use(['element', 'table', 'laytpl', 'tree', 'form', 'laypage', 'dropdown','treeTable'], function () {
+            var element = layui.element;
+            window.layTable = layui.table;
+            window.layTpl = layui.laytpl;
+            window.laytree = layui.tree;
+            window.layForm = layui.form;
+            window.layPage = layui.laypage;
+            window.layDropdown = layui.dropdown;
+            window.layTreeTable = layui.treeTable;
+
+            if (window.mytest) {
+                window.mytest()
+            }
+
+            // 系统内置工具的事件监听触发
+            if (window.addToolsEventListener) {
+                window.addToolsEventListener()
+            }
+
+            if (!tabAttr.error) {
+                renderTab($('.woo-table-body>.layui-tab>.layui-tab-content>.layui-tab-item.layui-show').index());
+            } else {
+                addAlert(tabAttr.error, 'error');
+            }
+            element.on('tab(tab)', function(data){
+                renderTab(data.index, true)
+            });
+
+            layDropdown.render({
+                elem: '.custom-export',
+                align : 'right',
+                style:"font-size:12px!important;",
+                data: [
+                    {
+                        title : '导出到 Csv 文件',
+                        id:100
+                    },
+                    {
+                        title : '导出到 Excel 文件',
+                        id:101
+                    }
+                ],
+                click:function (data) {
+                    var headers = [];
+                    var fields = [];
+                    var cols = window[window.currentTabName + 'Render'].config.cols[0];
+                    for (var i in cols) {
+                        if (!cols[i].field || !cols[i].title) {
+                            continue;
+                        }
+                        headers.push(cols[i].title);
+                        fields.push(cols[i].field);
+                    }
+                    var cache = layTable.cache[window[window.currentTabName + 'Render'].config.id];
+                    var values = [];
+                    for (var i in cache) {
+                        var row = [];
+                        for (var j in fields)  {
+                            row.push(cache[i][fields[j]] ? cache[i][fields[j]] : '')
+                        }
+                        values.push(row)
+                    }
+                    layTable.exportFile(headers, values, data.id == 100 ? 'csv': 'xls');
+                }
+            })
+
+            $(document).on('click', '.custom-refresh', function () {
+                window[window.currentTabName + 'Render'].reload();
+            })
+
+            window.mouseId = 0;
+            window.mouseHoverId = 0;
+            $(document).on('mouseenter', '.woo-tool-span', function () {
+                if (!$(this).find('.woo-btn-child').length && !$(this).data('mouseid')) {
+                    return;
+                }
+                if (!$(this).data('mouseid')) {
+                    window.mouseId++;
+                    $(this).attr('data-mouseid', window.mouseId);
+                }
+                if ($('.mouse-tooldown[data-mouseid="'+$(this).data('mouseid')+'"]').length) {
+                    var mouse = $('.mouse-tooldown[data-mouseid="'+$(this).data('mouseid')+'"]');
+                    var t = $(this).offset().top + $(this).outerHeight() + 20;
+                    mouse.css({
+                        'position' : 'absolute',
+                        'z-index' : 999,
+                        'right' : ($(window).width() - $(this).offset().left - $(this).outerWidth()) + 'px',
+                        'top' : t + 'px'
+                    })
+                    mouse.show().stop(true, true).animate({
+                        top: t - 20
+                    }, 200)
+                } else {
+                    var mouse = $('<div class="mouse-tooldown" data-mouseid="'+ $(this).data('mouseid') +'"></div>')
+                    mouse.append($(this).find('.woo-btn-child'));
+                    var t = $(this).offset().top + $(this).outerHeight() + 20
+                    mouse.css({
+                        'position' : 'absolute',
+                        'z-index' : 999,
+                        'right' : ($(window).width() - $(this).offset().left - $(this).outerWidth()) + 'px',
+                        'top' :  t + 'px',
+                        'min-width' : $(this).outerWidth()
+                    })
+                    $('body').append(mouse);
+                    mouse.stop(true, true).animate({
+                        top: t - 20
+                    }, 200)
+                }
+                if (isCheckOk) {
+                    mouse.find('.woo-tool-span.is-check').removeClass('tool-disabled');
+                } else {
+                    mouse.find('.woo-tool-span.is-check').addClass('tool-disabled');
+                }
+            }).on('mouseleave', '.woo-tool-span', function (e) {
+                if (!$(this).data('mouseid')) {
+                    return;
+                }
+                var mouseid = $(this).data('mouseid');
+                setTimeout(function () {
+                    if (mouseid != window.mouseHoverId) {
+                        $('.mouse-tooldown[data-mouseid="'+mouseid+'"]').hide()
+                    }
+                }, 50)
+            }).on('mouseenter', '.mouse-tooldown', function () {
+                window.mouseHoverId = $(this).data('mouseid')
+            }).on('mouseleave', '.mouse-tooldown', function () {
+                window.mouseHoverId = 0;
+                $(this).hide();
+            }).on('click', '.mouse-tooldown .woo-tool-span a', function () {
+                if (!$(this).closest('.mouse-tooldown').data('mouseid')) {
+                    return;
+                }
+                var mouseid = $(this).closest('.mouse-tooldown').data('mouseid');
+                $('.mouse-tooldown[data-mouseid="'+mouseid+'"]').hide()
+            })
+
+            layForm.on('switch(checker)', function(data){
+                var $this = $(data.elem);
+                var $switch = $(data.othis);
+                layer.confirm('请确认是否执行该操作？',{
+                    title : '确认',
+                    icon : 3,
+                    cancel : function () {
+                        $this.prop('checked', !$this.prop('checked'))
+                        var text = $this.attr('title').split('|');
+                        $switch.toggleClass('layui-form-onswitch').find('em').html($this.prop('checked') ? text[0] : text[1]);
+                    }
+                },function(){
+                    layer.closeAll();
+                    var index = layer.load(3, {
+                        time : 3000
+                    });
+                    WOO.request.call(this,"{:url('ajaxSwitch')}",'post',{
+                            'value' : data.elem.checked ? $this.data('yes') : $this.data('no'),
+                            'field' : $this.data('name'),
+                            'id'    : $this.data('id')
+                        },
+                        {
+                            'success':function(msg){
+                                if (data.elem.checked && $this.hasClass('is-open')) {
+                                    $this.attr('disabled', true);
+                                    $switch.addClass('layui-disabled');
+                                }
+                                layer.close(index);
+                                addAlert(msg, 'success');
+                            },
+                            'error':function(msg){
+                                layer.close(index);
+                                addAlert(msg, 'error');
+                                $this.prop('checked', !$this.prop('checked'))
+                                var text = $this.attr('title').split('|');
+                                $switch.toggleClass('layui-form-onswitch').find('em').html($this.prop('checked') ? text[0] : text[1]);
+                            }
+                        }
+                    );
+                },function(){
+                    $this.prop('checked', !$this.prop('checked'))
+                    var text = $this.attr('title').split('|');
+                    $switch.toggleClass('layui-form-onswitch').find('em').html($this.prop('checked') ? text[0] : text[1]);
+                })
+            });
+
+            document.onkeydown = function(event){
+                if (event.keyCode == 81 && event.altKey){
+                    var max_index  =  $('.woo-table-body').children('.layui-tab').children('.layui-tab-title').find('li').length -1 ;
+                    var index    = $('.woo-table-body').children('.layui-tab').children('.layui-tab-title').find('li.layui-this').index() + 1;
+                    if(index > max_index) {
+                        index = 0;
+                    }
+                    $('.woo-table-body').children('.layui-tab').children('.layui-tab-title').find('li:eq('+index+')').trigger('click') ;
+                }
+            }
+
+            $(document).on('focus', '.woo-filter-relation', function () {
+                $(this).attr('data-keyword', '');
+                $('.relation-box').removeClass('hover');
+                $(this).closest('.relation-box').addClass('hover');
+                get_relation_data.call(this);
+            }).on('keydown','.woo-filter-relation', WOO.debounce(function () {
+                $(this).parent().find('.relation-search-bar').trigger('click');
+                $(this).closest('.relation-box').addClass('hover');
+            })).on('click', '.relation-box .relation-search-bar', function () {
+                var val = $(this).parent().find('.woo-filter-relation').val();
+                if (/^\d+$/.test(val)) {
+                    $(this).parent().find('.relation-post-input').val(val);
+                }
+                $(this).parent().find('.woo-filter-relation').attr('data-keyword', val);
+                get_relation_data.call($(this).parent().find('.woo-filter-relation'));
+            }).on('click', '.relation-box .prev-page', function () {
+                if ($(this).hasClass('disabled')) {
+                    return false;
+                }
+                var page = parseInt($(this).closest('.relation-box').find('.woo-filter-relation').attr('data-page')) - 1;
+                get_relation_data.call($(this).closest('.relation-box').find('.woo-filter-relation'), page);
+            }).on('click', '.relation-box .next-page', function () {
+                if ($(this).hasClass('disabled')) {
+                    return false;
+                }
+                var page = parseInt($(this).closest('.relation-box').find('.woo-filter-relation').attr('data-page')) + 1;
+                get_relation_data.call($(this).closest('.relation-box').find('.woo-filter-relation'), page);
+            }).on('click', '.relation-filter-list li', function () {
+                var id = $(this).attr('data-id');
+                var dis = $(this).attr('data-display');
+                $(this).closest('.relation-box').find('.relation-post-input').val(id).end().find('.woo-filter-relation').val(dis);
+                $(this).closest('.relation-box').find('.relation-filter-container').remove();
+            }).on('click', '.filter-sigle-clear', function () {
+                if ($(this).parent().find('select').length == 1 && $(this).parent().find('input').length > 1) {
+                    var name = $(this).parent().find('input').not('.layui-unselect').attr('name');
+                    $(this).parent().find('input[name!=""]').val('');
+                } else {
+                    $(this).parent().find('input').val('');
+                    $(this).parent().find('select').val('');
+                    var name = $(this).parent().find('[name]').attr('name');
+                }
+                layForm.render();
+                if ($(this).parent().find('.close-reduction').length) {
+                    $(this).parent().find('.close-reduction').each(function () {
+                        $(this).html($(this).data('placeholder'));
+                    })
+                }
+                if (filterFieldsList[currentTabName] && filterFieldsList[currentTabName][name]) {
+                    $(this).closest('form').find('[lay-submit]').trigger('click');
+                }
+            }).on('click', '.woo-table-siderbar .action-remove', function () {
+                $(this).closest('.woo-table-siderbar').remove();
+            }).on('click', '.woo-counter .action-remove', function () {
+                $(this).closest('.woo-counter').remove();
+            }).on('click', '.layui-table-tool-more', function () {
+                $(this).closest('.layui-table-tool').find('.layui-table-tool-self').slideToggle(100);
+            }).on('click', function (ev) {
+                if ($('.relation-box.hover').length && !$('.relation-box.hover').parent()[0].contains(ev.target)) {
+                    $('.relation-box.hover').removeClass('hover');
+                }
+            })
+
+            // 全选 自定义列表使用
+            layForm.on('checkbox(layTableAllChoose1)', function(data){
+                $(data.elem).closest('.layui-custom-table')
+                    .find('[name="layTableCheckbox"]').prop('checked', data.elem.checked);
+                layForm.render('checkbox');
+
+                if (data.elem.checked) {
+                    isCheckOk = true;
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').removeClass('tool-disabled');
+                } else {
+                    isCheckOk = false;
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').addClass('tool-disabled');
+                }
+            });
+            // 选择切换 自定义列表使用
+            layForm.on('checkbox(layTableChoose1)', function(data){
+                var checkLength = $(data.elem).closest('.layui-custom-table').find('[name="layTableCheckbox"]:checked').length;
+                var allLength = $(data.elem).closest('.layui-custom-table').find('[name="layTableCheckbox"]').length;
+                $(data.elem).closest('.layui-custom-table').find('[lay-filter="layTableAllChoose1"]').prop('checked', checkLength >= allLength);
+                layForm.render('checkbox');
+                if (checkLength) {
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').removeClass('tool-disabled');
+                } else {
+                    $('#'+ window.currentTabName +'ToolBarInfo').find('.is-check').addClass('tool-disabled');
+                }
+            });
+
+            /*{if $is_mobile}*/
+            if (!window.localStorage.getItem('is_table_doubletap_tip')) {
+                setTimeout(function () {
+                    layer.msg('双敲表格区域可固定列表项操作，再敲则取消');
+                    window.localStorage.setItem('is_table_doubletap_tip', '1');
+                }, 1200);
+            }
+            $(document).on('dblclick', '.layui-table-view', function () {
+                var tableView = $(this);
+                if (tableView.hasClass('fixed-force-show')) {
+                    tableView.removeClass('fixed-force-show');
+                } else {
+                    setTimeout(function () {
+                        tableView.addClass('fixed-force-show');
+                    }, 200)
+                }
+            })
+            /*{/if}*/
+        })
+    }
+</script>

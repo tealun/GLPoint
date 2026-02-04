@@ -1,0 +1,17 @@
+{extend name="$extend_list"/}
+
+{block name="script"}
+<script type="text/html" id="aaa">
+    {{# if (!d.is_verify) { }}
+    <a href="{{woo_script_vars.approot}}/Certification/cert.html?id={{d.id}}" class="layui-btn layui-btn-sm btn-9 javascript" rel="exec_cert">认证</a>
+    {{# } }}
+</script>
+
+
+<script>
+function exec_cert() {
+    woo_item_tool.call(this, {}, '', '请确认是否提交认证？');
+}
+
+</script>
+{/block}

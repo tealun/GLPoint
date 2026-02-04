@@ -1,0 +1,78 @@
+{extend name="$extend_global"/}
+{block name="headscript"}
+{/block}
+{block name="header"}{/block}
+{block name="content"}
+<div class="woo-main">
+    <div class="woo-main-container">
+        {include file="$common_header"/}
+        <div class="app-list">
+            {if !$installed && !$noinstall}
+            <div class="no-list">当前还没有任何应用哦！</div>
+            {/if}
+            <ul class="grid">
+                {foreach $installed as $key => $item}
+                <li>
+                    <div class="header">
+                        <div class="version">V{$item.version??'1.0'}</div>
+                        <div>{$item.title??$key} 【{$key}】</div>
+                    </div>
+                    <div class="des">
+                        {$item.describe??''}{if !empty($item.author)}<span>[{$item.author}]</span>{/if}
+                    </div>
+                    <div class="action layui-btn-group">
+                        <a href="{:url('uninstall', ['name' => $key])}" class="layui-btn layui-btn-danger layui-btn-sm javascript" rel="inorun">卸载</a>
+                        <a href="{:url('modify', ['id' => $item.id])}" class="layui-btn layui-btn-normal layui-btn-sm"><i class="woo-icon woo-icon-xiugai"></i></a>
+                    </div>
+                </li>
+                {/foreach}
+                {foreach $noinstall as $key => $item}
+                <li>
+                    <div class="header">
+                        <div class="version">V{$item.version??'1.0'}</div>
+                        <div>{$item.title??$key} 【{$key}】</div>
+                    </div>
+                    <div class="des">
+                        {$item.describe??''}{if !empty($item.author)}<span>[{$item.author}]</span>{/if}
+                    </div>
+                    <div class="action layui-btn-group">
+                        <a href="{:url('install', ['name' => $key])}" class="layui-btn btn-5 layui-btn-sm javascript" rel="inorun">安装</a>
+                    </div>
+                </li>
+                {/foreach}
+            </ul>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="footer"}{/block}
+{block name="script"}
+<script>
+    function inorun() {
+        var href = $(this).attr('href');
+
+        layer.confirm('请确认是否执行该操作？',{
+            title : '确认',
+            icon : 3,
+        }, function(){
+            layer.closeAll();
+            var index = layer.load(3, {
+                time : 30000
+            });
+            WOO.request.call(this, href, 'get', {}, {
+                success: function (msg,data) {
+                    console.log(data)
+                    layer.close(index);
+                    addAlert(msg, 'success', 2000, 0,function () {
+                        location.reload();
+                    });
+                },
+                error : function (msg,data) {
+                    layer.close(index);
+                    addAlert(msg, 'error');
+                }
+            })
+        })
+    }
+</script>
+{/block}

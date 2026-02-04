@@ -1,0 +1,359 @@
+{extend name="$extend_global"/}
+{block name="content"}
+<div class="admin_home">
+    <div class="admin_content" style="padding:32px 24px 24px 24px;">
+        <div class="layui-row layui-col-space20">
+            <div class="layui-col-md8">
+                <div class="layui-row layui-col-space20">
+                    <!-- 统一的积分统计卡片，周期为维度，积分+人数，卡片样式优化+更大字体 -->
+                    <div class="layui-col-md12">
+                        <div class="layui-row layui-col-space20">
+                            <div class="layui-col-xs3">
+                                <div class="layui-card mcount" style="background:#f8f9fa;box-shadow:0 2px 8px #ececec;">
+                                    <div class="layui-card-header" style="font-weight:bold;text-align:center;">
+                                        <i class="layui-icon layui-icon-time" style="color:#5c6bc0;font-size:28px;"></i>
+                                        <span style="margin-left:6px;font-size:22px;">本周</span>
+                                    </div>
+                                    <div class="layui-card-body" style="text-align:center;">
+                                        <div style="display:flex;justify-content:center;align-items:center;gap:22px;">
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">积分</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$weekStats.reward|default=0}</div>
+                                            </div>
+                                            <div style="width:2px;height:40px;background:#e0e0e0;"></div>
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">人数</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$weekStats.reward_user_count|default=0}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-xs3">
+                                <div class="layui-card mcount" style="background:#f8f9fa;box-shadow:0 2px 8px #ececec;">
+                                    <div class="layui-card-header" style="font-weight:bold;text-align:center;">
+                                        <i class="layui-icon layui-icon-time" style="color:#42a5f5;font-size:28px;"></i>
+                                        <span style="margin-left:6px;font-size:22px;">本月</span>
+                                    </div>
+                                    <div class="layui-card-body" style="text-align:center;">
+                                        <div style="display:flex;justify-content:center;align-items:center;gap:22px;">
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">积分</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$monthStats.reward|default=0}</div>
+                                            </div>
+                                            <div style="width:2px;height:40px;background:#e0e0e0;"></div>
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">人数</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$monthStats.reward_user_count|default=0}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-xs3">
+                                <div class="layui-card mcount" style="background:#f8f9fa;box-shadow:0 2px 8px #ececec;">
+                                    <div class="layui-card-header" style="font-weight:bold;text-align:center;">
+                                        <i class="layui-icon layui-icon-time" style="color:#7e57c2;font-size:28px;"></i>
+                                        <span style="margin-left:6px;font-size:22px;">本年</span>
+                                    </div>
+                                    <div class="layui-card-body" style="text-align:center;">
+                                        <div style="display:flex;justify-content:center;align-items:center;gap:22px;">
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">积分</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$yearStats.reward|default=0}</div>
+                                            </div>
+                                            <div style="width:2px;height:40px;background:#e0e0e0;"></div>
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">人数</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$yearStats.reward_user_count|default=0}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-xs3">
+                                <div class="layui-card mcount" style="background:#f8f9fa;box-shadow:0 2px 8px #ececec;">
+                                    <div class="layui-card-header" style="font-weight:bold;text-align:center;">
+                                        <i class="layui-icon layui-icon-rate-solid" style="color:#fbc02d;font-size:28px;"></i>
+                                        <span style="margin-left:6px;font-size:22px;">累计</span>
+                                    </div>
+                                    <div class="layui-card-body" style="text-align:center;">
+                                        <div style="display:flex;justify-content:center;align-items:center;gap:22px;">
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">积分</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$totalReward|default=0}</div>
+                                            </div>
+                                            <div style="width:2px;height:40px;background:#e0e0e0;"></div>
+                                            <div>
+                                                <div style="font-size:18px;color:#888;">人数</div>
+                                                <div style="font-size:21px;font-weight:bold;color:#333;">{$rewardUserCount|default=0}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 积分增长趋势图 -->
+                    <div class="layui-col-md12">
+                        <div class="layui-card b5" style="background:#fff;box-shadow:0 2px 8px #f2f2f2;">
+                            <div class="layui-card-header" style="font-weight:bold;">
+                                <span class="woo-circle-icon cyan"><i class="layui-icon layui-icon-chart-screen"></i></span>
+                                积分增长趋势
+                            </div>
+                            <div class="layui-card-body">
+                                <div class="admin-charts" id="score-growth-chart" style="height:330px;">
+                                    <div id="growth-empty" style="display:none;text-align:center;color:#bbb;line-height:330px;">暂无数据</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 奖励分布图 -->
+                    <div class="layui-col-md12">
+                        <div class="layui-card" style="background:#fff;box-shadow:0 2px 8px #f2f2f2;">
+                            <div class="layui-card-header" style="font-weight:bold;">
+                                <span class="woo-circle-icon orange"><i class="layui-icon layui-icon-chart"></i></span>
+                                奖励分布
+                            </div>
+                            <div class="layui-card-body">
+                                <div class="admin-charts" id="reward-distribution-chart" style="height:260px;">
+                                    <div id="reward-empty" style="display:none;text-align:center;color:#bbb;line-height:260px;">暂无数据</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 右侧排行榜和分布，两列并排 -->
+            <div class="layui-col-md4">
+                <div class="layui-row layui-col-space16">
+                    <div class="layui-col-xs6">
+                        <!-- 周榜 -->
+                        <div class="layui-card" style="box-shadow:0 2px 8px #f2f2f2;margin-bottom:16px;max-width:100%;">
+                            <div class="layui-card-header" style="font-weight:bold;">
+                                <span class="woo-circle-icon blue"><i class="layui-icon layui-icon-user"></i></span>
+                                周榜
+                            </div>
+                            <div class="layui-card-body" style="padding:10px 8px;">
+                                <ol class="rank-list" style="padding-left:0;">
+                                    {assign name="i" value="1" /}
+                                    {foreach $weekRank as $item}
+                                    <li style="display:flex;align-items:center;padding:4px 0;border-bottom:1px dashed #eee;">
+                                        <span class="rank-num" style="width:22px;text-align:center;font-weight:bold;color:#5c6bc0;">{$i}</span>
+                                        <span class="rank-user" style="flex:1;color:#333;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                            <i class="layui-icon layui-icon-username"></i> {$item.user_nickname}
+                                        </span>
+                                        <span class="rank-score" style="color:#5c6bc0;font-weight:bold;width:56px;text-align:right;">{$item.total}</span>
+                                    </li>
+                                    {assign name="i" value="$i+1" /}
+                                    {/foreach}
+                                </ol>
+                            </div>
+                        </div>
+                        <!-- 年榜 -->
+                        <div class="layui-card" style="box-shadow:0 2px 8px #f2f2f2;max-width:100%;">
+                            <div class="layui-card-header" style="font-weight:bold;">
+                                <span class="woo-circle-icon purple"><i class="layui-icon layui-icon-user"></i></span>
+                                年榜
+                            </div>
+                            <div class="layui-card-body" style="padding:10px 8px;">
+                                <ol class="rank-list" style="padding-left:0;">
+                                    {assign name="i" value="1" /}
+                                    {foreach $yearRank as $item}
+                                    <li style="display:flex;align-items:center;padding:4px 0;border-bottom:1px dashed #eee;">
+                                        <span class="rank-num" style="width:22px;text-align:center;font-weight:bold;color:#7e57c2;">{$i}</span>
+                                        <span class="rank-user" style="flex:1;color:#333;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                            <i class="layui-icon layui-icon-username"></i> {$item.user_nickname}
+                                        </span>
+                                        <span class="rank-score" style="color:#7e57c2;font-weight:bold;width:56px;text-align:right;">{$item.total}</span>
+                                    </li>
+                                    {assign name="i" value="$i+1" /}
+                                    {/foreach}
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-xs6">
+                        <!-- 月榜 -->
+                        <div class="layui-card" style="box-shadow:0 2px 8px #f2f2f2;margin-bottom:16px;max-width:100%;">
+                            <div class="layui-card-header" style="font-weight:bold;">
+                                <span class="woo-circle-icon cyan"><i class="layui-icon layui-icon-user"></i></span>
+                                月榜
+                            </div>
+                            <div class="layui-card-body" style="padding:10px 8px;">
+                                <ol class="rank-list" style="padding-left:0;">
+                                    {assign name="i" value="1" /}
+                                    {foreach $monthRank as $item}
+                                    <li style="display:flex;align-items:center;padding:4px 0;border-bottom:1px dashed #eee;">
+                                        <span class="rank-num" style="width:22px;text-align:center;font-weight:bold;color:#42a5f5;">{$i}</span>
+                                        <span class="rank-user" style="flex:1;color:#333;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                            <i class="layui-icon layui-icon-username"></i> {$item.user_nickname}
+                                        </span>
+                                        <span class="rank-score" style="color:#42a5f5;font-weight:bold;width:56px;text-align:right;">{$item.total}</span>
+                                    </li>
+                                    {assign name="i" value="$i+1" /}
+                                    {/foreach}
+                                </ol>
+                            </div>
+                        </div>
+                        <!-- 总榜 -->
+                        <div class="layui-card" style="box-shadow:0 2px 8px #f2f2f2;max-width:100%;">
+                            <div class="layui-card-header" style="font-weight:bold;">
+                                <span class="woo-circle-icon orange"><i class="layui-icon layui-icon-user"></i></span>
+                                总榜
+                            </div>
+                            <div class="layui-card-body" style="padding:10px 8px;">
+                                <ol class="rank-list" style="padding-left:0;">
+                                    {assign name="i" value="1" /}
+                                    {foreach $totalRank as $item}
+                                    <li style="display:flex;align-items:center;padding:4px 0;border-bottom:1px dashed #eee;">
+                                        <span class="rank-num" style="width:22px;text-align:center;font-weight:bold;color:#fbc02d;">{$i}</span>
+                                        <span class="rank-user" style="flex:1;color:#333;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                            <i class="layui-icon layui-icon-username"></i> {$item.user_nickname}
+                                        </span>
+                                        <span class="rank-score" style="color:#fbc02d;font-weight:bold;width:56px;text-align:right;">{$item.total}</span>
+                                    </li>
+                                    {assign name="i" value="$i+1" /}
+                                    {/foreach}
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 积分余额分布 -->
+                <div class="layui-card" style="margin-bottom:20px;box-shadow:0 2px 8px #f2f2f2;max-width:100%;">
+                    <div class="layui-card-header" style="font-weight:bold;">
+                        <span class="woo-circle-icon"><i class="layui-icon layui-icon-group"></i></span>
+                        积分余额分布
+                    </div>
+                    <div class="layui-card-body">
+                        <ul class="balance-distribution" style="padding-left:0;">
+                            {foreach $balanceDistribution as $item}
+                            <li style="padding:4px 0;border-bottom:1px dashed #eee;">
+                                <i class="layui-icon layui-icon-chart"></i>
+                                <span style="color:#666;">{$item.score_range}</span>：<span style="color:#333;">{$item.count}</span>人
+                            </li>
+                            {/foreach}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+layui.use(['element'], function () {
+    function toPlainArray(arr) {
+        if (!arr) return [];
+        return arr.map(function(item){
+            if (typeof item.toJSON === 'function') {
+                return item.toJSON();
+            }
+            return item;
+        });
+    }
+
+    // 积分增长趋势图
+    var growthData = toPlainArray({:json_encode($growthData ?? [])});
+    var growthDates = [];
+    var growthReward = [];
+    if (growthData.length > 0) {
+        growthData.forEach(function(item){
+            var reward = Number(item.reward) || 0;
+            growthDates.push(item.date);
+            growthReward.push(reward);
+        });
+        document.getElementById('growth-empty').style.display = 'none';
+    } else {
+        document.getElementById('growth-empty').style.display = '';
+    }
+    var growthChart = echarts.init(document.getElementById('score-growth-chart'));
+    var growthOption = {
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['奖励'] },
+        grid: { left: 40, right: 20, bottom: 40, top: 40 },
+        xAxis: {
+            type: 'category',
+            data: growthDates,
+            axisLine: { lineStyle: { color: '#bbb' } },
+            axisLabel: { color: '#888' }
+        },
+        yAxis: {
+            type: 'value',
+            axisLine: { lineStyle: { color: '#bbb' } },
+            axisLabel: { color: '#888' },
+            splitLine: { lineStyle: { color: '#eee', type: 'dashed' } }
+        },
+        series: [
+            {
+                name: '奖励',
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 8,
+                itemStyle: { color: '#666' },
+                areaStyle: { color: 'rgba(102,102,102,0.06)' },
+                data: growthReward
+            }
+        ]
+    };
+    if (growthData.length > 0) {
+        growthChart.setOption(growthOption);
+    } else {
+        growthChart.clear();
+    }
+
+    // 奖励分布图
+    var rewardDistribution = toPlainArray({:json_encode($rewardDistribution ?? [])});
+    var rewardScores = [];
+    var rewardCounts = [];
+    if (rewardDistribution.length > 0) {
+        rewardDistribution.forEach(function(item){
+            rewardScores.push(item.score);
+            rewardCounts.push(Number(item.count) || 0);
+        });
+        document.getElementById('reward-empty').style.display = 'none';
+    } else {
+        document.getElementById('reward-empty').style.display = '';
+    }
+    var rewardChart = echarts.init(document.getElementById('reward-distribution-chart'));
+    var rewardOption = {
+        tooltip: { trigger: 'axis' },
+        color: ['#888'],
+        grid: { left: 40, right: 20, bottom: 40, top: 40 },
+        xAxis: {
+            type: 'category',
+            data: rewardScores,
+            axisLine: { lineStyle: { color: '#bbb' } },
+            axisLabel: { color: '#888' }
+        },
+        yAxis: {
+            type: 'value',
+            axisLine: { lineStyle: { color: '#bbb' } },
+            axisLabel: { color: '#888' },
+            splitLine: { lineStyle: { color: '#eee', type: 'dashed' } }
+        },
+        series: [{
+            name: '次数',
+            type: 'bar',
+            barWidth: 18,
+            itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#eee' },
+                    { offset: 1, color: '#888' }
+                ])
+            },
+            data: rewardCounts
+        }]
+    };
+    if (rewardDistribution.length > 0) {
+        rewardChart.setOption(rewardOption);
+    } else {
+        rewardChart.clear();
+    }
+});
+</script>
+{/block}

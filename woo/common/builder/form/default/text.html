@@ -1,0 +1,48 @@
+{if !empty($data.prefix) || !empty($data.suffix)}<div class="layui-input-group">{/if}
+{if !empty($data['prefix-icon']) || !empty($data['suffix-icon']) || isset($data['attrs']['lay-affix'])}<div class="layui-input-wrap">{/if}
+    {if !empty($data.prefix)}
+    <div class="layui-input-prefix layui-input-split">
+        {$data.prefix | raw}
+    </div>
+    {/if}
+    {if !empty($data['prefix-icon'])}
+    <div class="layui-input-prefix">
+        <i class="{:return_icon_class($data['prefix-icon'])}"></i>
+    </div>
+    {/if}
+    {if !empty($data.quick)}<div class="woo-has-quick clearfix">{/if}
+    <input type="text"
+           {foreach $data.attrs as $key => $value}
+    {$key}="{$value}"
+    {/foreach}>
+    {if !empty($data.quick)}
+    <div class="woo-quick">
+        <select class="woo-quick-select"  lay-filter="{$data.field_name}QuickFilter">
+            <option value="placeholder" disabled>快速填写≡{$data.label}≡</option>
+            {foreach $data.quick as $value => $title}
+            {if !is_array($title)}
+            <option value="{$value}" {if isset($data.attrs.value) && $data.attrs.value == $value && empty($is_select)}selected {assign name="is_select" value="1"/}{/if}>{$title}</option>
+            {else/}
+            <optgroup label="{$value}">
+                {foreach $title as $value1 => $title1}
+                <option value="{$value1}" {if isset($data.attrs.value) && $data.attrs.value == $value1 && empty($is_select)}selected {assign name="is_select" value="1"/}{/if}>{$title1}</option>
+                {/foreach}
+            </optgroup>
+            {/if}
+            {/foreach}
+        </select>
+    </div>
+    {/if}
+    {if !empty($data.quick)}</div>{/if}
+    {if !empty($data.suffix)}
+    <div class="layui-input-suffix layui-input-split">
+        {$data.suffix | raw}
+    </div>
+    {/if}
+    {if !empty($data['suffix-icon'])}
+    <div class="layui-input-suffix">
+        <i class="{:return_icon_class($data['suffix-icon'])}"></i>
+    </div>
+    {/if}
+{if !empty($data['prefix-icon']) || !empty($data['suffix-icon'])  || isset($data['attrs']['lay-affix'])}</div>{/if}
+{if !empty($data.prefix) || !empty($data.suffix)}</div>{/if}

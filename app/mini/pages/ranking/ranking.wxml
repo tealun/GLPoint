@@ -1,0 +1,72 @@
+<view class="container">
+  <!-- 时间段切换导航 -->
+  <view class="time-selector">
+    <view class="{{rankingType === 'week' ? 'active' : ''}}" data-type="week" bindtap="switchRanking">本周</view>
+    <view class="{{rankingType === 'month' ? 'active' : ''}}" data-type="month" bindtap="switchRanking">本月</view>
+    <view class="{{rankingType === 'year' ? 'active' : ''}}" data-type="year" bindtap="switchRanking">本年度</view>
+    <view class="{{rankingType === 'total' ? 'active' : ''}}" data-type="total" bindtap="switchRanking">累计</view>
+  </view>
+
+  <!-- 前三名领奖台 -->
+  <view class="podium-section" wx:if="{{rankingData.length > 0}}">
+    <view class="podium-container">
+      <!-- 第二名 -->
+      <view class="podium-item second" wx:if="{{rankingData[1]}}">
+        <view class="podium-rank-badge rank-2">2</view>
+        <image class="avatar" src="{{rankingData[1].avatar_url}}" mode="aspectFill"></image>
+        <text class="name">{{rankingData[1].nickname}}</text>
+        <view class="score-row">
+          <text class="podium-points">{{rankingData[1].points}}</text>
+          <text class="podium-points-unit">分</text>
+        </view>
+        <view class="podium-block second"></view>
+      </view>
+      
+      <!-- 第一名 -->
+      <view class="podium-item first" wx:if="{{rankingData[0]}}">
+        <view class="podium-rank-badge rank-1">1</view>
+        <view class="avatar-crown-wrapper">
+          <image class="avatar" src="{{rankingData[0].avatar_url}}" mode="aspectFill"></image>
+        </view>
+        <text class="name">{{rankingData[0].nickname}}</text>
+        <view class="score-row">
+          <text class="podium-points">{{rankingData[0].points}}</text>
+          <text class="podium-points-unit">分</text>
+        </view>
+        <view class="podium-block first"></view>
+      </view>
+      
+      <!-- 第三名 -->
+      <view class="podium-item third" wx:if="{{rankingData[2]}}">
+        <view class="podium-rank-badge rank-3">3</view>
+        <image class="avatar" src="{{rankingData[2].avatar_url}}" mode="aspectFill"></image>
+        <text class="name">{{rankingData[2].nickname}}</text>
+        <view class="score-row">
+          <text class="podium-points">{{rankingData[2].points}}</text>
+          <text class="podium-points-unit">分</text>
+        </view>
+        <view class="podium-block third"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 其他排名列表 -->
+  <view class="ranking-list" wx:if="{{rankingData.length > 3}}">
+    <block wx:for="{{rankingData}}" wx:key="index" wx:if="{{index > 2}}">
+      <view class="ranking-item {{item.user_id === currentUserId ? 'highlight' : ''}}">
+        <text class="rank">{{index + 1}}</text>
+        <image class="avatar" src="{{item.avatar_url}}" mode="aspectFill"></image>
+        <text class="name">{{item.nickname}}</text>
+        <text class="points">{{item.points}}</text><text class="points-unit">分</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 无数据提示 -->
+  <view wx:if="{{noData && !loading}}" style="text-align:center;color:#999;padding:60rpx 0;">
+    当前周期没有排名数据
+  </view>
+
+  <!-- 加载提示 -->
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+</view>
