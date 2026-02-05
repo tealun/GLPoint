@@ -290,46 +290,67 @@ class UserScore extends \woo\admin\controller\UserScore
 
             $success = 0;
             $fail = 0;
+            $failDetails = []; // 收集详细的失败信息
+            
             // 收集所有未找到用户的姓名
             $notFoundNames = [];
-            foreach ($data['data'] as $row) {
+            foreach ($data['data'] as $index => $row) {
                 $name = trim($row['姓名']);
                 if (!isset($userMap[$name]) || !$userMap[$name]) {
                     $notFoundNames[$name] = true;
+                    if (!isset($failDetails[$name])) {
+                        $failDetails[$name] = [];
+                    }
+                    $failDetails[$name][] = [
+                        'row' => $index + 2, // Excel行号（从2开始，1是表头）
+                        'reason' => '未找到该用户'
+                    ];
                 }
             }
             if (!empty($notFoundNames)) {
                 Log::warning('【调试】以下姓名未找到用户，将跳过其所有记录: ' . implode('，', array_keys($notFoundNames)));
             }
-            foreach ($data['data'] as $row) {
+            
+            foreach ($data['data'] as $index => $row) {
+                $rowNum = $index + 2; // Excel行号
                 $name = trim($row['姓名']);
+                
                 if (isset($notFoundNames[$name])) {
                     Log::warning('【调试】跳过未找到用户的姓名: ' . $name);
                     $fail++;
                     continue;
                 }
+                
                 $user_id = $userMap[$name] ?? null;
                 if (!$user_id) {
                     Log::warning('【调试】未找到用户: ' . $row['姓名']);
+                    $failDetails[$name][] = [
+                        'row' => $rowNum,
+                        'reason' => '未找到该用户'
+                    ];
                     $fail++;
                     continue;
                 }
+                
                 $giver_id = null;
                 if (isset($row['开具人']) && trim($row['开具人']) !== '') {
                     $giver_id = $userMap[trim($row['开具人'])] ?? null;
                     Log::debug('【调试】开具人: ' . $row['开具人'] . '，ID: ' . $giver_id);
                 }
+                
                 // 新增审核人和记录人
                 $reviewer_id = null;
                 if (isset($row['审核人']) && trim($row['审核人']) !== '') {
                     $reviewer_id = $userMap[trim($row['审核人'])] ?? null;
                     Log::debug('【调试】审核人: ' . $row['审核人'] . '，ID: ' . $reviewer_id);
                 }
+                
                 $recorder_id = null;
                 if (isset($row['记录人']) && trim($row['记录人']) !== '') {
                     $recorder_id = $userMap[trim($row['记录人'])] ?? null;
                     Log::debug('【调试】记录人: ' . $row['记录人'] . '，ID: ' . $recorder_id);
                 }
+                
                 // 日期格式兼容处理
                 $dateRaw = $row['日期'];
                 if (is_numeric($dateRaw)) {
@@ -369,13 +390,54 @@ class UserScore extends \woo\admin\controller\UserScore
                     model('UserScore')->create($data); // 强制插入
                     $success++;
                 } catch (\Exception $e) {
-                    Log::error('【调试】保存失败: ' . $e->getMessage());
+                    $errorMsg = $e->getMessage();
+                    Log::error('【调试】保存失败: ' . $errorMsg);
+                    if (!isset($failDetails[$name])) {
+                        $failDetails[$name] = [];
+                    }
+                    $failDetails[$name][] = [
+                        'row' => $rowNum,
+                        'reason' => '保存失败: ' . $errorMsg,
+                        'data' => $row
+                    ];
                     $fail++;
                 }
             }
 
             Log::debug("【调试】导入完成，成功{$success}条，失败{$fail}条");
-            return $this->message("导入完成，成功{$success}条，失败{$fail}条", 'success');
+            
+            // 根据结果返回不同的消息
+            if ($fail === 0) {
+                // 全部成功
+                return $this->message("导入成功！共导入{$success}条记录", 'success');
+            } else if ($success === 0) {
+                // 全部失败
+                $errorMsg = "导入失败！共{$fail}条记录失败<br><br>";
+                $errorMsg .= "<div style='text-align:left;max-height:300px;overflow-y:auto;'>";
+                foreach ($failDetails as $name => $errors) {
+                    $errorMsg .= "<strong>【{$name}】</strong><br>";
+                    foreach ($errors as $error) {
+                        $errorMsg .= "  • 第{$error['row']}行: {$error['reason']}<br>";
+                    }
+                }
+                $errorMsg .= "</div>";
+                // 失败时延长显示时间到10秒
+                return $this->message($errorMsg, 'error', [], 10);
+            } else {
+                // 部分成功，部分失败
+                $errorMsg = "导入部分完成！成功{$success}条，失败{$fail}条<br><br>";
+                $errorMsg .= "<div style='text-align:left;max-height:300px;overflow-y:auto;'>";
+                $errorMsg .= "<strong style='color:#f56c6c;'>失败记录：</strong><br>";
+                foreach ($failDetails as $name => $errors) {
+                    $errorMsg .= "<strong>【{$name}】</strong><br>";
+                    foreach ($errors as $error) {
+                        $errorMsg .= "  • 第{$error['row']}行: {$error['reason']}<br>";
+                    }
+                }
+                $errorMsg .= "</div>";
+                // 部分失败时也延长显示时间到8秒
+                return $this->message($errorMsg, 'warn', [], 8);
+            }
         } else {
             Log::debug('【调试】UserScore importScoreFromExcel 返回上传页面');
             // 返回上传页面
