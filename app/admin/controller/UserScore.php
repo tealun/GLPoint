@@ -332,22 +332,22 @@ class UserScore extends \woo\admin\controller\UserScore
                     continue;
                 }
                 
-                $giver_id = null;
+                $giver_id = 0;
                 if (isset($row['开具人']) && trim($row['开具人']) !== '') {
-                    $giver_id = $userMap[trim($row['开具人'])] ?? null;
+                    $giver_id = $userMap[trim($row['开具人'])] ?? 0;
                     Log::debug('【调试】开具人: ' . $row['开具人'] . '，ID: ' . $giver_id);
                 }
                 
                 // 新增审核人和记录人
-                $reviewer_id = null;
+                $reviewer_id = 0;
                 if (isset($row['审核人']) && trim($row['审核人']) !== '') {
-                    $reviewer_id = $userMap[trim($row['审核人'])] ?? null;
+                    $reviewer_id = $userMap[trim($row['审核人'])] ?? 0;
                     Log::debug('【调试】审核人: ' . $row['审核人'] . '，ID: ' . $reviewer_id);
                 }
                 
-                $recorder_id = null;
+                $recorder_id = 0;
                 if (isset($row['记录人']) && trim($row['记录人']) !== '') {
-                    $recorder_id = $userMap[trim($row['记录人'])] ?? null;
+                    $recorder_id = $userMap[trim($row['记录人'])] ?? 0;
                     Log::debug('【调试】记录人: ' . $row['记录人'] . '，ID: ' . $recorder_id);
                 }
                 
@@ -411,30 +411,42 @@ class UserScore extends \woo\admin\controller\UserScore
                 // 全部成功
                 return $this->message("导入成功！共导入{$success}条记录", 'success');
             } else if ($success === 0) {
-                // 全部失败
-                $errorMsg = "导入失败！共{$fail}条记录失败<br><br>";
-                $errorMsg .= "<div style='text-align:left;max-height:300px;overflow-y:auto;'>";
+                // 全部失败 - 生成纯文本和HTML两个版本
+                $errorText = "导入失败！共{$fail}条记录失败\n\n";
+                $errorMsg = "导入失败！共{$fail}条记录失败";
+                $errorMsg .= "<button onclick='copyErrorText()' style='margin-left:10px;padding:4px 12px;background:#409eff;color:#fff;border:none;border-radius:3px;cursor:pointer;'>复制错误信息</button><br><br>";
+                $errorMsg .= "<div id='error-details' style='text-align:left;max-height:300px;overflow-y:auto;user-select:text;'>";
                 foreach ($failDetails as $name => $errors) {
+                    $errorText .= "【{$name}】\n";
                     $errorMsg .= "<strong>【{$name}】</strong><br>";
                     foreach ($errors as $error) {
+                        $errorText .= "  • 第{$error['row']}行: {$error['reason']}\n";
                         $errorMsg .= "  • 第{$error['row']}行: {$error['reason']}<br>";
                     }
                 }
                 $errorMsg .= "</div>";
+                $errorMsg .= "<textarea id='error-text' style='position:absolute;left:-9999px;'>" . htmlspecialchars($errorText) . "</textarea>";
+                $errorMsg .= "<script>function copyErrorText(){var t=document.getElementById('error-text');t.select();document.execCommand('copy');alert('错误信息已复制到剪贴板');}</script>";
                 // 失败时延长显示时间到10秒
                 return $this->message($errorMsg, 'error', [], 10);
             } else {
-                // 部分成功，部分失败
-                $errorMsg = "导入部分完成！成功{$success}条，失败{$fail}条<br><br>";
-                $errorMsg .= "<div style='text-align:left;max-height:300px;overflow-y:auto;'>";
+                // 部分成功，部分失败 - 生成纯文本和HTML两个版本
+                $errorText = "导入部分完成！成功{$success}条，失败{$fail}条\n\n失败记录：\n";
+                $errorMsg = "导入部分完成！成功{$success}条，失败{$fail}条";
+                $errorMsg .= "<button onclick='copyErrorText()' style='margin-left:10px;padding:4px 12px;background:#409eff;color:#fff;border:none;border-radius:3px;cursor:pointer;'>复制错误信息</button><br><br>";
+                $errorMsg .= "<div id='error-details' style='text-align:left;max-height:300px;overflow-y:auto;user-select:text;'>";
                 $errorMsg .= "<strong style='color:#f56c6c;'>失败记录：</strong><br>";
                 foreach ($failDetails as $name => $errors) {
+                    $errorText .= "【{$name}】\n";
                     $errorMsg .= "<strong>【{$name}】</strong><br>";
                     foreach ($errors as $error) {
+                        $errorText .= "  • 第{$error['row']}行: {$error['reason']}\n";
                         $errorMsg .= "  • 第{$error['row']}行: {$error['reason']}<br>";
                     }
                 }
                 $errorMsg .= "</div>";
+                $errorMsg .= "<textarea id='error-text' style='position:absolute;left:-9999px;'>" . htmlspecialchars($errorText) . "</textarea>";
+                $errorMsg .= "<script>function copyErrorText(){var t=document.getElementById('error-text');t.select();document.execCommand('copy');alert('错误信息已复制到剪贴板');}</script>";
                 // 部分失败时也延长显示时间到8秒
                 return $this->message($errorMsg, 'warn', [], 8);
             }
