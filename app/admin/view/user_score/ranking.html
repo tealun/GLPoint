@@ -1,0 +1,150 @@
+{extend name="$extend_global"/}
+{block name="content"}
+<div class="layui-card">
+    <div class="layui-card-header" style="font-weight:bold;font-size:18px;">
+        <i class="layui-icon layui-icon-chart"></i> 积分排名
+    </div>
+    <div class="layui-card-body">
+        <!-- 选项卡切换 -->
+        <div class="layui-tab layui-tab-brief" lay-filter="rankingTab">
+            <ul class="layui-tab-title">
+                <li class="{$period == 'week' ? 'layui-this' : ''}" data-period="week">
+                    <i class="layui-icon layui-icon-time"></i> 本周排名
+                </li>
+                <li class="{$period == 'month' ? 'layui-this' : ''}" data-period="month">
+                    <i class="layui-icon layui-icon-date"></i> 本月排名
+                </li>
+                <li class="{$period == 'year' ? 'layui-this' : ''}" data-period="year">
+                    <i class="layui-icon layui-icon-template-1"></i> 本年排名
+                </li>
+                <li class="{$period == 'total' ? 'layui-this' : ''}" data-period="total">
+                    <i class="layui-icon layui-icon-star-fill"></i> 累计排名
+                </li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <!-- 统计信息 -->
+                    <div style="padding:10px 0 20px 0;color:#666;">
+                        <i class="layui-icon layui-icon-user"></i> 共 <span style="color:#5FB878;font-weight:bold;">{$totalUsers}</span> 人参与排名
+                    </div>
+
+                    <!-- 排名列表 -->
+                    <table class="layui-table" lay-skin="line">
+                        <thead>
+                            <tr>
+                                <th width="80" style="text-align:center;">排名</th>
+                                <th width="150">用户昵称</th>
+                                <th width="150" style="text-align:center;">积分</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankingList">
+                            {if $rankList}
+                            {foreach $rankList as $item}
+                            <tr>
+                                <td style="text-align:center;">
+                                    {if $item.rank <= 3}
+                                    <span style="display:inline-block;width:32px;height:32px;line-height:32px;border-radius:50%;
+                                        background:{$item.rank == 1 ? '#FFD700' : ($item.rank == 2 ? '#C0C0C0' : '#CD7F32')};
+                                        color:#fff;font-weight:bold;font-size:16px;">
+                                        {$item.rank}
+                                    </span>
+                                    {else}
+                                    <span style="font-size:16px;font-weight:bold;color:#666;">
+                                        {$item.rank}
+                                    </span>
+                                    {/if}
+                                </td>
+                                <td>
+                                    <i class="layui-icon layui-icon-username" style="color:#5FB878;"></i>
+                                    {$item.user_nickname}
+                                </td>
+                                <td style="text-align:center;">
+                                    <span style="font-size:18px;font-weight:bold;color:#FF5722;">
+                                        {$item.total}
+                                    </span> 分
+                                </td>
+                                <td style="color:#999;">
+                                    {if $item.rank <= 10}
+                                        <span style="color:#5FB878;"><i class="layui-icon layui-icon-ok-circle"></i> 前十名</span>
+                                    {else/}
+                                        -
+                                    {/if}
+                                </td>
+                            </tr>
+                            {/foreach}
+                            {else/}
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:#999;padding:60px 0;">
+                                    <i class="layui-icon layui-icon-face-surprised" style="font-size:48px;"></i>
+                                    <div style="margin-top:10px;">暂无排名数据</div>
+                                </td>
+                            </tr>
+                            {/if}
+                        </tbody>
+                    </table>
+
+                    <!-- 分页 -->
+                    {if $totalPages > 1}
+                    <div id="pagination" style="margin-top:20px;text-align:center;"></div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+layui.use(['element', 'laypage'], function(){
+    var element = layui.element;
+    var laypage = layui.laypage;
+    
+    var currentPeriod = '{$period}';
+    var currentPage = {$page};
+    var totalPages = {$totalPages};
+    var totalUsers = {$totalUsers};
+    var limit = {$limit};
+
+    // 选项卡切换事件
+    $('.layui-tab-title li').on('click', function(){
+        var period = $(this).data('period');
+        if (period !== currentPeriod) {
+            // 切换周期，重置到第一页
+            window.location.href = '{:url("user_score/ranking")}?period=' + period + '&page=1';
+        }
+    });
+
+    // 渲染分页
+    if (totalPages > 1) {
+        laypage.render({
+            elem: 'pagination',
+            count: totalUsers,
+            limit: limit,
+            curr: currentPage,
+            layout: ['count', 'prev', 'page', 'next', 'limit', 'skip'],
+            jump: function(obj, first){
+                // 首次不执行
+                if(!first){
+                    window.location.href = '{:url("user_score/ranking")}?period=' + currentPeriod + '&page=' + obj.curr;
+                }
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.layui-tab-title li {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.layui-tab-title li:hover {
+    color: #5FB878;
+}
+.layui-table tbody tr:hover {
+    background-color: #f8f8f8;
+}
+</style>
+{/block}

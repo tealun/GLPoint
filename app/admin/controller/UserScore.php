@@ -212,6 +212,100 @@ class UserScore extends \woo\admin\controller\UserScore
         ]);
     }
 
+    /**
+     * 积分排名页面 - 支持周/月/年/累计榜单查询和分页
+     * 增加独立的排名页面，显示所有用户的积分排名
+     */
+    public function ranking()
+    {
+        // 获取查询参数
+        $period = $this->request->param('period', 'week'); // 默认周榜
+        $page = (int)$this->request->param('page', 1);
+        $limit = 20; // 每页20条
+        
+        $mdl = model('UserScore');
+        $notDeleted = ['delete_time' => 0];
+        
+        // 根据周期构建时间条件
+        $timeWhere = [];
+        switch ($period) {
+            case 'week':
+                $timeWhere[] = ['create_time', '>=', strtotime('this week')];
+                break;
+            case 'month':
+                $timeWhere[] = ['create_time', '>=', strtotime(date('Y-m-01'))];
+                break;
+            case 'year':
+                $timeWhere[] = ['create_time', '>=', strtotime(date('Y-01-01'))];
+                break;
+            case 'total':
+                // 不加时间条件
+                break;
+            default:
+                $timeWhere[] = ['create_time', '>=', strtotime('this week')];
+                break;
+        }
+        
+        // 查询总人数（用于分页）
+        $totalUsers = $mdl
+            ->where($notDeleted)
+            ->where($timeWhere)
+            ->group('user_id')
+            ->count();
+        
+        // 查询当前页排名数据
+        $rankList = $mdl
+            ->where($notDeleted)
+            ->where($timeWhere)
+            ->field('user_id, SUM(score) as total')
+            ->group('user_id')
+            ->order('total', 'desc')
+            ->limit(($page - 1) * $limit, $limit)
+            ->select();
+        
+        // 获取用户昵称
+        $userIds = array_column($rankList->toArray(), 'user_id');
+        $userNicknames = [];
+        if ($userIds) {
+            $userNicknames = model('User')
+                ->whereIn('id', $userIds)
+                ->column('nickname', 'id');
+        }
+        
+        // 替换user_id为nickname，并添加排名
+        $startRank = ($page - 1) * $limit + 1;
+        foreach ($rankList as $index => &$item) {
+            $uid = $item['user_id'];
+            $item['user_nickname'] = $userNicknames[$uid] ?? "用户{$uid}";
+            $item['rank'] = $startRank + $index;
+        }
+        
+        // 计算总页数
+        $totalPages = ceil($totalUsers / $limit);
+        
+        // AJAX请求返回JSON
+        if ($this->request->isAjax()) {
+            return json([
+                'code' => 0,
+                'msg' => '获取成功',
+                'data' => $rankList,
+                'count' => $totalUsers,
+                'page' => $page,
+                'totalPages' => $totalPages
+            ]);
+        }
+        
+        // 正常请求渲染视图
+        return $this->fetch('ranking', [
+            'rankList' => $rankList,
+            'period' => $period,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalUsers' => $totalUsers,
+            'limit' => $limit
+        ]);
+    }
+
     public function importScoreFromExcel()
     {
         if ($this->request->isPost()) {
@@ -230,7 +324,7 @@ class UserScore extends \woo\admin\controller\UserScore
 
             if (!$filepath) {
                 Log::error('【调试】上传失败: ' . json_encode($upload->getError(), JSON_UNESCAPED_UNICODE));
-                return $this->message($upload->getError()[0] ?? '上传错误', 'error');
+                return $this->message($upload->getError()[0] ?? '上传错误', 'error', [], 6);
             }
 
             Log::debug('【调试】上传文件的完整路径: ' . $filepath);
@@ -248,7 +342,7 @@ class UserScore extends \woo\admin\controller\UserScore
             $fileExists = file_exists($filepath);
             Log::debug('【调试】file_exists 检查: ' . ($fileExists ? '存在' : '不存在') . '，路径: ' . $filepath);
             if (!$fileExists) {
-                return $this->message('文件保存失败，未找到上传的Excel文件：' . $filepath, 'error');
+                return $this->message('文件保存失败，未找到上传的Excel文件：' . $filepath, 'error', [], 6);
             }
 
             // 读取Excel文件
@@ -259,12 +353,12 @@ class UserScore extends \woo\admin\controller\UserScore
                 Log::debug('【调试】Excel读取结果: ' . json_encode($data, JSON_UNESCAPED_UNICODE));
             } catch (\Exception $e) {
                 Log::error('【调试】Excel读取异常: ' . $e->getMessage());
-                return $this->message('Excel读取失败：' . $e->getMessage(), 'error');
+                return $this->message('Excel读取失败：' . $e->getMessage(), 'error', [], 6);
             }
 
             if (empty($data['data'])) {
                 Log::debug('【调试】Excel中没有数据: ' . json_encode($data, JSON_UNESCAPED_UNICODE));
-                return $this->message('Excel中没有数据', 'error');
+                return $this->message('Excel中没有数据', 'error', [], 6);
             }
             // 获取所有涉及的昵称（包括“姓名”、“开具人”、“审核人”、“记录人”）
             $nicknames = array_map('trim', array_column($data['data'], '姓名'));
@@ -408,8 +502,10 @@ class UserScore extends \woo\admin\controller\UserScore
             
             // 根据结果返回不同的消息
             if ($fail === 0) {
-                // 全部成功
-                return $this->message("导入成功！共导入{$success}条记录", 'success');
+                // 全部成功 - 延长显示时间并增加提示
+                $successMsg = "<div style='font-size:16px;'><i class='layui-icon layui-icon-ok-circle' style='font-size:20px;color:#5FB878;'></i> 导入成功！</div>";
+                $successMsg .= "<div style='margin-top:10px;font-size:14px;'>共成功导入 <span style='color:#5FB878;font-weight:bold;font-size:18px;'>{$success}</span> 条记录</div>";
+                return $this->message($successMsg, 'success', [], 5);
             } else if ($success === 0) {
                 // 全部失败 - 生成纯文本和HTML两个版本
                 $errorText = "导入失败！共{$fail}条记录失败\n\n";
