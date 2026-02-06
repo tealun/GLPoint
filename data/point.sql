@@ -111,3 +111,86 @@ CREATE TABLE `woo_subscribe_auth` (
 
 -- 修复用户表ID自增问题,修改users表的AUTO_INCREMENT属性:
 ALTER TABLE `woo_user` AUTO_INCREMENT=1;
+
+-- ----------------------------
+-- 7. 积分系统菜单数据 (woo_admin_rule)
+-- ----------------------------
+-- 注意：以下菜单插入需要在完整安装 database.sql 后执行
+-- 如果是全新安装，这些菜单会与主系统菜单一起创建
+
+-- 积分目录菜单（如果不存在）
+INSERT IGNORE INTO `woo_admin_rule` (
+    `id`, `parent_id`, `title`, `is_nav`, `list_order`, `family`, `level`, `children_count`,
+    `create_time`, `update_time`, `type`, `icon`, `addon`, `controller`, `action`,
+    `url`, `args`, `open_type`, `jianpin`, `pinyin`, `rule`, `other_name`, `js_func`
+) VALUES (
+    327, 0, '积分', 1, 3, ',327,', 1, 6, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(),
+    'directory', 'woo-icon-jifen', '', '', '', '', '', '_iframe', 'jf', 'jifen', '', '', ''
+);
+
+-- 积分发放菜单
+INSERT IGNORE INTO `woo_admin_rule` (
+    `id`, `parent_id`, `title`, `is_nav`, `list_order`, `family`, `level`, `children_count`,
+    `create_time`, `update_time`, `type`, `icon`, `addon`, `controller`, `action`,
+    `url`, `args`, `open_type`, `jianpin`, `pinyin`, `rule`, `other_name`, `js_func`
+) VALUES (
+    331, 327, '积分发放', 1, 1, ',327,331,', 2, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(),
+    'menu', 'layui-icon-add-1', '', 'user_score', 'create', '', '', '_iframe', 'jfff', 'jifenfafang', 'user_score/create', '', ''
+);
+
+-- 积分排名菜单 ⭐ 新增
+INSERT IGNORE INTO `woo_admin_rule` (
+    `id`, `parent_id`, `title`, `is_nav`, `list_order`, `family`, `level`, `children_count`,
+    `create_time`, `update_time`, `type`, `icon`, `addon`, `controller`, `action`,
+    `url`, `args`, `open_type`, `jianpin`, `pinyin`, `rule`, `other_name`, `js_func`
+) VALUES (
+    360, 327, '积分排名', 1, 2, ',327,360,', 2, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(),
+    'menu', 'layui-icon-chart', '', 'user_score', 'ranking', '', '', '_iframe', 'jfpm', 'jifenpaiming', 'user_score/ranking', '', ''
+);
+
+-- 积分记录菜单
+INSERT IGNORE INTO `woo_admin_rule` (
+    `id`, `parent_id`, `title`, `is_nav`, `list_order`, `family`, `level`, `children_count`,
+    `create_time`, `update_time`, `type`, `icon`, `addon`, `controller`, `action`,
+    `url`, `args`, `open_type`, `jianpin`, `pinyin`, `rule`, `other_name`, `js_func`
+) VALUES (
+    53, 327, '积分记录', 1, 7, ',327,53,', 2, 7, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(),
+    'menu', 'layui-icon-list', '', 'user_score', 'index', '', '', '_iframe', 'jfjl', 'jifenjilu', 'user_score/index', '', ''
+);
+
+-- 积分申诉菜单
+INSERT IGNORE INTO `woo_admin_rule` (
+    `id`, `parent_id`, `title`, `is_nav`, `list_order`, `family`, `level`, `children_count`,
+    `create_time`, `update_time`, `type`, `icon`, `addon`, `controller`, `action`,
+    `url`, `args`, `open_type`, `jianpin`, `pinyin`, `rule`, `other_name`, `js_func`
+) VALUES (
+    335, 327, '积分申诉', 1, 9, ',327,335,', 2, 9, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(),
+    'menu', 'woo-icon-reception', '', 'score_appeal', 'index', '', '', '_iframe', 'jfss', 'jifenshensu', 'score_appeal/index', '', ''
+);
+
+-- 积分规则表菜单
+INSERT IGNORE INTO `woo_admin_rule` (
+    `id`, `parent_id`, `title`, `is_nav`, `list_order`, `family`, `level`, `children_count`,
+    `create_time`, `update_time`, `type`, `icon`, `addon`, `controller`, `action`,
+    `url`, `args`, `open_type`, `jianpin`, `pinyin`, `rule`, `other_name`, `js_func`
+) VALUES (
+    346, 327, '积分规则表', 1, 6, ',327,346,', 2, 6, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(),
+    'menu', 'woo-icon-list-full', '', 'score_rule', 'index', '', '', '_iframe', 'jfgzb', 'jifenguizebiao', 'score_rule/index', '', ''
+);
+
+-- 积分看板菜单（Dashboard）
+INSERT IGNORE INTO `woo_admin_rule` (
+    `id`, `parent_id`, `title`, `is_nav`, `list_order`, `family`, `level`, `children_count`,
+    `create_time`, `update_time`, `type`, `icon`, `addon`, `controller`, `action`,
+    `url`, `args`, `open_type`, `jianpin`, `pinyin`, `rule`, `other_name`, `js_func`
+) VALUES (
+    359, 327, '积分看板', 1, 0, ',327,359,', 2, 0, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(),
+    'menu', 'layui-icon-chart-screen', '', 'user_score', 'dashboard', '', '', '_iframe', 'jfkb', 'jifenkanban', 'user_score/dashboard', '', ''
+);
+
+-- 说明：
+-- 1. 使用 INSERT IGNORE 避免重复插入
+-- 2. id 需要与 database.sql 保持一致
+-- 3. create_time 和 update_time 使用 UNIX_TIMESTAMP() 自动生成
+-- 4. 新安装时会自动创建所有积分相关菜单
+-- 5. 升级时不会影响已存在的菜单记录
