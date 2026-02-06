@@ -3,8 +3,8 @@
 -- 执行方式：在数据库管理工具中执行此SQL，或在后台系统中手动添加菜单
 
 -- 1. 添加"积分排名"菜单（parent_id=327为积分目录）
--- 注意：id需要根据实际数据库中的最大id+1，这里假设使用360
-INSERT INTO `woo_admin_rule` (
+-- 注意：如果id=360已存在，会自动跳过
+INSERT IGNORE INTO `woo_admin_rule` (
     `id`, 
     `parent_id`, 
     `title`, 
